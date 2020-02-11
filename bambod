@@ -1,0 +1,39 @@
+#!/bin/bash
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+utils="$script_dir/utils.sh"
+
+
+source $script_dir/bambod_src/arguments.sh
+
+workdir=$($utils upfind docker-compose.yml)
+
+if [ -z  $workdir ]; then
+	case $function_name in
+		help|list|df|pruneall)
+			# Fine without composefile
+		;;
+		*)
+			echo 'No docker-compose.yml found!'
+			exit 1
+		;;
+	esac
+else
+	cd $workdir
+	export CURRENT_UID=$(id -u):$(id -g);
+
+	if [ -f '.env' ]; then
+		$($utils parseEnv .env)
+	else
+		echo 'No .env file!'
+	fi
+
+	if [ -f '_docker/scripts.sh' ]; then
+		source _docker/scripts.sh
+	fi
+fi
+
+
+source $script_dir/bambod_src/general.sh
+source $script_dir/bambod_src/compose.sh
+
+$function_name
