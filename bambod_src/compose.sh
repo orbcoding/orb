@@ -118,3 +118,8 @@ function umountremote() { # Unmount _remote
 	# fusermount -u _remote
 	sudo umount -l _remote
 }
+
+function updateremotecli() { # Update remote script
+	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
+	cd bambocli && git pull"
+}
