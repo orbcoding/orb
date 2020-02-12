@@ -38,10 +38,10 @@ bundle exec rails db:migrate' \
 	elif [[ $env == 'staging' ]]; then
 		ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
 cd ${SRV_REPO_PATH}/${APP_NAME}-${env} && \
-bambod start -e staging &&
-bambod run -e staging bundle install && \
+bambo start -e staging &&
+bambo run -e staging bundle install && \
 yarn install --production' && \
-bambod start -e -r staging && \
+bambo start -e -r staging && \
 docker exec -it
 "
 	else

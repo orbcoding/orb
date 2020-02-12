@@ -5,11 +5,11 @@ function help() { # Show this help
 		echo
 
 		echo '# GENERAL'
-    grep "^function" "$script_dir/bambod_src/general.sh" | cut -d ' ' -f2- | sed 's/{ //g'
+    grep "^function" "$script_dir/bambo_src/general.sh" | cut -d ' ' -f2- | sed 's/{ //g'
 		echo
 
 		echo '# COMPOSE'
-    grep "^function" "$script_dir/bambod_src/compose.sh" | cut -d ' ' -f2- | sed 's/{ //g'
+    grep "^function" "$script_dir/bambo_src/compose.sh" | cut -d ' ' -f2- | sed 's/{ //g'
 
 		if [[ $workdir && -f $workdir/_docker/scripts.sh ]]; then
 			echo

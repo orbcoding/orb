@@ -44,6 +44,7 @@ function pull() { # $arg1 = env
 
 # Containers
 function start() { # Start compose containers, -r = restart
+	env = ${args[0]}
 	if [[ $r_arg -eq "1" ]]; then
 		stop;
 	fi
@@ -51,6 +52,7 @@ function start() { # Start compose containers, -r = restart
 }
 
 function stop() { # Stop container
+	env = ${args[0]}
 	if isRunning; then
 		echo "Stopping ${APP_NAME}_$env containers";
 		docker stop $(docker container ls -af "name=${APP_NAME}_${env}*" --format {{.ID}});
@@ -103,6 +105,11 @@ function run() { # Run inside running container
 function runsingle() { # Run in parallell container, $arg1 = command
 	cmd=$(composeCommand)
 	$cmd run --no-deps --rm ${service} bash -c "${args[*]}"
+}
+
+function runremote() {
+	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
+	cd ${SRV_REPO_PATH} && cd ${APP_NAME}-${args[0]} && "${args[@]:1}""
 }
 
 # Remote

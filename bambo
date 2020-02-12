@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 utils="$script_dir/utils.sh"
 
 
-source $script_dir/bambod_src/arguments.sh
+source $script_dir/bambo_src/arguments.sh
 
 workdir=$($utils upfind docker-compose.yml)
 
@@ -33,7 +33,7 @@ else
 fi
 
 
-source $script_dir/bambod_src/general.sh
-source $script_dir/bambod_src/compose.sh
+source $script_dir/bambo_src/general.sh
+source $script_dir/bambo_src/compose.sh
 
 $function_name
