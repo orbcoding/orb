@@ -5,34 +5,37 @@ utils="$script_dir/utils.sh"
 
 source $script_dir/bambo_src/arguments.sh
 
+# Move to closest docker-compose
 workdir=$($utils upfind docker-compose.yml)
-
 if [ -z  $workdir ]; then
 	case $function_name in
-		help|list|df|pruneall)
+		help|list|df|pruneall|pruneimages|rebuild|runimage|push)
 			# Fine without composefile
 		;;
-		*)
+		*) # Otherwise exit
 			echo 'No docker-compose.yml found!'
 			exit 1
 		;;
 	esac
 else
 	cd $workdir
-	export CURRENT_UID=$(id -u):$(id -g);
+fi
 
-	if [ -f '.env' ]; then
-		$($utils parseEnv .env)
-	else
-		echo 'No .env file!'
-	fi
+# Setup environment
+export CURRENT_UID=$(id -u):$(id -g);
 
-	if [ -f '_docker/scripts.sh' ]; then
-		source _docker/scripts.sh
-	fi
+if [ -f '.env' ]; then
+	$($utils parseEnv .env)
+else
+	echo 'No .env file!'
+fi
+
+if [ -f '_docker/scripts.sh' ]; then
+	source _docker/scripts.sh
 fi
 
 
+# Load functions
 source $script_dir/bambo_src/general.sh
 source $script_dir/bambo_src/compose.sh
 

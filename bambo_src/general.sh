@@ -34,5 +34,23 @@ function pruneall() { # Prune all stopped and unused including volumes, -f = for
 	docker system prune --all --volumes $force;
 }
 
+function pruneimages() {
+	[[ $f_arg == '1' ]] && force='-f' || force=''; # Set force or empty
+	docker image prune $force
+}
 
+# Image
+function rebuild() { # Rebuild image $BUILD_IMAGE from _docker (.env)
+	pwd
+	[ -d _docker ] && path=_docker || path=.
+	docker build --build-arg PARENT_IMAGE=$PARENT_IMAGE $path -t $BUILD_IMAGE
+}
 
+function runimage() { # Run built image
+	docker run -it --rm $BUILD_IMAGE bash -c "${args[*]}"
+}
+
+function push() { # Push rebuilt image $BUILD_IMAGE to docker hub
+	docker login
+	docker push $BUILD_IMAGE
+}

@@ -7,6 +7,8 @@ f_arg=0
 r_arg=0
 args=()
 
+set_env=0 # Track if user set manually
+set_service=0
 
 function arg_help() {
     echo "\
@@ -24,6 +26,7 @@ key="$1"
 case $key in
     -e|--env)
         env="$2"
+        set_env=1
         if [[ $env != 'prod' && $env != 'staging' && $env != 'dev' && $env != 'idle' ]]; then
             echo '-e not prod/staging/idle/dev'
             exit 1
@@ -33,6 +36,7 @@ case $key in
     ;;
     -s|--service)
         service="$2"
+        set_service=1
         shift # past argument
         shift # past value
     ;;
