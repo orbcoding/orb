@@ -1,10 +1,3 @@
-hasContainers() {
-	[ $(docker container ls -a -f "name=${APP_NAME}_${env}" | wc -l) -gt 1 ]
-}
-isRunning() {
-	[ $(docker container ls -f "name=${APP_NAME}_${env}${s}" | wc -l) -gt 1 ]
-}
-
 composeCommand() {
 	case $env in
 		prod)
@@ -24,6 +17,10 @@ composeCommand() {
 			fi
 		;;
 	esac
+}
+
+serviceId() {
+	echo $($(composeCommand) ps -q $service)
 }
 
 # Containers
@@ -52,46 +49,29 @@ function pull() { # $arg1 = env
 }
 
 function logs() { # Get container log, $arg1 = lines
-	[[ -z ${args[0]} ]] && lines='120' || lines=${args[0]};
+	[[ -z ${args[0]} ]] && lines='300' || lines=${args[0]};
 	[[ $f_arg -eq "0" ]] && follow='' || follow='-f';
-	$(composeCommand) logs $follow $service
+	$(composeCommand) logs  --tail $lines $follow $service
 }
 
-function clearlogs() { # Clear logs of container
-	if hasContainers; then
-		sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' ${APP_NAME}_${env}_${service})
-	else
-		echo "${APP_NAME}_${env}_${service} no container"
-	fi
+function clearlogs() { # Trim logs of container
+	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceId))
 }
 
 function bash() { # Enter container with bash
-	if isRunning; then
-		docker exec -it "${APP_NAME}_${env}_${service}" /bin/bash
-	else
-		echo "Not running"
-	fi
+	docker exec -it "$(serviceId)" /bin/bash
 }
 
 function rootbash() { # Enter container as root with bash
-	if isRunning; then
-		docker exec --user 0 -it "${APP_NAME}_${env}_${service}" /bin/bash
-	else
-		echo "Not running"
-	fi
+	docker exec --user 0 -it "$(serviceId)" /bin/bash
 }
 
 function run() { # Run inside running container
-	if isRunning; then
-		docker exec -it "${APP_NAME}_${env}_${service}" bash -c "${args[*]}"
-	else
-		echo 'Not running'
-	fi
+	docker exec -it "$(serviceId)" bash -c "${args[*]}"
 }
 
 function runsingle() { # Run in parallell container, $arg1 = command
-	cmd=$(composeCommand)
-	$cmd run --no-deps --rm ${service} bash -c "${args[*]}"
+	$(composeCommand) run --no-deps --rm ${service} bash -c "${args[*]}"
 }
 
 function runremote() {
