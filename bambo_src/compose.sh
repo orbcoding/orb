@@ -33,7 +33,7 @@ function start() { # Start compose containers, -r = restart
 	fi
 
 	if [[ $set_service == '1' ]]; then
-		$(composeCommand) start $service
+		$(composeCommand) up -d --no-deps $service
 	else
 		$(composeCommand) up -d
 	fi
