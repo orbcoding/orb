@@ -23,34 +23,39 @@ while [[ $# -gt 0 ]]
 do
 key="$1"
 
-case $key in
-    -e|--env)
-        env="$2"
-        set_env=1
-        if [[ $env != 'prod' && $env != 'staging' && $env != 'dev' && $env != 'idle' ]]; then
-            echo '-e not prod/staging/idle/dev'
-            exit 1
-        fi
-        shift # past argument
-        shift # past value
-    ;;
-    -s|--service)
-        service="$2"
-        set_service=1
-        shift # past argument
-        shift # past value
-    ;;
-    -f)
-        f_arg=1
-        shift # past argument
-    ;;
-    -r)
-        r_arg=1
-        shift # past argument
-    ;;
-    *)    # unknown option
-        args+=("$1") # save it in an array for later
-        shift # past argument
-    ;;
-esac
+if [[ $function_name != 'runremote' ]]; then
+    case $key in
+        -e|--env)
+            env="$2"
+            set_env=1
+            if [[ $env != 'prod' && $env != 'staging' && $env != 'dev' && $env != 'idle' ]]; then
+                echo '-e not prod/staging/idle/dev'
+                exit 1
+            fi
+            shift # past argument
+            shift # past value
+        ;;
+        -s|--service)
+            service="$2"
+            set_service=1
+            shift # past argument
+            shift # past value
+        ;;
+        -f)
+            f_arg=1
+            shift # past argument
+        ;;
+        -r)
+            r_arg=1
+            shift # past argument
+        ;;
+        *)    # unknown option
+            args+=("$1") # save it in an array for later
+            shift # past argument
+        ;;
+    esac
+else
+    args+=("$1")
+    shift
+fi
 done
