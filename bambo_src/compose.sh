@@ -54,7 +54,7 @@ function pull() { # $arg1 = env
 function logs() { # Get container log, $arg1 = lines
 	[[ -z ${args[0]} ]] && lines='120' || lines=${args[0]};
 	[[ $f_arg -eq "0" ]] && follow='' || follow='-f';
-	$(composeCommand) logs $service $follow
+	$(composeCommand) logs $follow $service
 }
 
 function clearlogs() { # Clear logs of container
