@@ -67,11 +67,11 @@ function rootbash() { # Enter container as root with bash
 }
 
 function run() { # Run inside running container
-	docker exec -it "$(serviceId)" bash -c "${args[*]}"
+	docker exec -it "$(serviceId)" bash -ci "${args[*]}"
 }
 
 function runsingle() { # Run in parallell container, $arg1 = command
-	$(composeCommand) run --no-deps --rm ${service} bash -c "${args[*]}"
+	$(composeCommand) run --no-deps --rm ${service} bash -ci "${args[*]}"
 }
 
 function runremote() {
