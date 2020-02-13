@@ -22,10 +22,19 @@ else
 fi
 
 # Setup environment
-export CURRENT_UID=$(id -u):$(id -g);
+export CURRENT_ID=$(id -u);
+export CURRENT_GID=$(id -g);
 
 if [ -f '.env' ]; then
 	$($utils parseEnv .env)
+	if [[ ! -z $DEFAULT_ENV && $set_env == 0 ]]; then
+		echo "Default .env $DEFAULT_ENV"
+		env=$DEFAULT_ENV
+	fi
+	if [[ ! -z $DEFAULT_SERVICE && $set_service == 0 ]]; then
+		echo "Default .env $DEFAULT_SERVICE"
+		service=$DEFAULT_SERVICE
+	fi
 else
 	echo 'No .env file!'
 fi
