@@ -83,7 +83,7 @@ function runremote() {
 # Remote
 function mountremote() { # Mount remote to _remote
 	if [ -d _remote ]; then
-		sshfs ${SRV_USER}@${SRV_DOMAIN}:${SRV_REPO_PATH} _remote
+		sshfs -o follow_symlinks ${SRV_USER}@${SRV_DOMAIN}:${SRV_REPO_PATH} _remote
 	else
 		echo 'No _remote'
 	fi
