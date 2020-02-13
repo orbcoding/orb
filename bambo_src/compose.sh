@@ -24,7 +24,8 @@ serviceId() {
 }
 
 # Containers
-function start() { # Start compose containers, -r = restart
+function start() { # Start compose containers, $1 = env, -r = restart
+	[[ ! -z ${args[0]} ]] && env=${args[0]}
 	if [[ $r_arg == "1" ]]; then
 		stop;
 	fi
@@ -44,17 +45,17 @@ function stop() { # Stop container
 	fi
 }
 
-function pull() { # $arg1 = env
+function pull() { # Pull compose images
 	$(composeCommand) pull
 }
 
-function logs() { # Get container log, $arg1 = lines
+function logs() { # Get container log, $1 = lines, -f = follow
 	[[ -z ${args[0]} ]] && lines='300' || lines=${args[0]};
 	[[ $f_arg -eq "0" ]] && follow='' || follow='-f';
 	$(composeCommand) logs  --tail $lines $follow $service
 }
 
-function clearlogs() { # Trim logs of container
+function clearlogs() { # Clear container logs
 	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceId))
 }
 
@@ -66,18 +67,19 @@ function rootbash() { # Enter container as root with bash
 	docker exec --user 0 -it "$(serviceId)" /bin/bash
 }
 
-function run() { # Run inside running container
+function run() { # Run inside running container, $1 = command
 	docker exec -it "$(serviceId)" bash -ci "${args[*]}"
 }
 
-function runsingle() { # Run in parallell container, $arg1 = command
+function runsingle() { # Run in parallell container, $1 = command
 	$(composeCommand) run --no-deps --rm ${service} bash -ci "${args[*]}"
 }
 
-function runremote() {
+function runremote() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
+	[[ ${args[0]} == 'nginx' ]] && sub_path='nginx' || sub_path=${APP_NAME}-${args[0]}
 	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
 	PATH=$PATH:~/bambocli && \
-	cd ${SRV_REPO_PATH}/${APP_NAME}-${args[0]} && "${args[@]:1}""
+	cd ${SRV_REPO_PATH}/${sub_path} && "${args[@]:1}""
 }
 
 # Remote
@@ -90,7 +92,6 @@ function mountremote() { # Mount remote to _remote
 }
 
 function umountremote() { # Unmount _remote
-	# fusermount -u _remote
 	sudo umount -l _remote
 }
 

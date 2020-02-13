@@ -22,9 +22,6 @@ else
 fi
 
 # Setup environment
-export CURRENT_ID=$(id -u);
-export CURRENT_GID=$(id -g);
-
 if [ -f '.env' ]; then
 	$($utils parseEnv .env)
 	if [[ ! -z $DEFAULT_ENV && $set_env == 0 ]]; then
@@ -38,6 +35,10 @@ if [ -f '.env' ]; then
 else
 	echo 'No .env file!'
 fi
+
+export CURRENT_ID=$(id -u);
+export CURRENT_GID=$(id -g);
+export CURRENT_ENV=$env
 
 if [ -f '_docker/scripts.sh' ]; then
 	source _docker/scripts.sh
