@@ -5,16 +5,17 @@ function help() { # Show this help
 		echo
 
 		echo '# GENERAL'
-    grep "^function" "$script_dir/bambo_src/general.sh" | cut -d ' ' -f2- | sed 's/{ //g'
+    $utils listFunctions $script_dir/general.sh 1
+		# grep "^function" "$script_dir/general.sh" | cut -d ' ' -f2- | sed 's/{ //g'
 		echo
 
 		echo '# COMPOSE'
-    grep "^function" "$script_dir/bambo_src/compose.sh" | cut -d ' ' -f2- | sed 's/{ //g'
+		$utils listFunctions $script_dir/compose.sh 1
 
-		if [[ $workdir && -f $workdir/_docker/scripts.sh ]]; then
+		if [[ $workdir && -f $workdir/_docker/d.sh ]]; then
 			echo
 			echo '# PROJECT'
-			grep "^function" "$workdir/_docker/scripts.sh" | cut -d ' ' -f2- | sed 's/{ //g'
+			$utils listFunctions $workdir/_docker/d.sh 1
 		fi
 }
 
@@ -43,7 +44,7 @@ function pruneimages() {
 function rebuild() { # Rebuild image $BUILD_IMAGE from _docker (.env)
 	pwd
 	[ -d _docker ] && path=_docker || path=.
-	docker build --build-arg PARENT_IMAGE=$PARENT_IMAGE $path -t $BUILD_IMAGE
+	docker build --rm --build-arg PARENT_IMAGE=$PARENT_IMAGE $path -t $BUILD_IMAGE
 }
 
 function runimage() { # Run built image

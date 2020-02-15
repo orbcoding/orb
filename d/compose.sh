@@ -76,10 +76,9 @@ function runsingle() { # Run in parallell container, $1 = command
 }
 
 function runremote() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
-	[[ ${args[0]} == 'nginx' ]] && sub_path='nginx' || sub_path=${APP_NAME}-${args[0]}
 	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
 	PATH=$PATH:~/bambocli && \
-	cd ${SRV_REPO_PATH}/${sub_path} && "${args[@]:1}""
+	cd ${SRV_REPO_PATH}/${args[0]} && "${args[@]:1}""
 }
 
 # Remote

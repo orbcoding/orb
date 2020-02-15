@@ -6,6 +6,19 @@ parseEnv() {
 	echo "eval $(egrep -v '^#' $1 | sed -e 's/ = /=/g' | xargs -0)"
 }
 
+listFunctions() { # $1 = path, $2 = with_comments=0
+	if [[ $2 == '1' ]]; then
+		grep "^function" "$1" | cut -d ' ' -f2- | sed 's/() {/ --/g'
+	else
+		grep "^function" "$1" | cut -d ' ' -f2 | sed 's/()//g'
+	fi
+}
+
+hasFunction() { # $1 = function, $2 = file
+	listFunctions $2 | grep -Fxq $1
+}
+
+
 cpSamples() {
 	from=$1; to=$2
 	for file in $(find $from -maxdepth 1 -type f -exec basename {} \;); do
@@ -13,12 +26,12 @@ cpSamples() {
 	done;
 }
 
-splitString() { # arg1 = string, arg2 = delimiter, arg3 = return index
+splitString() { # $1 = string, $2 = delimiter, $3 = return index
 	IFS=$2 read -r -a array <<< "$1"
 	echo "${array[$3]}"
 }
 
-upfind() { # arg1 = filename
+upfind() { # $1 = filename
 	x=`pwd`
 	while [ "$x" != "/" ] ; do
 			if [[ -f "$x/$1" ]]; then
