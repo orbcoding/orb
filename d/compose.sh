@@ -7,7 +7,7 @@ composeCommand() {
 			echo 'docker-compose -f docker-compose.yml -f docker-compose.staging.yml';
 		;;
 		idle)
-			echo 'docker-compose -f docker-compose.yml -f docker-compose.dev.yml -f docker-compose.idle.yml';
+			echo "docker-compose -f docker-compose.yml -f docker-compose.${flag_env}.yml -f docker-compose.idle.yml";
 		;;
 		dev)
 			if [ -f docker-compose.dev.yml ]; then
@@ -24,8 +24,10 @@ serviceId() {
 }
 
 # Containers
-function start() { # Start compose containers, $1 = env, -r = restart
+function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
+  [[ ! -z $env ]] && flag_env=$env
 	[[ ! -z ${args[0]} ]] && env=${args[0]}
+
 	if [[ $r_arg == "1" ]]; then
 		stop;
 	fi
