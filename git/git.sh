@@ -24,8 +24,3 @@ function forget() { # Forget file from history
 
 # Parse args
 source $script_dir/arguments.sh
-
-
-
-
-$function_name

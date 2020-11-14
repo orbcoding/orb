@@ -32,5 +32,3 @@ fi
 # Load functions
 source $script_dir/general.sh
 source $script_dir/compose.sh
-
-$function_name

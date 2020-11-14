@@ -1,9 +1,9 @@
 #!/bin/bash
 bambo_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-utils="$bambo_dir/utils.sh"
+utils="$bambo_dir/utils/utils.sh"
 
 case $1 in
-		d|git|help) # Script tags
+		d|utils|git|help) # Script tags
 			script=$1
 			shift
 		;;
@@ -12,9 +12,15 @@ case $1 in
 		;;
 esac
 
+# Just load the util
+if [[ $script == 'utils' ]]; then
+	$utils "$@";
+	exit 0;
+fi
 
 function_name=$1; shift
 script_dir="$bambo_dir/$script"
 
 source $script_dir/${script}.sh
+$function_name
 
