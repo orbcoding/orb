@@ -39,11 +39,21 @@ function start() { # Start compose containers, $1 = env, -r = restart, -e = spec
 	fi
 }
 
-function stop() { # Stop container
+function stop() { # Stop containers
+	[[ ! -z ${args[0]} ]] && env=${args[0]}
 	if [[ $set_service == '1' ]]; then
 		$(composeCommand) stop $service
 	else
 		$(composeCommand) stop
+	fi
+}
+
+function rm() { # Rm containers
+	[[ ! -z ${args[0]} ]] && env=${args[0]}
+	if [[ $set_service == '1' ]]; then
+		$(composeCommand) rm $service --force
+	else
+		$(composeCommand) rm --force
 	fi
 }
 

@@ -35,9 +35,18 @@ function pruneall() { # Prune all stopped and unused including volumes, -f = for
 	docker system prune --all --volumes $force;
 }
 
-function pruneimages() {
+function prunecontainers() { # Prune all stopped containers, -f = force
+	[[ $f_arg == '1' ]] && force='-f' || force=''; # Set force or empty
+	docker container prune $force;
+}
+
+function pruneimages() { # remove all images, -f = force
 	[[ $f_arg == '1' ]] && force='-f' || force=''; # Set force or empty
 	docker image prune $force
+}
+
+function stopall() { # stop all containers
+	docker stop $(docker ps -a -q)
 }
 
 # Image

@@ -18,13 +18,15 @@ fi
 
 set_env=0 # Track if user set manually
 set_service=0
+set_db=0
 
 function arg_help() {
     echo "\
     -e  = env      (def=dev)
     -s  = service  (def=web)
     -f  = force/follow
-    -r  = restart"
+    -r  = restart
+    -db = db"
 }
 
 args=()
@@ -60,6 +62,12 @@ while [[ $# -gt 0 ]]; do
             -r)
                 r_arg=1
                 shift # past argument
+            ;;
+            -db|--database)
+                db="$2"
+                set_db=1
+                shift # past argument
+                shift # past value
             ;;
             *)    # unknown option
                 args+=("$1") # save it in an array for later
