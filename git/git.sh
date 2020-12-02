@@ -1,5 +1,5 @@
 function help() { # Show this help
-	$utils listFunctions $script_dir/git.sh 1
+	$utils listfunctions $script_dir/git.sh 1
 }
 
 function forget() { # Forget file from history

@@ -24,19 +24,29 @@ serviceId() {
 }
 
 # Containers
+declare -A start_args=(
+	['1']='env'
+	["-e arg"]='env if $1 = idle'
+	['-r']='restart if already started'
+)
 function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
-  [[ ! -z $env ]] && flag_env=$env
-	[[ ! -z ${args[0]} ]] && env=${args[0]}
+	echo ${args[1]}
+  # [[ -n $env ]] && flag_env=$env
+	# [[ -n ${args[0]} ]] && env=${args[0]}
 
-	if [[ $r_arg == "1" ]]; then
-		stop;
-	fi
+	# export CURRENT_ID=$(id -u);
+	# export CURRENT_GID=$(id -g);
+	# export CURRENT_ENV=$env
 
-	if [[ $set_service == '1' ]]; then
-		$(composeCommand) up -d --no-deps $service
-	else
-		$(composeCommand) up -d
-	fi
+	# if [[ $r_arg == "1" ]]; then
+	# 	stop;
+	# fi
+
+	# if [[ $set_service == '1' ]]; then
+	# 	$(composeCommand) up -d --no-deps $service
+	# else
+	# 	$(composeCommand) up -d
+	# fi
 }
 
 function stop() { # Stop containers
@@ -49,7 +59,7 @@ function stop() { # Stop containers
 }
 
 function rm() { # Rm containers
-	[[ ! -z ${args[0]} ]] && env=${args[0]}
+	[[ -n ${args[0]} ]] && env=${args[0]}
 	if [[ $set_service == '1' ]]; then
 		$(composeCommand) rm $service --force
 	else
@@ -62,7 +72,8 @@ function pull() { # Pull compose images
 }
 
 function logs() { # Get container log, $1 = lines, -f = follow
-	[[ -z ${args[0]} ]] && lines='300' || lines=${args[0]};
+	lines=${args[0]-300} # 300 default
+	# [[ -z ${args[0]} ]] && lines='300' || lines=${args[0]};
 	[[ $f_arg -eq "0" ]] && follow='' || follow='-f';
 	$(composeCommand) logs  --tail $lines $follow $service
 }

@@ -3,24 +3,32 @@ bambo_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
 utils="$bambo_dir/utils/utils.sh"
 
 case $1 in
-		d|utils|git|help) # Script tags
+		d|git|help)
+			# Specified script tag
 			script=$1
 			shift
+		;;
+		utils)
+			# Just run the util and exit
+			shift;
+			$utils "$@";
+			exit;
 		;;
 		*) # Default script = d
 			script=d
 		;;
 esac
 
-# Just load the util
-if [[ $script == 'utils' ]]; then
-	$utils "$@";
-	exit 0;
-fi
-
+# First argument is function name
 function_name=$1; shift
-script_dir="$bambo_dir/$script"
 
+# Source main script file with functions
+script_dir="$bambo_dir/$script"
 source $script_dir/${script}.sh
+
+# Collect function specific arguments
+source "$bambo_dir/utils/argument_collector.sh"
+
+# Call function
 $function_name
 
