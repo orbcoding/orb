@@ -26,10 +26,18 @@ cpsamples() {
 	done;
 }
 
-splitstring() { # $1 = string, $2 = delimiter, $3 = return index
-	IFS=$2 read -r -a array <<< "$1"
-	echo "${array[$3]}"
+grepbetween() { # $1 = string, $2 = from, $3 = to (either|or)
+	echo $(grep -oP "(?<=$2).*?(?=$3)" <<< $1)
 }
+
+# splitstring() { # $1 = string, $2 = delimiter, $3 = return index
+# 	IFS=$2 read -r -a array <<< "$1"
+# 	if [[ -n "$3" ]]; then
+# 		echo "${array[$3]}"
+# 	else
+# 		echo "${array[@]}"
+# 	fi
+# }
 
 upfind() { # $1 = filename
 	x=`pwd`

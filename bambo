@@ -30,5 +30,5 @@ source $script_dir/${script}.sh
 source "$bambo_dir/utils/argument_collector.sh"
 
 # Call function
-$function_name
+$function_name "${inline_args[@]}"
 
