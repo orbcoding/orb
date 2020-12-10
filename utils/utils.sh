@@ -26,6 +26,11 @@ cpsamples() {
 	done;
 }
 
+isnr() { # $1 nr
+	re='^[0-9]+$'
+	[[ $1 =~ $re ]] && true || false
+}
+
 grepbetween() { # $1 = string, $2 = from, $3 = to (either|or)
 	echo $(grep -oP "(?<=$2).*?(?=$3)" <<< $1)
 }

@@ -1,81 +1,98 @@
-composecommand() {
-	case ${args[-e arg]} in
-		prod)
-			echo 'docker-compose -f docker-compose.yml -f docker-compose.prod.yml';
-		;;
-		staging)
-			echo 'docker-compose -f docker-compose.yml -f docker-compose.staging.yml';
-		;;
-		idle)
-			echo "docker-compose -f docker-compose.yml -f docker-compose.${args[-e argZ]}.yml -f docker-compose.idle.yml";
-		;;
-		dev)
-			if [ -f docker-compose.dev.yml ]; then
-				echo 'docker-compose -f docker-compose.yml -f docker-compose.dev.yml';
-			else
-				echo 'docker-compose'
-			fi
-		;;
-	esac
-}
-
-serviceid() {
-	echo $($(composecommand) ps -q $service)
-}
-
 # Containers
 declare -A start_args=(
-	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|idle|dev'
-	["-e arg"]='env if $1 = idle; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|idle|dev'
-	['-r']='restart if already started'
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='start single service'
-)
-function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
-	export CURRENT_ENV=$1
-	export CURRENT_ID=$(id -u);
-	export CURRENT_GID=$(id -g);
+	['-i']='start idle'
+	['-r']='stop first'
+); function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
+	export CURRENT_ENV="$1"
+	export CURRENT_ID="$(id -u)";
+	export CURRENT_GID="$(id -g)";
 
-	[[ ${args[-r]} == true ]] && stop
+	[[ -n ${args[-r]} ]] && bambo stop $1 `passflags "-s arg"`
 
-	if [[ -n ${args[-s]} ]]; then
-		$(composecommand) up -d --no-deps $service
+	cmd="$(bambo composecmd "$1" `passflags -i`) up -d "
+	[[ -n ${args[-s arg]} ]] && cmd+=" --no-deps ${args[-s arg]}"
+
+	$cmd
+}
+
+
+declare -A stop_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['-s arg']='stop single service'
+); function stop() { # Stop containers
+	$(bambo composecmd $1) stop ${args[-s arg]}
+}
+
+
+declare -A logs_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['-s arg']='service; DEFAULT: web'
+	['-nf']='no follow;'
+	['-l arg']="lines; DEFAULT: 300"
+); function logs() { # Get container log
+	cmd="$(bambo composecmd $1) logs --tail ${args[-l arg]}"
+	[[ -z ${args[-nf]} ]] && cmd+=" -f" # follow unless nf
+	cmd+=" ${args[-s arg]}"
+	$cmd
+}
+
+
+declare -A clearlogs_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['-s arg']='service; DEFAULT: web'
+); function clearlogs() { # Clear container logs
+	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceid $1 `passflags "-s arg"`))
+}
+
+
+declare -A rm_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['-s arg']='rm single service'
+); function rm() { # Rm containers
+	$(bambo composecmd $1) rm --force ${args[-s arg]}
+}
+
+
+declare -A pull_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+); function pull() { # Pull compose images
+	$(composecmd $1) pull
+}
+
+
+# Mostly Internal
+declare -A composecmd_args=(
+	['1']='env; IN: prod|staging|dev; REQUIRED'
+	['-s arg']='service name'
+	['-i']='start idle'
+); composecmd() { #
+	# Select files for cmd
+	if [[ ! -f "docker-compose.$1.yml" ]]; then
+		cmd='docker-compose' # start without envs
 	else
-		$(composecommand) up -d
+		cmd="docker-compose -f docker-compose.yml -f docker-compose.$1.yml"
+
+		if [[ "${args[-i]}" == true ]]; then # idle
+			[[ -f "docker-compose.idle.yml" ]] && \
+			cmd+=' -f docker-compose.idle.yml' || \
+			(echo 'no docker-compose.idle.yml' && exit 1)
+		fi
 	fi
+
+	echo "$cmd"
 }
 
-function stop() { # Stop containers
-	[[ ! -z ${args[0]} ]] && env=${args[0]}
-	if [[ $set_service == '1' ]]; then
-		$(composecommand) stop $service
-	else
-		$(composecommand) stop
-	fi
+
+declare -A serviceid_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['-s arg']='service; REQUIRED'
+); serviceid() {
+	$(bambo composecmd $1) ps -q ${args[-s arg]}
 }
 
-function rm() { # Rm containers
-	[[ -n ${args[0]} ]] && env=${args[0]}
-	if [[ $set_service == '1' ]]; then
-		$(composecommand) rm $service --force
-	else
-		$(composecommand) rm --force
-	fi
-}
 
-function pull() { # Pull compose images
-	$(composecommand) pull
-}
-
-function logs() { # Get container log, $1 = lines, -f = follow
-	lines=${args[0]-300} # 300 default
-	# [[ -z ${args[0]} ]] && lines='300' || lines=${args[0]};
-	[[ $f_arg -eq "0" ]] && follow='' || follow='-f';
-	$(composecommand) logs  --tail $lines $follow $service
-}
-
-function clearlogs() { # Clear container logs
-	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceid))
-}
 
 function bash() { # Enter container with bash
 	docker exec -it "$(serviceid)" /bin/bash
@@ -89,8 +106,12 @@ function run() { # Run inside running container, $1 = command
 	docker exec -it "$(serviceid)" bash -ci "${args[*]}"
 }
 
-function runsingle() { # Run in parallell container, $1 = command
-	$(composecommand) run --no-deps --rm ${service} bash -ci "${args[*]}"
+declare -A runsingle_args=(
+	['-e']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['*']='cmd;'
+); function runsingle() { # Run in parallell container, $1 = command
+	echo "$@"
+	# $(bambo composecmd $1) run --no-deps --rm ${service} bash -ci "${args[*]}"
 }
 
 function runremote() { # Run command on remote, $1 = prod/staging/nginx, $2 = command

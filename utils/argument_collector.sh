@@ -44,49 +44,14 @@ parse_args() {
 	validate_args
 }
 
-collect_args() {
-	while [[ ${#remaining_args[@]} -gt 0 ]]; do
-		arg="${remaining_args[0]}"
-
-		if [[ ${arg:0:1} == '-' ]]; then
-			handle_flagged_arg "$arg"
-		else
-			# add numbered args to args and inline_args
-			inline_args+=("$arg")
-			arg_nr=${#inline_args[@]}
-			args[$arg_nr]="$arg"
-			shift_args
-		fi
-	done
-}
-
-
-handle_flagged_arg() {
-	# if function declared seeking flagged arg
-	if [[ -v "function_args["$1"]" ]]; then
-		args[$1]=true
-		shift_args
-	elif [[ -v "function_args[$1 arg]" ]]; then
-		# if arg suffix, set value to next arg and shift both
-		args["$1 arg"]=${remaining_args[1]}
-		shift_args 2
-	else
-		echo "error, invalid param: $1"
-		exit 1
-		shift_args
-	fi
-}
-
-
-
 set_arg_defaults() {
-	for arg in "${!function_args[@]}"; do
+	for arg in "${!function_args["@"]}"; do
 		value=$(get_arg_value "$arg" DEFAULT)
-		[[ -z $value ]] && return # Exit if no default param values
 
+		[[ -z $value ]] && continue # next if no default param values
+
+		# check each if default defined
 		IFS='|' read -r -a options <<< $value # split by |
-
-		# check each unless defined
 		for option in ${options[@]}; do
 			if [[ ${option:0:1} == '$' ]]; then
 				# is variable
@@ -101,7 +66,74 @@ set_arg_defaults() {
 		done
 
 		args["$arg"]="$value"
+		$($utils isnr "$arg") && inline_args[$arg]="$value"
 	done
+}
+
+collect_args() {
+	count=1
+
+
+	has_wildcard && echo "has"
+
+	for arg in "${!function_args[@]}"; do
+		echo "hej $arg"
+	done
+
+	while [[ ${#remaining_args[@]} -gt 0 ]]; do
+		arg="${remaining_args[0]}"
+
+		if [[ ${arg:0:1} == '-' ]]; then
+			parse_flagged_arg "$arg"
+		else
+			# add numbered args to args and inline_args
+			inline_args[$count]="$arg"
+			args[$count]="$arg"
+			(( count++ ))
+			shift_args
+		fi
+	done
+}
+
+has_wildcard() {
+	for arg in "${!function_args[@]}"; do
+		if [[ "${arg}" != "${arg/\*/}" ]]; then
+			return 0
+		fi
+	done
+
+	return 1
+}
+
+
+parse_flagged_arg() { # $1 arg_key
+	# if function declared seeking flagged arg
+	if [[ -n ${function_args["$1"]} ]]; then
+		args[$1]=true
+		shift_args
+	elif [[ -n ${function_args[$1 arg]} ]]; then
+		# if arg suffix, set value to next arg and shift both
+		args["$1 arg"]=${remaining_args[1]}
+		shift_args 2
+	else
+		parse_multiple_flags "$1" || \
+		(echo "${function_name} error, invalid arg: $1" && exit 1)
+	fi
+}
+
+parse_multiple_flags() { # $1 arg_key
+	flags=$(echo "${1:1}" | grep -o .)
+	for flag in $flags; do
+		if [[ -n ${function_args[-$flag]} ]]; then
+			args[-$flag]=true
+		else
+			echo "${function_name} error, invalid arg: -$flag" && exit 1
+		fi
+	done
+
+	shift_args
+
+	return 0
 }
 
 validate_args() { # $1 arg
@@ -114,7 +146,7 @@ validate_args() { # $1 arg
 validate_required() { # $1 arg
 	echo "${function_args[$1]}" | grep -q 'REQUIRED' && \
 	[[ -z ${args[$1]} ]] && \
-	echo "error, $1 is required" && \
+	echo "${function_name} error, $1 is required" && \
 	exit 1
 }
 
@@ -132,7 +164,7 @@ validate_in() { # $1 arg
 	done
 
 	# error if not found in IN
-	echo "error, $arg not in IN $in_str"
+	echo "${function_name} error, $arg not in IN $in_str"
 	exit 1
 }
 
@@ -155,9 +187,33 @@ eval_variable_or_string() { # $1 $variable/string (in string format)
 shift_args() {
 	steps=${1-1} # 1 default value
 	for (( i = 0; i < $steps; i++ )); do
-		remaining_args=(${remaining_args[@]:1})
+		remaining_args=("${remaining_args[@]:1}")
 	done
 }
+
+function passflags() { # $1 arr
+		pass=""
+
+		for arg in "$@"; do
+			if [[ -n ${args[$arg]} ]]; then
+				if [[ "${arg/ arg/}" !=  "$arg" ]]; then
+					pass+=" ${arg/ arg/} ${args[$arg]}"
+				else
+					pass+=" $arg"
+				fi
+			fi
+		done
+
+		echo "${pass:1}"
+}
+
+# function flagif() { # $1 arg, $2 value
+# 	[[ -n "$2" ]] && echo "$1"
+# }
+
+# function passflagarg() { # $1 arg, $2 value
+# 	[[ -n "$2" ]] && echo "$1 $2"
+# }
 
 
 # Run main function
