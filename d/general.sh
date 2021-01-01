@@ -1,25 +1,4 @@
 #!/bin/bash
-function help() { # Show this help
-		echo '# ARGS'
-		arg_help
-		echo
-
-		echo '# GENERAL'
-    $utils listfunctions $script_dir/general.sh 1
-		# grep "^function" "$script_dir/general.sh" | cut -d ' ' -f2- | sed 's/{ //g'
-		echo
-
-		echo '# COMPOSE'
-		$utils listfunctions $script_dir/compose.sh 1
-
-		if [[ $workdir && -f $workdir/_docker/d.sh ]]; then
-			echo
-			echo '# PROJECT'
-			$utils listfunctions $workdir/_docker/d.sh 1
-		fi
-}
-
-
 function list() { # List containers and images
 	docker ps -a
 	echo

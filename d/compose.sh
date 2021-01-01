@@ -64,7 +64,7 @@ declare -A pull_args=(
 
 # Mostly Internal
 declare -A composecmd_args=(
-	['1']='env; IN: prod|staging|dev; REQUIRED'
+	['1']='env; IN: prod|staging|dev'
 	['-s arg']='service name'
 	['-i']='start idle'
 ); composecmd() { #
@@ -107,10 +107,14 @@ function run() { # Run inside running container, $1 = command
 }
 
 declare -A runsingle_args=(
-	['-e']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
-	['*']='cmd;'
+	['1']='env; IN: prod|dev; DEFAULT: dude; prod'
+	['-e arg']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+	['-r']="yo; DEFAULT: true"
+	['-i']="yo;"
+	['*']="all commands here foreeeeeeever and ever;"
 ); function runsingle() { # Run in parallell container, $1 = command
-	echo "$@"
+	print_args
+	a='b'
 	# $(bambo composecmd $1) run --no-deps --rm ${service} bash -ci "${args[*]}"
 }
 

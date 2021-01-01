@@ -1,23 +1,19 @@
 #!/bin/bash
 bambo_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-utils="$bambo_dir/utils/utils.sh"
+source "$bambo_dir/utils/utils.sh"
 
-case $1 in
-		d|git|help)
-			# Specified script tag
-			script=$1
-			shift
-		;;
-		utils)
-			# Just run the util and exit
-			shift;
-			$utils "$@";
-			exit;
-		;;
-		*) # Default script = d
-			script=d
-		;;
-esac
+scripts=('d' 'git' 'utils')
+
+[[ "$1" == '--help' ]] && print_global_help && exit 0
+
+if [[ " ${scripts[@]} " =~ " ${1} " ]]; then
+	# Specified script tag
+	script="$1"
+	shift
+else
+	script=d
+fi
+
 
 # First argument is function name
 function_name=$1; shift
@@ -26,9 +22,17 @@ function_name=$1; shift
 script_dir="$bambo_dir/$script"
 source $script_dir/${script}.sh
 
+if [[ "$function_name" == '--help' ]]; then
+	print_script_help && exit 0
+elif ! is_function "$function_name"; then
+	[[ -z "$function_name" ]] &&  echo -e "$(color red)Error: no function provided$(color none)" \
+		|| echo -e "$(color red)Error: function $(bold)$function_name$(normal)$(color red) undefined"
+	exit 1
+fi
+
 # Collect function specific arguments
-source "$bambo_dir/utils/argument_collector.sh"
+source "$bambo_dir/_src/arguments.sh"
 
 # Call function
-$function_name "${inline_args[@]}"
+$function_name "${args_inline[@]}" "${args_wildcard[@]}"
 
