@@ -74,16 +74,14 @@ declare -A passflags_args=(
 		pass=""
 
 		for arg in "$@"; do
-			if [[ -n ${args[$arg]} ]]; then
-				if [[ "${arg/ arg/}" !=  "$arg" ]]; then
-					pass+=" ${arg/ arg/} ${args[$arg]}"
-				else
-					pass+=" $arg"
-				fi
+			if [[ ${args[$arg]} == true ]]; then
+				pass+=" $arg"
+			elif [[ "${arg/ arg/}" !=  "$arg" ]]; then
+				pass+=" ${arg/ arg/} ${args[$arg]}"
 			fi
 		done
 
-		echo "${pass:1}"
+		echo "$pass" | xargs # trim whitespace
 }
 
 

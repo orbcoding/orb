@@ -1,3 +1,23 @@
+declare -A composecmd_args=(
+	['1']='env; IN: prod|staging|dev'
+	['-i']='start idle'
+); composecmd() { # Init composecmd with correct env files
+	if [[ ! -f "docker-compose.$1.yml" ]]; then
+		cmd='docker-compose' # start without envs
+	else
+		cmd="docker-compose -f docker-compose.yml -f docker-compose.$1.yml"
+
+		if [[ "${args[-i]}" == true ]]; then # idle
+			[[ -f "docker-compose.idle.yml" ]] && \
+			cmd+=' -f docker-compose.idle.yml' || \
+			(echo 'no docker-compose.idle.yml' && exit 1)
+		fi
+	fi
+
+	echo "$cmd"
+}
+
+
 # Containers
 declare -A start_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
@@ -29,13 +49,10 @@ declare -A stop_args=(
 declare -A logs_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; DEFAULT: web'
-	['-nf']='no follow;'
+	['-f']='follow; DEFAULT: true;'
 	['-l arg']="lines; DEFAULT: 300"
 ); function logs() { # Get container log
-	cmd="$(orb composecmd $1) logs --tail ${args[-l arg]}"
-	[[ -z ${args[-nf]} ]] && cmd+=" -f" # follow unless nf
-	cmd+=" ${args[-s arg]}"
-	$cmd
+	$(orb composecmd "$1") logs $(passflags "-f") --tail "${args[-l arg]}" ${args[-s arg]}
 }
 
 
@@ -61,28 +78,6 @@ declare -A pull_args=(
 	$(composecmd $1) pull
 }
 
-
-# Mostly Internal
-declare -A composecmd_args=(
-	['1']='env; IN: prod|staging|dev'
-	['-s arg']='service name'
-	['-i']='start idle'
-); composecmd() { #
-	# Select files for cmd
-	if [[ ! -f "docker-compose.$1.yml" ]]; then
-		cmd='docker-compose' # start without envs
-	else
-		cmd="docker-compose -f docker-compose.yml -f docker-compose.$1.yml"
-
-		if [[ "${args[-i]}" == true ]]; then # idle
-			[[ -f "docker-compose.idle.yml" ]] && \
-			cmd+=' -f docker-compose.idle.yml' || \
-			(echo 'no docker-compose.idle.yml' && exit 1)
-		fi
-	fi
-
-	echo "$cmd"
-}
 
 
 declare -A serviceid_args=(
@@ -118,10 +113,24 @@ declare -A runsingle_args=(
 	# $(orb composecmd $1) run --no-deps --rm ${service} bash -ci "${args[*]}"
 }
 
-function runremote() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
-	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
-	PATH=$PATH:~/orbcli && \
-	cd ${SRV_REPO_PATH}/${args[0]} && "${args[@]:1}""
+declare -A srv_args=(
+	['1']='IN: prod|staging|nginx|adminer; OPTIONAL'
+	['-t']='DEFAULT: false'
+	['*']='cmd; OPTIONAL'
+)
+function srv() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
+	cmd=$(cat << EOF
+	  PATH=\$PATH:~/orb-cli
+	  cd ${SRV_REPO_PATH}/${args[1]}
+
+		if [[ "${args['*']}" == true ]]; then
+			"${args_wildcard[*]}"
+		else
+			orb bash
+		fi
+EOF
+)
+	ssh $(passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "$cmd"
 }
 
 # Remote

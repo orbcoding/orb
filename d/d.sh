@@ -19,8 +19,8 @@ if [[ -n  "$workdir" ]]; then
 		script_files+=($(realpath --relative-to="$script_dir" "_docker/d.sh"))
 	fi
 
-# --help and general functions dont require docker-compose.yml
-elif [["$function_name" != "--help" ]] && ! $(orb utils hasfunction $function_name $script_dir/general.sh); then
+# help and general functions dont require docker-compose.yml
+elif [[ "$function_name" != "help" ]] && ! $(orb utils hasfunction $function_name $script_dir/general.sh); then
 	echo 'No docker-compose.yml found!'
 	exit 1
 fi

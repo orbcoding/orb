@@ -1,3 +1,12 @@
+function print_args() { # print collected arguments from arguments.sh, useful for debugging
+	declare -A | grep 'A args=' | cut -d '=' -f2-
+	[[ ${args["*"]} == true ]]  && echo "[*]=${args_wildcard[*]}"
+}
+
+
+###############
+# INTERNAL
+###############
 print_global_help() {
 echo "$(cat <<EOF
 orb [script_name(default=d)] [function_name]
@@ -23,10 +32,6 @@ print_function_help() {
 	print_args_definition
 }
 
-function print_args() { # print collected arguments from arguments.sh, useful for debugging
-	declare -A | grep 'A args=' | cut -d '=' -f2-
-	[[ ${args["*"]} == true ]]  && echo "[*]=${args_wildcard[*]}"
-}
 
 print_args_definition() {
 	props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED')

@@ -41,13 +41,14 @@
 # This allows expected access through: $1, $2, $@/$* etc
 #
 #
-# If the first argument of any function is --help
+# If the first argument of any function is help
 # An argument help output will be printed
 #
 #########################################
 
 # Name ref to function defined args (from string variable)
 declare -n args_declaration=${function_name}_args
+[[ -z args_declaration ]] && echo 'no args defined' && exit 1
 
 # non-flagged args_inline $1, $2... (* appended) will be passed forward so
 # $1 == ${args[1]} (unless [1] optional and fail validation so cought by wildcard instead)
@@ -161,7 +162,7 @@ seeks_inline_arg() {
 }
 
 seeks_wildcard() {
-	[[ -n ${args_declaration["*"]} ]]
+	[[ -n ${args_declaration['*']} ]]
 }
 
 wildcard_can_start_with_flag() {
@@ -301,7 +302,7 @@ error_and_exit() { # $1 arg_key $2 arg_value/required
 }
 
 # Run main function
-if [[ $1 == "--help" ]]; then
+if [[ $1 == "help" ]]; then
 	print_function_help # from utils
 	exit 0
 else
