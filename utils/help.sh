@@ -1,6 +1,6 @@
 print_global_help() {
 echo "$(cat <<EOF
-bambo [script_name(default=d)] [function_name]
+orb [script_name(default=d)] [function_name]
 
 available scripts: $(echo ${scripts[*]} | sed 's/ /, /g')
 EOF

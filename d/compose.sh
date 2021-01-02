@@ -9,9 +9,9 @@ declare -A start_args=(
 	export CURRENT_ID="$(id -u)";
 	export CURRENT_GID="$(id -g)";
 
-	[[ -n ${args[-r]} ]] && bambo stop $1 `passflags "-s arg"`
+	[[ -n ${args[-r]} ]] && orb stop $1 `passflags "-s arg"`
 
-	cmd="$(bambo composecmd "$1" `passflags -i`) up -d "
+	cmd="$(orb composecmd "$1" `passflags -i`) up -d "
 	[[ -n ${args[-s arg]} ]] && cmd+=" --no-deps ${args[-s arg]}"
 
 	$cmd
@@ -22,7 +22,7 @@ declare -A stop_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='stop single service'
 ); function stop() { # Stop containers
-	$(bambo composecmd $1) stop ${args[-s arg]}
+	$(orb composecmd $1) stop ${args[-s arg]}
 }
 
 
@@ -32,7 +32,7 @@ declare -A logs_args=(
 	['-nf']='no follow;'
 	['-l arg']="lines; DEFAULT: 300"
 ); function logs() { # Get container log
-	cmd="$(bambo composecmd $1) logs --tail ${args[-l arg]}"
+	cmd="$(orb composecmd $1) logs --tail ${args[-l arg]}"
 	[[ -z ${args[-nf]} ]] && cmd+=" -f" # follow unless nf
 	cmd+=" ${args[-s arg]}"
 	$cmd
@@ -51,7 +51,7 @@ declare -A rm_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='rm single service'
 ); function rm() { # Rm containers
-	$(bambo composecmd $1) rm --force ${args[-s arg]}
+	$(orb composecmd $1) rm --force ${args[-s arg]}
 }
 
 
@@ -89,7 +89,7 @@ declare -A serviceid_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; REQUIRED'
 ); serviceid() {
-	$(bambo composecmd $1) ps -q ${args[-s arg]}
+	$(orb composecmd $1) ps -q ${args[-s arg]}
 }
 
 
@@ -115,12 +115,12 @@ declare -A runsingle_args=(
 ); function runsingle() { # Run in parallell container, $1 = command
 	print_args
 	a='b'
-	# $(bambo composecmd $1) run --no-deps --rm ${service} bash -ci "${args[*]}"
+	# $(orb composecmd $1) run --no-deps --rm ${service} bash -ci "${args[*]}"
 }
 
 function runremote() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
 	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
-	PATH=$PATH:~/bambocli && \
+	PATH=$PATH:~/orbcli && \
 	cd ${SRV_REPO_PATH}/${args[0]} && "${args[@]:1}""
 }
 
@@ -139,5 +139,5 @@ function umountremote() { # Unmount _remote
 
 function updateremotecli() { # Update remote script
 	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
-	cd bambocli && git pull"
+	cd orbcli && git pull"
 }

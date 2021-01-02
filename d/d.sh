@@ -2,14 +2,14 @@
 script_files=(general.sh compose.sh)
 
 # Move to closest docker-compose
-workdir=$(bambo utils upfind docker-compose.yml)
+workdir=$(orb utils upfind docker-compose.yml)
 
 if [[ -n  "$workdir" ]]; then
 	cd "$workdir"
 
 	# Parse .env
 	if [ -f '.env' ]; then
-		$(bambo utils parseenv .env)
+		$(orb utils parseenv .env)
 	else
 		echo 'No .env file!'
 	fi
@@ -20,7 +20,7 @@ if [[ -n  "$workdir" ]]; then
 	fi
 
 # --help and general functions dont require docker-compose.yml
-elif [["$function_name" != "--help" ]] && ! $(bambo utils hasfunction $function_name $script_dir/general.sh); then
+elif [["$function_name" != "--help" ]] && ! $(orb utils hasfunction $function_name $script_dir/general.sh); then
 	echo 'No docker-compose.yml found!'
 	exit 1
 fi
