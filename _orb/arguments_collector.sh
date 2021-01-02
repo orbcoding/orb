@@ -48,7 +48,6 @@
 
 # Name ref to function defined args (from string variable)
 declare -n args_declaration=${function_name}_args
-[[ -z args_declaration ]] && echo 'no args defined' && exit 1
 
 # non-flagged args_inline $1, $2... (* appended) will be passed forward so
 # $1 == ${args[1]} (unless [1] optional and fail validation so cought by wildcard instead)
@@ -72,20 +71,15 @@ set_arg_defaults() {
 	for arg in "${!args_declaration[@]}"; do
 		value=$(get_arg_prop "$arg" DEFAULT)
 
-		[[ -z "$value" ]] && continue # next if no default param values
+		if [[ -z "$value" ]]; then
+			# default flags and wildcard to false for ez conditions
+			is_flag "$arg" || [[ "$arg" == '*' ]] && args["$arg"]=false
+			continue
+		fi
 		# check each if default defined
 		IFS='|' read -r -a options <<< $value # split by |
 		for option in ${options[@]}; do
-			if [[ ${option:0:1} == '$' ]]; then
-				# is variable
-				option="${option:1}" # rm $
-				value="${!option}" # eval var name
-				[[ -n "$value" ]] && break # break if exists
-			else
-				# is static value
-				value="$option" # set it and break
-				break;
-			fi
+			value="$(eval_variable_or_string $option)"
 		done
 
 		args["$arg"]="$value"
@@ -141,8 +135,12 @@ parse_inline_arg() { # $1 = arg_key
 ###################
 
 # flag with - => enable, + => disable
-is_flag() {
-	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && return 0 || return 1
+is_flag() { # starts with - or + and has no spaces
+	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
+}
+
+is_flag_with_arg() { # starts with - and has substr ' arg'
+	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
 }
 
 flag_value() {
@@ -249,8 +247,7 @@ validate_required() { # $1 arg
 
 is_required() { # $1 arg
 	(is_flag "$1" &&  get_arg_prop "$1" 'REQUIRED') || \
-	(! is_flag "$1" && ! get_arg_prop "$1" 'OPTIONAL') && \
-	[[ -z $(get_arg_prop "$1" 'DEFAULT') ]]
+	(! is_flag "$1" && ! get_arg_prop "$1" 'OPTIONAL')
 }
 
 

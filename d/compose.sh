@@ -1,33 +1,13 @@
-declare -A composecmd_args=(
-	['1']='env; IN: prod|staging|dev'
-	['-i']='start idle'
-); composecmd() { # Init composecmd with correct env files
-	if [[ ! -f "docker-compose.$1.yml" ]]; then
-		cmd='docker-compose' # start without envs
-	else
-		cmd="docker-compose -f docker-compose.yml -f docker-compose.$1.yml"
-
-		if [[ "${args[-i]}" == true ]]; then # idle
-			[[ -f "docker-compose.idle.yml" ]] && \
-			cmd+=' -f docker-compose.idle.yml' || \
-			(echo 'no docker-compose.idle.yml' && exit 1)
-		fi
-	fi
-
-	echo "$cmd"
-}
-
 
 # Containers
+# start
 declare -A start_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='start single service'
 	['-i']='start idle'
 	['-r']='stop first'
 ); function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
-	export CURRENT_ENV="$1"
-	export CURRENT_ID="$(id -u)";
-	export CURRENT_GID="$(id -g)";
+	set_env $1
 
 	[[ -n ${args[-r]} ]] && orb stop $1 `passflags "-s arg"`
 
@@ -37,7 +17,7 @@ declare -A start_args=(
 	$cmd
 }
 
-
+# stop
 declare -A stop_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='stop single service'
@@ -45,7 +25,7 @@ declare -A stop_args=(
 	$(orb composecmd $1) stop ${args[-s arg]}
 }
 
-
+# logs
 declare -A logs_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; DEFAULT: web'
@@ -55,7 +35,7 @@ declare -A logs_args=(
 	$(orb composecmd "$1") logs $(passflags "-f") --tail "${args[-l arg]}" ${args[-s arg]}
 }
 
-
+# clearlogs
 declare -A clearlogs_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; DEFAULT: web'
@@ -63,7 +43,7 @@ declare -A clearlogs_args=(
 	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceid $1 `passflags "-s arg"`))
 }
 
-
+# rm
 declare -A rm_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='rm single service'
@@ -71,7 +51,7 @@ declare -A rm_args=(
 	$(orb composecmd $1) rm --force ${args[-s arg]}
 }
 
-
+# pull
 declare -A pull_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 ); function pull() { # Pull compose images
@@ -79,61 +59,68 @@ declare -A pull_args=(
 }
 
 
-
+# serviceid
 declare -A serviceid_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; REQUIRED'
 ); serviceid() {
-	$(orb composecmd $1) ps -q ${args[-s arg]}
+	$(orb composecmd $1) ps -q "${args[-s arg]}"
 }
 
 
+# bash
+declare -A bash_args=(
+	['-e arg']='env; DEFAULT: $DEFAULT_ENV|dev'
+	['-s arg']='service; DEFAULT: $DEFAULT_SERVICE; REQUIRED'
+	['-r']='root'
+	['-d']='detached, using run'
+	['*']='cmd; OPTIONAL'
+); function bash() { # Enter container with bash or exec/run cmd
+	cmd=( $(composecmd $(passflags "-e arg")))
 
-function bash() { # Enter container with bash
-	docker exec -it "$(serviceid)" /bin/bash
+	if ${args[-d]}; then
+		set_env ${args[-e arg]}
+		cmd+=( run --no-deps --rm )
+	else
+		cmd+=( exec )
+	fi
+	# root
+	${args[-r]} && cmd+=( --user 0 )
+	# service
+	cmd+=( ${args['-s arg']} )
+	# bash
+	bash_cmd=`${args['*']} && echo -c \"${args_wildcard[*]}\"`
+	cmd+=( /bin/sh -c "[[ ! -f /bin/bash ]] && alias bash=/bin/sh; bash $bash_cmd")
+	# exec
+	echo "${cmd[@]}"
+	"${cmd[@]}"
 }
 
-function rootbash() { # Enter container as root with bash
-	docker exec --user 0 -it "$(serviceid)" /bin/bash
-}
-
-function run() { # Run inside running container, $1 = command
-	docker exec -it "$(serviceid)" bash -ci "${args[*]}"
-}
-
-declare -A runsingle_args=(
-	['1']='env; IN: prod|dev; DEFAULT: dude; prod'
-	['-e arg']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
-	['-r']="yo; DEFAULT: true"
-	['-i']="yo;"
-	['*']="all commands here foreeeeeeever and ever;"
-); function runsingle() { # Run in parallell container, $1 = command
-	print_args
-	a='b'
-	# $(orb composecmd $1) run --no-deps --rm ${service} bash -ci "${args[*]}"
-}
-
+# srv
 declare -A srv_args=(
 	['1']='IN: prod|staging|nginx|adminer; OPTIONAL'
-	['-t']='DEFAULT: false'
+	['-t']='ssh tty; DEFAULT: true'
 	['*']='cmd; OPTIONAL'
-)
-function srv() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
+); function srv() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
 	cmd=$(cat << EOF
-	  PATH=\$PATH:~/orb-cli
-	  cd ${SRV_REPO_PATH}/${args[1]}
+	  PATH=\$PATH:~/orb-cli;
+	  cd ${SRV_REPO_PATH}/${args[1]};
 
 		if [[ "${args['*']}" == true ]]; then
-			"${args_wildcard[*]}"
+			${args_wildcard[*]}
+			:
 		else
-			orb bash
+			/bin/bash;
 		fi
 EOF
 )
-	ssh $(passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "$cmd"
+
+	/bin/ssh $(passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "${cmd}"
 }
 
+###########
 # Remote
+###########
 function mountremote() { # Mount remote to _remote
 	if [ -d _remote ]; then
 		sshfs -o follow_symlinks ${SRV_USER}@${SRV_DOMAIN}:${SRV_REPO_PATH} _remote
@@ -150,3 +137,35 @@ function updateremotecli() { # Update remote script
 	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
 	cd orbcli && git pull"
 }
+
+##########
+# HELPERS
+##########
+# composecmd
+declare -A composecmd_args=(
+	['1']='env; IN: prod|staging|dev'
+	['-i']='start idle'
+); function composecmd() { # Init composecmd with correct env files
+	if [[ ! -f "docker-compose.$1.yml" ]]; then
+		cmd=( docker-compose ) # start without envs
+	else
+		cmd=( docker-compose -f docker-compose.yml -f docker-compose.$1.yml )
+
+		if [[ "${args[-i]}" == true ]]; then # idle
+			[[ -f "docker-compose.idle.yml" ]] && \
+			cmd+=( -f docker-compose.idle.yml ) || \
+			(echo 'no docker-compose.idle.yml' && exit 1)
+		fi
+	fi
+
+	echo "${cmd[@]}"
+}
+
+declare -A set_env_args=(
+	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
+); set_env() {
+	export CURRENT_ENV="$1"
+	export CURRENT_ID="$(id -u)";
+	export CURRENT_GID="$(id -g)";
+}
+

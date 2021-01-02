@@ -1,9 +1,11 @@
+# parsenv
 declare -A parseenv_args=(
 	['1']='path to .env'
 ); function parseenv() { # export variables in .env to shell
 	echo "eval $(egrep -v '^#' $1 | sed -e 's/ = /=/g' | xargs -0)"
 }
 
+# hasfunction
 declare -A hasfunction_args=(
 	['1']='function'
 	['2']='file'
@@ -11,6 +13,7 @@ declare -A hasfunction_args=(
 	listfunctions "$2" | grep -Fxq $1
 }
 
+# isnr
 declare -A isnr_args=(
 	['1']='number input'
 ); function isnr() { # check if is nr
@@ -18,16 +21,14 @@ declare -A isnr_args=(
 	[[ $1 =~ $re ]] && true || false
 }
 
-declare -A is_function_args=(
+# isfunction
+declare -A isfunction_args=(
 	['1']='string'
-); function is_function() {
-	if [ -n "$(LC_ALL=C type -t $1)" ] && [ "$(LC_ALL=C type -t $1)" = function ]; then
-		return 0
-	else
-		return 1
-	fi
+); function isfunction() { # check if is function
+	[ -n "$(LC_ALL=C type -t $1)" ] && [ "$(LC_ALL=C type -t $1)" = function ]
 }
 
+# grepbetween
 declare -A grepbetween_args=(
 	['1']='string to grep'
 	['2']='grep betwen from'
@@ -36,6 +37,7 @@ declare -A grepbetween_args=(
 	echo "$(grep -oP "(?<=$2).*?(?=$3)" <<< $1)"
 }
 
+# upfind
 declare -A upfind_args=(
 	['1']='filename to upfind'
 ); function upfind() { # Find closest filename upwards in filsystem
@@ -52,39 +54,7 @@ declare -A upfind_args=(
 	exit 1;
 }
 
-function bold() {
-	echo $(tput bold)
-}
-
-function normal() {
-	echo $(tput sgr0)
-}
-
-declare -A color_args=(
-	['1']='color; IN: red|none'
-); function color() {
-	[[ $1 == 'red' ]] && echo '\033[0;91m'
-	[[ $1 == 'none' ]] && echo '\033[0m' # No Color
-}
-
-
-declare -A passflags_args=(
-	['*']='flags to pass'
-); function passflags() { # pass functions flags with values if recieved
-		pass=""
-
-		for arg in "$@"; do
-			if [[ ${args[$arg]} == true ]]; then
-				pass+=" $arg"
-			elif [[ "${arg/ arg/}" !=  "$arg" ]]; then
-				pass+=" ${arg/ arg/} ${args[$arg]}"
-			fi
-		done
-
-		echo "$pass" | xargs # trim whitespace
-}
-
-
+# eval_variable_or_string
 eval_variable_or_string_args=(
 	['1']='$variable/string'
 ); function eval_variable_or_string() { # $1 $variable/string (in string format)

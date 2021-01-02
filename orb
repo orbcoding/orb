@@ -24,14 +24,14 @@ source $script_dir/${script}.sh
 
 if [[ "$function_name" == 'help' ]]; then
 	print_script_help && exit 0
-elif ! is_function "$function_name"; then
+elif ! isfunction "$function_name"; then
 	[[ -z "$function_name" ]] &&  echo -e "$(color red)Error: no function provided$(color none)" \
-		|| echo -e "$(color red)Error: function $(bold)$function_name$(normal)$(color red) undefined"
+		|| echo -e "$(color red)Error:$(color none) $(bold)$function_name$(normal) undefined"
 	exit 1
 fi
 
 # Collect function specific arguments
-source "$orb_dir/_src/arguments.sh"
+source "$orb_dir/_orb/arguments_collector.sh"
 
 # Call function
 $function_name "${args_inline[@]}" "${args_wildcard[@]}"
