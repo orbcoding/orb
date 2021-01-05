@@ -285,7 +285,7 @@ shift_args() {
 }
 
 error_and_exit() { # $1 arg_key $2 arg_value/required
-	msg="${script}-> $(bold)${function_name}$(normal)$(color red) invalid args:$(color none) $1"
+	msg=$(error "invalid args: $1")
 
 	if [[ "$2" == 'required' ]]; then
 		msg+=" is required"
@@ -294,13 +294,13 @@ error_and_exit() { # $1 arg_key $2 arg_value/required
 	fi
 
 	echo -e "$msg\n"
-	print_args_definition # from utils
+	print_args_definition
 	exit 1
 }
 
 # Run main function
 if [[ $1 == "help" ]]; then
-	print_function_help # from utils
+	print_function_help
 	exit 0
 else
 	parse_args

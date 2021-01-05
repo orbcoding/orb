@@ -1,8 +1,6 @@
-function help() { # Show this help
-	$utils listfunctions $script_dir/git.sh
-}
-
-function forget() { # Forget file from history
+declare -A forget_args=(
+  ['1']='file to forget'
+); function forget() { # Forget file from history
 	is_git_repo || exit 0
 	path=${args[0]}
 	if [ -z $path ]; then
@@ -21,6 +19,3 @@ function forget() { # Forget file from history
 		git filter-branch --index-filter "git rm -rf --cached --ignore-unmatch ${path}" HEAD
 	fi
 }
-
-# Parse args
-source $script_dir/arguments.sh

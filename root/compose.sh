@@ -78,6 +78,7 @@ declare -A bash_args=(
 ); function bash() { # Enter container with bash or exec/run cmd
 	cmd=( $(composecmd $(passflags "-e arg")))
 
+	# detached
 	if ${args[-d]}; then
 		set_env ${args[-e arg]}
 		cmd+=( run --no-deps --rm )
@@ -96,26 +97,19 @@ declare -A bash_args=(
 	"${cmd[@]}"
 }
 
-# srv
-declare -A srv_args=(
+# ssh
+declare -A ssh_args=(
 	['1']='IN: prod|staging|nginx|adminer; OPTIONAL'
 	['-t']='ssh tty; DEFAULT: true'
 	['*']='cmd; OPTIONAL'
-); function srv() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
-	cmd=$(cat << EOF
-	  PATH=\$PATH:~/orb-cli;
-	  cd ${SRV_REPO_PATH}/${args[1]};
+); function ssh() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
+	cmd=( PATH=\$PATH:~/orb-cli\; cd ${SRV_REPO_PATH}/${args[1]} '&&' )
 
-		if [[ "${args['*']}" == true ]]; then
-			${args_wildcard[*]}
-			:
-		else
-			/bin/bash;
-		fi
-EOF
-)
+	${args['*']} && cmd+=( ${args_wildcard[*]} ) || cmd+=( /bin/bash )
 
-	/bin/ssh $(passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "${cmd}"
+	/bin/bash -c "echo hej"
+
+	# /bin/ssh $(passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "${cmd[@]}"
 }
 
 ###########

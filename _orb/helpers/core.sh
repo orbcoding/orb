@@ -5,33 +5,17 @@ declare -A parseenv_args=(
 	echo "eval $(egrep -v '^#' $1 | sed -e 's/ = /=/g' | xargs -0)"
 }
 
-# hasfunction
-declare -A hasfunction_args=(
-	['1']='function'
-	['2']='file'
-); function hasfunction() { # check if file has function
-	listfunctions "$2" | grep -Fxq $1
-}
-
 # isnr
 declare -A isnr_args=(
 	['1']='number input'
 ); function isnr() { # check if is nr
-	re='^[0-9]+$'
-	[[ $1 =~ $re ]] && true || false
-}
-
-# isfunction
-declare -A isfunction_args=(
-	['1']='string'
-); function isfunction() { # check if is function
-	[ -n "$(LC_ALL=C type -t $1)" ] && [ "$(LC_ALL=C type -t $1)" = function ]
+	[[ $1 =~ '^[0-9]+$' ]]
 }
 
 # grepbetween
 declare -A grepbetween_args=(
 	['1']='string to grep'
-	['2']='grep betwen from'
+	['2']='grep between from'
 	['3']='grep between to'
 ); function grepbetween() { # grep between two strings, can use (either|or)
 	echo "$(grep -oP "(?<=$2).*?(?=$3)" <<< $1)"
@@ -43,8 +27,8 @@ declare -A upfind_args=(
 ); function upfind() { # Find closest filename upwards in filsystem
 	x=`pwd`
 	while [ "$x" != "/" ] ; do
-			if [[ -f "$x/$1" ]]; then
-				echo $x
+			if [[ -e "$x/$1" ]]; then
+				echo "$x/$1"
 				break;
 				exit 0;
 			fi
@@ -55,7 +39,7 @@ declare -A upfind_args=(
 }
 
 # eval_variable_or_string
-eval_variable_or_string_args=(
+declare -A eval_variable_or_string_args=(
 	['1']='$variable/string'
 ); function eval_variable_or_string() { # $1 $variable/string (in string format)
 	str="$1"
@@ -65,4 +49,21 @@ eval_variable_or_string_args=(
 	else # is static value
 		echo "$str" # set it and break
 	fi
+}
+
+# list_public_functions
+declare -A list_public_functions=(
+	['*']='files'
+); function list_public_functions() {
+	for file in "$@"; do
+		grep "^[); ]*function" $file | sed 's/\(); \)*function //' | cut -d '(' -f1
+	done
+}
+
+# has_public_function
+declare -A has_public_function_args=(
+	['1']='function'
+	['2']='file'
+); function has_public_function() { # check if file has function
+	orb utils list_public_functions "$2" | grep -Fxq $1
 }

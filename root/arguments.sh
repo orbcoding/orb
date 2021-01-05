@@ -1,3 +1,4 @@
+# passflags
 declare -A passflags_args=(
 	['*']='flags to pass'
 ); function passflags() { # pass functions flags with values if recieved

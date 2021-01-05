@@ -1,9 +1,3 @@
-function print_args() { # print collected arguments from arguments.sh, useful for debugging
-	declare -A | grep 'A args=' | cut -d '=' -f2-
-	[[ ${args["*"]} == true ]]  && echo "[*]=${args_wildcard[*]}"
-}
-
-
 ###############
 # INTERNAL
 ###############
@@ -19,7 +13,11 @@ EOF
 print_script_help() {
 	output=
 	for file in ${script_files[@]}; do
-		output+="$(bold)$(basename $file | tr a-z A-Z)$(normal)\n"
+		filename=$(basename $file)
+		if [[ "${filename}" == "${script}.sh" ]]; then
+			output+="-----------------# $(italic)project _orb_extensions\n$(nostyle)"
+		fi
+		output+="$(bold)${filename^^}$(nostyle)\n"
 		output+=$(grep "^[); ]*function" $script_dir/$file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
 		output+="\n\n"
 	done
@@ -38,7 +36,7 @@ print_args_definition() {
 	[[ -z "${!args_declaration[@]}" ]] && exit
 	props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED')
 	IFS=';'
-	msg="$(bold)${props[*]}$(normal)\n"
+	msg="$(bold)${props[*]}$(nostyle)\n"
 	# IFS=''
 	msg+=$(for key in "${!args_declaration[@]}"; do
 		sub="$key"
@@ -67,5 +65,6 @@ print_function_comment() {
 
 print_function_name_and_comment() {
 	comment=$(print_function_comment)
-	echo "$(bold)$function_name$(normal) $([[ -n "$comment" ]] && echo "- $comment")"
+	echo "$(bold)$function_name$(nostyle) $([[ -n "$comment" ]] && echo "- $comment")"
 }
+
