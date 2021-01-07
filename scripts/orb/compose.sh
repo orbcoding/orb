@@ -31,7 +31,7 @@ declare -A logs_args=(
 	['-f']='follow; DEFAULT: true;'
 	['-l arg']="lines; DEFAULT: 300"
 ); function logs() { # Get container log
-	orb utils passflags "-f" "-s arg"
+$(orb composecmd $(orb utils echoerr -e hej))
 	# $(orb composecmd "$1") logs $(orb utils passflags "-f") --tail "${args[-l arg]}" ${args[-s arg]}
 }
 

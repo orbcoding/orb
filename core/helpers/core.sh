@@ -21,7 +21,7 @@ declare -A parseenv_args=(
 declare -A isnr_args=(
 	['1']='number input'
 ); function isnr() { # check if is nr
-	[[ $1 =~ '^[0-9]+$' ]]
+	[[ $1 =~ ^[0-9]+$ ]]
 }
 
 # grepbetween

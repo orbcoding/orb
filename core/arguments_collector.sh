@@ -49,15 +49,15 @@
 # Name ref to function defined args (from string variable)
 declare -n args_declaration=${function_name}_args
 
-# non-flagged args_inline $1, $2... (* appended) will be passed forward so
+# non-flagged args_nrs $1, $2... (* appended) will be passed forward so
 # $1 == ${args[1]} (unless [1] optional and fail validation so cought by wildcard instead)
-args_inline=()
+args_nrs=()
 # if mixing numbered and wildcard input, this variable can be used to distinguish them
 # args[*] only holds boolean as nested arrays not supported and string list wont preserve indexes
 args_wildcard=()
 declare -A args # all args
 args_remaining=("$@") # array of input args each quoted
-args_inline_count=1
+args_nrs_count=1
 
 
 # Main function
@@ -86,7 +86,7 @@ set_arg_defaults() {
 		done
 
 		args["$arg"]="$value"
-		$(isnr "$arg") && args_inline[$arg]="$value"
+		isnr $arg && args_nrs[$arg]="$value"
 	done
 }
 
@@ -122,13 +122,13 @@ parse_flagged_arg() { # $1 arg_key
 }
 
 parse_inline_arg() { # $1 = arg_key
-	# add numbered args to args and args_inline
-	if seeks_inline_arg && $(is_valid_arg "$args_inline_count" "$1"); then
+	# add numbered args to args and args_nrs
+	if seeks_inline_arg && is_valid_arg "$args_nrs_count" "$1"; then
 		assign_inline_arg "$1"
 	elif seeks_wildcard; then
 		assign_wildcard
 	else
-		error_and_exit "$args_inline_count" "$1"
+		error_and_exit "$args_nrs_count" "$1"
 	fi
 }
 
@@ -149,7 +149,7 @@ seeks_flag_with_arg() {
 }
 
 seeks_inline_arg() {
-	[[ -n ${args_declaration["$args_inline_count"]} ]]
+	[[ -n ${args_declaration["$args_nrs_count"]} ]]
 }
 
 seeks_wildcard() {
@@ -176,9 +176,9 @@ assign_flag_with_arg() {
 }
 
 assign_inline_arg() {
-	args_inline[$args_inline_count]="$1"
-	args[$args_inline_count]="$1"
-	(( args_inline_count++ ))
+	args_nrs[$args_nrs_count]="$1"
+	args[$args_nrs_count]="$1"
+	(( args_nrs_count++ ))
 	shift_args
 }
 
@@ -198,7 +198,6 @@ try_assign_multiple_flags() { # $1 arg_key
 assign_wildcard() {
 	args['*']=true # cant preserve spaces so put in wildcards
 	args_wildcard+=("${args_remaining[@]}")
-	args_inline+=("${args_wildcard[@]}")
 	args_remaining=()
 }
 
@@ -278,16 +277,17 @@ shift_args() {
 }
 
 error_and_exit() { # $1 arg_key $2 arg_value/required
-	msg=$(error "invalid args: $1")
+	error "invalid args: $1"
 
+	msg=""
 	if [[ "$2" == 'required' ]]; then
 		msg+=" is required"
 	elif [[ -n "$2" ]]; then
 		msg+=" with value $2"
 	fi
 
-	echo -e "$msg\n"
-	print_args_definition
+	echo -e "$msg" >&2
+	print_args_definition >&2
 	exit 1
 }
 

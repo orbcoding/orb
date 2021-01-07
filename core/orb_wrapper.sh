@@ -1,7 +1,7 @@
 function orb() {
-	init_hook=$(cat << EOF
-parent_script_name=$script_name
-parent_function_name=$function_name
+	caller_info=$(cat << EOF
+caller_script_name=$script_name
+caller_function_name=$function_name
 	\n
 EOF
 )
@@ -11,12 +11,12 @@ EOF
 	for arr in ${arrs_to_copy[@]}; do
 		[[ ! -v $arr[@] ]] && continue
 		declare -n arr_ref=$arr
-		init_hook+="declare -A parent_$arr\n"
+		caller_info+="declare -A caller_$arr\n"
 		for key in "${!arr_ref[@]}"; do
-			init_hook+="parent_$arr[\"$key\"]=\"${arr_ref[$key]}\"\n"
+			caller_info+="caller_$arr[\"$key\"]=\"${arr_ref[$key]}\"\n"
 		done
 	done
 
 
-	init_hook="$init_hook" $(which orb) "$@"
+	caller_info="$caller_info" $(which orb) "$@"
 }

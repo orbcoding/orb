@@ -1,6 +1,6 @@
 #!/bin/bash
 orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-[[ -n "$init_hook" ]] && eval "$(echo -e "$init_hook")"
+[[ -n "$caller_info" ]] && eval "$(echo -e "$caller_info")"
 
 source "$orb_dir/core/helpers/help.sh"
 [[ "$1" == '--help' ]] && print_global_help && exit 0
@@ -37,5 +37,5 @@ if [[ -n $orb_extensions && -f $orb_extensions/${script_name}.sh ]]; then
 fi
 
 # Call function
-$function_name "${args_inline[@]}" "${args_wildcard[@]}"
+$function_name "${args_nrs[@]}" "${args_wildcard[@]}"
 
