@@ -9,19 +9,22 @@ function df() { # Get docker disk usage
 	docker system df
 }
 
-function pruneall() { # Prune all stopped and unused including volumes, -f = force
-	[[ $f_arg == '1' ]] && force='-f' || force=''; # Set force or empty
-	docker system prune --all --volumes $force;
+declare -A pruneall_args=(
+	['-f']='force'
+); function pruneall() { # Prune all stopped and unused including volumes
+	docker system prune --all --volumes $(orb utils passflags -f);
 }
 
-function prunecontainers() { # Prune all stopped containers, -f = force
-	[[ $f_arg == '1' ]] && force='-f' || force=''; # Set force or empty
-	docker container prune $force;
+declare -A prunecontainers_args=(
+	['-f']='force'
+); function prunecontainers() { # Prune all stopped containers, -f = force
+	docker container prune $(orb utils passflags -f);
 }
 
-function pruneimages() { # remove all images, -f = force
-	[[ $f_arg == '1' ]] && force='-f' || force=''; # Set force or empty
-	docker image prune $force
+declare -A pruneimages_args=(
+	['-f']='force'
+); function pruneimages() { # remove all images, -f = force
+	docker image prune $(orb utils passflags -f)
 }
 
 function stopall() { # stop all containers

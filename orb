@@ -1,33 +1,40 @@
 #!/bin/bash
 orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+[[ -n "$init_hook" ]] && eval "$(echo -e "$init_hook")"
 
-source "$orb_dir/_orb/orb_wrapper.sh"
-source "$orb_dir/_orb/helpers/help.sh"
+source "$orb_dir/core/helpers/help.sh"
 [[ "$1" == '--help' ]] && print_global_help && exit 0
 
-source "$orb_dir/_orb/helpers/core.sh"
-source "$orb_dir/_orb/helpers/bootstrap.sh"
-source "$orb_dir/_orb/helpers/dev.sh"
-source "$orb_dir/_orb/helpers/text.sh"
+source "$orb_dir/core/helpers/core.sh"
+source "$orb_dir/core/helpers/bootstrap.sh"
+source "$orb_dir/scripts/utils/dev.sh"
+source "$orb_dir/scripts/text/format.sh"
 
-scripts=( root git utils )
+scripts=( orb git utils text )
 
 if [[ " ${scripts[@]} " =~ " ${1} " ]]; then
 	# Specified script tag
 	script_name="$1"
 	shift
 else
-	script_name=root
+	script_name=orb
 fi
 
 # First argument is function name
 function_name=$1; shift
-script_dir="$orb_dir/$script_name"
 
-source "$orb_dir/_orb/script_file_sourcer.sh"
+script_dir="$orb_dir/scripts/$script_name"
+
+source "$orb_dir/core/script_file_sourcer.sh"
 handle_function_is_help_or_missing
-source "$orb_dir/_orb/arguments_collector.sh"
+source "$orb_dir/core/arguments_collector.sh"
 unset_all_functions_except_called_and_wrapper
+source "$orb_dir/core/orb_wrapper.sh"
+
+# Re source script extensions to allow internal calls without orb prefix
+if [[ -n $orb_extensions && -f $orb_extensions/${script_name}.sh ]]; then
+	source "$orb_extensions/${script_name}.sh"
+fi
 
 # Call function
 $function_name "${args_inline[@]}" "${args_wildcard[@]}"

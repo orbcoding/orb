@@ -1,3 +1,15 @@
+declare -A is_flag_args=(
+	['1']='arg'
+); function is_flag() { # starts with - or + and has no spaces
+	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
+}
+
+declare -A is_flag_with_arg_args=(
+	['1']='arg'
+); function is_flag_with_arg() { # starts with - and has substr ' arg'
+	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
+}
+
 # parsenv
 declare -A parseenv_args=(
 	['1']='path to .env'
@@ -66,4 +78,12 @@ declare -A has_public_function_args=(
 	['2']='file'
 ); function has_public_function() { # check if file has function
 	orb utils list_public_functions "$2" | grep -Fxq $1
+}
+
+# join_by
+declare -A join_by_args=(
+	['1']='delimiter'
+	['*']='to join'
+); function join_by() { # join array by separator
+	local d=$1; shift; local f=$1; shift; printf %s "$f" "${@/#/$d}";
 }

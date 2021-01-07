@@ -11,7 +11,7 @@ handle_function_is_help_or_missing() {
 		print_script_help && exit 0
 	elif ! declare -F | grep -q "$function_name"; then
 		[[ -z "$function_name" ]] &&  echo -e "$(color red)Error: no function provided$(color none)" \
-			|| echo -e "$(red)Error:$(nocolor) $script_name->$(bold)$function_name$(nostyle) undefined"
+			|| echo -e "$(red)Error:$(nocolor) $script_name->$(bold)$function_name$(reset) undefined"
 		exit 1
 	fi
 }

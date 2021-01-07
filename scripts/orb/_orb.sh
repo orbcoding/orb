@@ -2,9 +2,6 @@
 script_files+=(
 	docker.sh
 	compose.sh
-	arguments.sh
-	../_orb/helpers/text.sh
-	../_orb/helpers/dev.sh
 )
 
 # Move to closest docker-compose

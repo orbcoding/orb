@@ -1,4 +1,3 @@
-
 # Containers
 # start
 declare -A start_args=(
@@ -9,9 +8,9 @@ declare -A start_args=(
 ); function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
 	set_env $1
 
-	[[ -n ${args[-r]} ]] && orb stop $1 `passflags "-s arg"`
+	[[ -n ${args[-r]} ]] && orb stop $1 `orb utils passflags "-s arg"`
 
-	cmd="$(orb composecmd "$1" `passflags -i`) up -d "
+	cmd="$(orb composecmd "$1" `orb utils passflags -i`) up -d "
 	[[ -n ${args[-s arg]} ]] && cmd+=" --no-deps ${args[-s arg]}"
 
 	$cmd
@@ -32,7 +31,8 @@ declare -A logs_args=(
 	['-f']='follow; DEFAULT: true;'
 	['-l arg']="lines; DEFAULT: 300"
 ); function logs() { # Get container log
-	$(orb composecmd "$1") logs $(passflags "-f") --tail "${args[-l arg]}" ${args[-s arg]}
+	orb utils passflags "-f" "-s arg"
+	# $(orb composecmd "$1") logs $(orb utils passflags "-f") --tail "${args[-l arg]}" ${args[-s arg]}
 }
 
 # clearlogs
@@ -40,7 +40,7 @@ declare -A clearlogs_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; DEFAULT: web'
 ); function clearlogs() { # Clear container logs
-	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceid $1 `passflags "-s arg"`))
+	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceid $1 `orb utils passflags "-s arg"`))
 }
 
 # rm
@@ -76,7 +76,7 @@ declare -A bash_args=(
 	['-d']='detached, using run'
 	['*']='cmd; OPTIONAL'
 ); function bash() { # Enter container with bash or exec/run cmd
-	cmd=( $(composecmd $(passflags "-e arg")))
+	cmd=( $(composecmd $(orb utils passflags "-e arg")))
 
 	# detached
 	if ${args[-d]}; then
@@ -109,7 +109,7 @@ declare -A ssh_args=(
 
 	/bin/bash -c "echo hej"
 
-	# /bin/ssh $(passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "${cmd[@]}"
+	# /bin/ssh $(orb utils passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "${cmd[@]}"
 }
 
 ###########

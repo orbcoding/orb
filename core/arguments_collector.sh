@@ -62,6 +62,9 @@ args_inline_count=1
 
 # Main function
 parse_args() {
+	if [[ ${#args_remaining[@]} > 0 && ! -v args_declaration[@] ]]; then
+		error 'does not accept arguments' && exit 1
+	fi
 	set_arg_defaults
 	collect_args
 	post_validation
@@ -133,16 +136,6 @@ parse_inline_arg() { # $1 = arg_key
 ###################
 # ARG HELPERS
 ###################
-
-# flag with - => enable, + => disable
-is_flag() { # starts with - or + and has no spaces
-	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
-}
-
-is_flag_with_arg() { # starts with - and has substr ' arg'
-	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
-}
-
 flag_value() {
 	[[ ${1:0:1} == '-' ]] && echo true || echo false
 }
