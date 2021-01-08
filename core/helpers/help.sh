@@ -10,7 +10,7 @@ EOF
 
 print_script_help_introtext() {
 	if [[ $script_name == 'orb' ]]; then
-		intromsg="Main $(bold)orb$(reset) namespace scripts listed below.\n"
+		intromsg="Main $(bold)orb$(normal) namespace scripts listed below.\n"
 		intromsg+="For other script namespaces see: orb "
 		other_scripts=()
 		for script in ${scripts[@]}; do
@@ -28,9 +28,9 @@ print_script_help() {
 	for file in ${script_files[@]}; do
 		filename=$(basename $file)
 		if [[ "${filename}" == "${script_name}.sh" ]]; then
-			output+="-----------------# $(italic)local _orb_extensions\n$(reset)"
+			output+="-----------------# $(italic)local _orb_extensions\n$(normal)"
 		fi
-		output+="$(bold)${filename^^}$(reset)\n"
+		output+="$(bold)${filename^^}$(normal)\n"
 		output+=$(grep "^[); ]*function" $script_dir/$file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
 		output+="\n\n"
 	done
@@ -49,7 +49,7 @@ print_args_definition() {
 	[[ -z "${!args_declaration[@]}" ]] && exit
 	props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED')
 	IFS=';'
-	msg="$(bold)${props[*]}$(reset)\n"
+	msg="$(bold)${props[*]}$(normal)\n"
 	# IFS=''
 	msg+=$(for key in "${!args_declaration[@]}"; do
 		sub="$key"
@@ -78,6 +78,6 @@ print_function_comment() {
 
 print_function_name_and_comment() {
 	comment=$(print_function_comment)
-	echo "$(bold)$function_name$(reset) $([[ -n "$comment" ]] && echo "- $comment")"
+	echo "$(bold)$function_name$(normal) $([[ -n "$comment" ]] && echo "- $comment")"
 }
 

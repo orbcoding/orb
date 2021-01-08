@@ -5,11 +5,11 @@ declare -A passflags_args=(
   pass=()
 
   for arg in "$@"; do
-    if [[ ${caller_args[$arg]} == true ]]; then
+    if [[ ${args_caller[$arg]} == true ]]; then
       pass+=( $arg )
-    elif [[ -n ${caller_args[$arg]} ]] && orb utils is_flag_with_arg "$arg"; then
+    elif [[ -n ${args_caller[$arg]} ]] && orb utils is_flag_with_arg "$arg"; then
       # if non empty and argument ends with ' arg'
-      pass+=( "${arg/ arg/} ${caller_args[$arg]}" )
+      pass+=( "${arg/ arg/} ${args_caller[$arg]}" )
     fi
   done
 
@@ -28,11 +28,15 @@ declare -A echoerr_args=(
   echo "$@" >&2
 }
 
+function exit_script() { # exits entire script
+  exit 77
+}
+
 
 declare -A error_args=(
 	['1']='message'
 ); function error() { # print formated error
-	msg=( "$(orb text red)$(orb text bold)Error:$(orb text reset)" )
+	msg=( "$(orb text red)$(orb text bold)Error:$(orb text normal)" )
 	if [[ $script_name == 'error' && -n ${caller_script_name} && -n ${caller_function_name} ]]; then
     script=$caller_script_name
     fn=$caller_function_name
@@ -40,7 +44,10 @@ declare -A error_args=(
     script=$script_name
     fn=$function_name
 	fi
-  msg+=( "${script}->$(orb text bold)${fn}" )
-	msg+=( $(orb text reset)$1 )
+  script_msg=$script
+  [[ -n $fn ]] && script_msg+="->$(orb text bold)${fn}" || script_msg+=' is script tag -'
+  [[ -n $script_msg ]] && msg+=( "$script_msg" )
+  
+	msg+=( $(orb text normal)$1 )
 	echo -e "${msg[*]}" >&2
 };

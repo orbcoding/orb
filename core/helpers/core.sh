@@ -10,6 +10,13 @@ declare -A is_flag_with_arg_args=(
 	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
 }
 
+declare -A function_exists_args=(
+	['1']='function_name'
+); function function_exists() {
+	declare -f -F $1 > /dev/null
+	return $?
+}
+
 # parsenv
 declare -A parseenv_args=(
 	['1']='path to .env'
