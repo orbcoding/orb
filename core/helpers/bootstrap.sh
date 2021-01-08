@@ -11,9 +11,9 @@ handle_function_is_help_or_missing() {
 		print_script_help && exit 0
 	elif [[ -z $function_name ]]; then
 		error "no function provided"
-		exit_script
+		kill_script
 	elif ! function_exists $function_name; then
 		error "undefined"
-		exit_script
+		kill_script
 	fi
 }

@@ -1,11 +1,5 @@
 #!/bin/bash
 orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-# [[ -n "$caller_info" ]] && eval "$(echo -e "$caller_info")"
-
-# https://unix.stackexchange.com/a/48550
-# Exit 77 will exit entire script even from subshell
-set -E
-trap '[ "$?" -ne 77 ] || (exit 77)' ERR
 
 function orb() {
 	source "$orb_dir/core/helpers/help.sh"

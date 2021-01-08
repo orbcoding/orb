@@ -28,8 +28,9 @@ declare -A echoerr_args=(
   echo "$@" >&2
 }
 
-function exit_script() { # exits entire script
-  exit 77
+# https://stackoverflow.com/a/14152313
+function kill_script() { # exits entire script
+  kill -PIPE 0
 }
 
 
@@ -47,7 +48,7 @@ declare -A error_args=(
   script_msg=$script
   [[ -n $fn ]] && script_msg+="->$(orb text bold)${fn}" || script_msg+=' is script tag -'
   [[ -n $script_msg ]] && msg+=( "$script_msg" )
-  
+
 	msg+=( $(orb text normal)$1 )
 	echo -e "${msg[*]}" >&2
 };

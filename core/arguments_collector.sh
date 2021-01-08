@@ -63,7 +63,7 @@ args_nrs_count=1
 # Main function
 parse_args() {
 	if [[ ${#args_remaining[@]} > 0 && ! -v args_declaration[@] ]]; then
-		error 'does not accept arguments' && exit_script
+		error 'does not accept arguments' && kill_script
 	fi
 	set_arg_defaults
 	collect_args
@@ -288,7 +288,7 @@ error_and_exit() { # $1 arg_key $2 arg_value/required
 
 	echo -e "$msg" >&2
 	print_args_definition >&2
-	exit_script
+	kill_script
 }
 
 # Run main function
