@@ -10,10 +10,8 @@ handle_function_is_help_or_missing() {
 	if [[ "$function_name" == 'help' ]]; then
 		print_script_help && exit 0
 	elif [[ -z $function_name ]]; then
-		error "no function provided"
-		kill_script
+		raise_error "no function provided"
 	elif ! function_exists $function_name; then
-		error "undefined"
-		kill_script
+		raise_error "undefined"
 	fi
 }

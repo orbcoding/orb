@@ -47,7 +47,7 @@ print_function_help() {
 
 print_args_definition() {
 	[[ -z "${!args_declaration[@]}" ]] && exit
-	props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED')
+	props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED' 'CAN_START_FLAGGED')
 	IFS=';'
 	msg="$(bold)${props[*]}$(normal)\n"
 	# IFS=''
@@ -57,6 +57,8 @@ print_args_definition() {
 			val=
 			if [[ "$prop" == 'REQUIRED' ]]; then
 				is_required "$key" && val='true'
+			elif [[ "$prop" == 'CAN_START_FLAGGED' ]]; then
+				can_start_flagged "$key" && val='true'
 			else
 				val="$(get_arg_prop "$key" "$prop")"
 			fi

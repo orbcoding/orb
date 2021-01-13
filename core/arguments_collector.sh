@@ -26,7 +26,7 @@
 # - Flag args are optional unless prop REQUIRED
 # - IN lists multiple accepted values with |
 # - DEFAULT can eval variables and falls back through | chain when undef.
-# - ['*'] with CAN_START_WITH_FLAG allows unrecognized flag to start wildcard assignment
+# - ['*'] with CAN_START_FLAGGED allows unrecognized flag to start wildcard assignment
 #
 #
 # Values are then stored in $args array
@@ -56,14 +56,14 @@ args_nrs=()
 # args[*] only holds boolean as nested arrays not supported and string list wont preserve indexes
 args_wildcard=()
 declare -A args # all args
-args_remaining=("$@") # array of input args each quoted
 args_nrs_count=1
+args_remaining=("$@") # array of input args each quoted
 
 
 # Main function
 parse_args() {
 	if [[ ${#args_remaining[@]} > 0 && ! -v args_declaration[@] ]]; then
-		error 'does not accept arguments' && kill_script
+		raise_error 'does not accept arguments'
 	fi
 	set_arg_defaults
 	collect_args
@@ -76,7 +76,7 @@ set_arg_defaults() {
 
 		if [[ -z "$value" ]]; then
 			# default flags and wildcard to false for ez conditions
-			is_flag "$arg" || [[ "$arg" == '*' ]] && args["$arg"]=false
+			is_boolean_flag "$arg" || [[ "$arg" == '*' ]] && args["$arg"]=false
 			continue
 		fi
 		# check each if default defined
@@ -86,16 +86,18 @@ set_arg_defaults() {
 		done
 
 		args["$arg"]="$value"
-		isnr $arg && args_nrs[$arg]="$value"
+		isnr "$arg" && args_nrs["$arg"]="$value"
 	done
+
+	unset arg
 }
 
 collect_args() {
 	# Start collecting from first input arg onwards
-	while [[ ${#args_remaining[@]} -gt 0 ]]; do
-		arg="${args_remaining[0]}"
+	while [[ ${#args_remaining[@]} > 0 ]]; do
+		local arg="${args_remaining[0]}"
 
-		if is_flag "$arg"; then
+		if is_flagged_arg "$arg"; then
 			parse_flagged_arg "$arg"
 		else
 			parse_inline_arg "$arg"
@@ -112,7 +114,9 @@ parse_flagged_arg() { # $1 arg_key
 		invalid_flags=()
 		try_assign_multiple_flags "$1"
 		if [[ $? == 1 ]]; then
-			if wildcard_can_start_with_flag && seeks_wildcard; then
+			if seeks_inline_arg && can_start_flagged "$args_nrs_count" && is_valid_arg "$args_nrs_count" "$1"; then
+				assign_inline_arg "$1"
+			elif seeks_wildcard && can_start_flagged '*'; then
 				assign_wildcard
 			else
 				error_and_exit "${invalid_flags[*]}"
@@ -156,8 +160,8 @@ seeks_wildcard() {
 	[[ -n ${args_declaration['*']} ]]
 }
 
-wildcard_can_start_with_flag() {
-	get_arg_prop "*" "CAN_START_WITH_FLAG"
+can_start_flagged() { # $1 arg
+	get_arg_prop "$1" "CAN_START_FLAGGED"
 }
 
 assign_flag() {
@@ -183,6 +187,10 @@ assign_inline_arg() {
 }
 
 try_assign_multiple_flags() { # $1 arg_key
+	if ! is_boolean_flag "$1"; then
+		invalid_flags+=( "$1" )
+		return 1 # only boolean flags can be multi-flags
+	fi
 	flags=$(echo "${1:1}" | grep -o .)
 	for flag in $flags; do
 		if seeks_flag "-$flag"; then
@@ -229,6 +237,7 @@ post_validation() {
 	for arg in "${!args_declaration[@]}"; do
 		validate_required "$arg"
 	done
+	unset arg
 }
 
 validate_required() { # $1 arg
@@ -238,8 +247,8 @@ validate_required() { # $1 arg
 }
 
 is_required() { # $1 arg
-	(is_flag "$1" &&  get_arg_prop "$1" 'REQUIRED') || \
-	(! is_flag "$1" && ! get_arg_prop "$1" 'OPTIONAL')
+	( is_flagged_arg "$1" && get_arg_prop "$1" 'REQUIRED') || \
+	( ! is_flagged_arg "$1" && ! get_arg_prop "$1" 'OPTIONAL')
 }
 
 
@@ -251,8 +260,8 @@ is_required() { # $1 arg
 #
 get_arg_prop() { # $1 arg_key, $2 sub_property
 	value=
-	# with [*]=wildcard; CAN_START_WITH_FLAG prop an invalid flag can init assign to wildcard
-	boolean_props=( REQUIRED OPTIONAL CAN_START_WITH_FLAG )
+	# with [*]=wildcard; CAN_START_FLAGGED prop an invalid flag can init assign to wildcard
+	boolean_props=( REQUIRED OPTIONAL CAN_START_FLAGGED )
 	if [[ "$2" == 'DESCRIPTION' ]]; then # Is first
 		value="$(grepbetween "${args_declaration["$1"]}" '^' '(;|$)')"
 	elif [[ " ${boolean_props[@]} " =~ " $2 " ]]; then
@@ -277,18 +286,16 @@ shift_args() {
 }
 
 error_and_exit() { # $1 arg_key $2 arg_value/required
-	error "invalid args: $1"
-
-	msg=""
+	msg="invalid args: $1"
 	if [[ "$2" == 'required' ]]; then
 		msg+=" is required"
 	elif [[ -n "$2" ]]; then
 		msg+=" with value $2"
 	fi
 
-	echo -e "$msg" >&2
-	print_args_definition >&2
-	kill_script
+	msg+="\n\n$(print_args_definition)"
+
+	raise_error "$msg"
 }
 
 # Run main function

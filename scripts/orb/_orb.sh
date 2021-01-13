@@ -18,8 +18,7 @@ if [[ -n  "$compose_file" ]]; then
 	fi
 
 # compose functions require docker-compose.yml
-elif orb utils has_public_function $function_name "$script_dir/compose.sh"; then
-	orb error "requires docker-compose.yml!"
-	exit 1
+elif orb utils has_public_function "$function_name" "$script_dir/compose.sh"; then
+	raise_error "requires docker-compose.yml!"
 fi
 

@@ -1,13 +1,29 @@
-declare -A is_flag_args=(
-	['1']='arg'
-); function is_flag() { # starts with - or + and has no spaces
+# is_boolean_flag
+declare -A is_boolean_flag_args=(
+	['1']='arg; CAN_START_FLAGGED'
+); function is_boolean_flag() { # starts with - or + and has no spaces
 	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
 }
 
+# is_flag_with_arg
 declare -A is_flag_with_arg_args=(
-	['1']='arg'
+	['1']='arg; CAN_START_FLAGGED'
 ); function is_flag_with_arg() { # starts with - and has substr ' arg'
 	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
+}
+
+# is_flagged_arg
+declare -A is_flagged_arg_args=(
+	['1']='arg; CAN_START_FLAGGED'
+); function is_flagged_arg() {
+	is_boolean_flag "$1" || is_flag_with_arg "$1"
+}
+
+# isnr
+declare -A isnr_args=(
+	['1']='number input'
+); function isnr() { # check if is nr
+	[[ $1 =~ ^[0-9]+$ ]]
 }
 
 declare -A function_exists_args=(
@@ -22,13 +38,6 @@ declare -A parseenv_args=(
 	['1']='path to .env'
 ); function parseenv() { # export variables in .env to shell
 	echo "eval $(egrep -v '^#' $1 | sed -e 's/ = /=/g' | xargs -0)"
-}
-
-# isnr
-declare -A isnr_args=(
-	['1']='number input'
-); function isnr() { # check if is nr
-	[[ $1 =~ ^[0-9]+$ ]]
 }
 
 # grepbetween
@@ -71,7 +80,7 @@ declare -A eval_variable_or_string_args=(
 }
 
 # list_public_functions
-declare -A list_public_functions=(
+declare -A list_public_functions_args=(
 	['*']='files'
 ); function list_public_functions() {
 	for file in "$@"; do
