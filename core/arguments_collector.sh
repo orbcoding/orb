@@ -26,7 +26,7 @@
 # - Flag args are optional unless prop REQUIRED
 # - IN lists multiple accepted values with |
 # - DEFAULT can eval variables and falls back through | chain when undef.
-# - ['*'] with CAN_START_FLAGGED allows unrecognized flag to start wildcard assignment
+# - ['*'] or ['1'] (any nr) with CAN_START_WITH_FLAG allows unrecognized flag to start assignment
 #
 #
 # Values are then stored in $args array
@@ -46,93 +46,79 @@
 #
 #########################################
 
-# Name ref to function defined args (from string variable)
-declare -n args_declaration=${function_name}_args
-
-# non-flagged args_nrs $1, $2... (* appended) will be passed forward so
-# $1 == ${args[1]} (unless [1] optional and fail validation so cought by wildcard instead)
-args_nrs=()
-# if mixing numbered and wildcard input, this variable can be used to distinguish them
-# args[*] only holds boolean as nested arrays not supported and string list wont preserve indexes
-args_wildcard=()
-declare -A args # all args
-args_nrs_count=1
-args_remaining=("$@") # array of input args each quoted
-
-
 # Main function
-parse_args() {
-	if [[ ${#args_remaining[@]} > 0 && ! -v args_declaration[@] ]]; then
-		raise_error 'does not accept arguments'
+_parse_args() {
+	local _args_nrs_count=1
+	local _args_remaining=("$@") # array of input args each quoted
+	if [[ ${#_args_remaining[@]} > 0 && ! -v args_declaration[@] ]]; then
+		orb utils raise_error 'does not accept arguments'
 	fi
-	set_arg_defaults
-	collect_args
-	post_validation
+	_set_arg_defaults
+	_collect_args
+	_post_validation
 }
 
-set_arg_defaults() {
-	for arg in "${!args_declaration[@]}"; do
-		value=$(get_arg_prop "$arg" DEFAULT)
+_set_arg_defaults() {
+	for _arg in "${!args_declaration[@]}"; do
+		local _value="$(_get_arg_prop "$_arg" DEFAULT)"
 
-		if [[ -z "$value" ]]; then
+		if [[ -z "$_value" ]]; then
 			# default flags and wildcard to false for ez conditions
-			is_boolean_flag "$arg" || [[ "$arg" == '*' ]] && args["$arg"]=false
+			is_boolean_flag "$_arg" || [[ "$_arg" == '*' ]] && args["$_arg"]=false
 			continue
 		fi
 		# check each if default defined
-		IFS='|' read -r -a options <<< $value # split by |
-		for option in ${options[@]}; do
-			value="$(eval_variable_or_string $option)"
+		IFS='|' read -r -a options <<< $_value # split by |
+		for _option in ${options[@]}; do
+			_value="$(eval_variable_or_string $_option)"
 		done
 
-		args["$arg"]="$value"
-		isnr "$arg" && args_nrs["$arg"]="$value"
+		args["$_arg"]="$_value"
+		isnr "$_arg" && args_nrs["$_arg"]="$_value"
 	done
-
-	unset arg
 }
 
-collect_args() {
+_collect_args() {
 	# Start collecting from first input arg onwards
-	while [[ ${#args_remaining[@]} > 0 ]]; do
-		local arg="${args_remaining[0]}"
+	while [[ ${#_args_remaining[@]} > 0 ]]; do
+		local _arg="${_args_remaining[0]}"
 
-		if is_flagged_arg "$arg"; then
-			parse_flagged_arg "$arg"
+		if is_flagged_arg "$_arg"; then
+			_parse_flagged_arg "$_arg"
 		else
-			parse_inline_arg "$arg"
+			_parse_inline_arg "$_arg"
 		fi
 	done
 }
 
-parse_flagged_arg() { # $1 arg_key
-	if seeks_flag "$1"; then
-		assign_flag "$1"
-	elif seeks_flag_with_arg "$1"; then
-		assign_flag_with_arg "$1"
+_parse_flagged_arg() { # $1 arg_key
+	if _seeks_flag "$1"; then
+		_assign_flag "$1"
+	elif _seeks_flag_with_arg "$1"; then
+		_assign_flag_with_arg "$1"
 	else
-		invalid_flags=()
-		try_assign_multiple_flags "$1"
+		local _invalid_flags=()
+		_try_assign_multiple_flags "$1"
 		if [[ $? == 1 ]]; then
-			if seeks_inline_arg && can_start_flagged "$args_nrs_count" && is_valid_arg "$args_nrs_count" "$1"; then
-				assign_inline_arg "$1"
-			elif seeks_wildcard && can_start_flagged '*'; then
-				assign_wildcard
+			if _seeks_inline_arg && _can_start_flagged "$_args_nrs_count" && _is_valid_arg "$_args_nrs_count" "$1"; then
+				_assign_inline_arg "$1"
+			elif _seeks_wildcard && _can_start_flagged '*'; then
+				_assign_wildcard
 			else
-				error_and_exit "${invalid_flags[*]}"
+				_error_and_exit "${_invalid_flags[*]}"
 			fi
 		fi
 	fi
 }
 
-parse_inline_arg() { # $1 = arg_key
+_parse_inline_arg() { # $1 = arg_key
 	# add numbered args to args and args_nrs
-	if seeks_inline_arg && is_valid_arg "$args_nrs_count" "$1"; then
-		assign_inline_arg "$1"
-	elif seeks_wildcard; then
-		assign_wildcard
+	if _seeks_inline_arg && _is_valid_arg "$_args_nrs_count" "$1"; then
+		_assign_inline_arg "$1"
+	elif _seeks_wildcard; then
+		_assign_wildcard
 	else
-		error_and_exit "$args_nrs_count" "$1"
+		_error_and_exit "$_args_nrs_count" "$1"
 	fi
 }
 
@@ -140,168 +126,160 @@ parse_inline_arg() { # $1 = arg_key
 ###################
 # ARG HELPERS
 ###################
-flag_value() {
+_flag_value() {
 	[[ ${1:0:1} == '-' ]] && echo true || echo false
 }
 
-seeks_flag() {
+_seeks_flag() {
 	[[ -n ${args_declaration["${1/+/-}"]} ]]
 }
 
-seeks_flag_with_arg() {
+_seeks_flag_with_arg() {
 	[[ -n ${args_declaration["$1 arg"]} ]]
 }
 
-seeks_inline_arg() {
-	[[ -n ${args_declaration["$args_nrs_count"]} ]]
+_seeks_inline_arg() {
+	[[ -n ${args_declaration["$_args_nrs_count"]} ]]
 }
 
-seeks_wildcard() {
+_seeks_wildcard() {
 	[[ -n ${args_declaration['*']} ]]
 }
 
-can_start_flagged() { # $1 arg
-	get_arg_prop "$1" "CAN_START_FLAGGED"
+_can_start_flagged() { # $1 arg
+	_get_arg_prop "$1" "CAN_START_WITH_FLAG"
 }
 
-assign_flag() {
-	args["${1/+/-}"]=$(flag_value $1)
-	shift_args
+_assign_flag() {
+	args["${1/+/-}"]=$(_flag_value $1)
+	_shift_args
 }
 
 # if specified with arg suffix, set value to next arg and shift both
-assign_flag_with_arg() {
-	if is_valid_arg "$1 arg" "${args_remaining[1]}"; then
-		args["$1 arg"]="${args_remaining[1]}"
-		shift_args 2
+_assign_flag_with_arg() {
+	if _is_valid_arg "$1 arg" "${_args_remaining[1]}"; then
+		args["$1 arg"]="${_args_remaining[1]}"
+		_shift_args 2
 	else
-		error_and_exit "$1 arg ${args_remaining[1]}"
+		_error_and_exit "$1 arg ${_args_remaining[1]}"
 	fi
 }
 
-assign_inline_arg() {
-	args_nrs[$args_nrs_count]="$1"
-	args[$args_nrs_count]="$1"
-	(( args_nrs_count++ ))
-	shift_args
+_assign_inline_arg() {
+	args_nrs[$_args_nrs_count]="$1"
+	args[$_args_nrs_count]="$1"
+	(( _args_nrs_count++ ))
+	_shift_args
 }
 
-try_assign_multiple_flags() { # $1 arg_key
+_try_assign_multiple_flags() { # $1 arg_key
 	if ! is_boolean_flag "$1"; then
-		invalid_flags+=( "$1" )
+		_invalid_flags+=( "$1" )
 		return 1 # only boolean flags can be multi-flags
 	fi
-	flags=$(echo "${1:1}" | grep -o .)
-	for flag in $flags; do
-		if seeks_flag "-$flag"; then
-			args["-$flag"]="$(flag_value "$1")"
+	local _flags=$(echo "${1:1}" | grep -o .)
+	for _flag in $_flags; do
+		if _seeks_flag "-$_flag"; then
+			args["-$_flag"]="$(_flag_value "$1")"
 		else
-			invalid_flags+=(-$flag)
+			_invalid_flags+=(-$_flag)
 		fi
 	done
 
-	[[ ${#invalid_flags} == 0 ]] && shift_args || return 1
+	[[ ${#_invalid_flags} == 0 ]] && _shift_args || return 1
 }
 
-assign_wildcard() {
+_assign_wildcard() {
 	args['*']=true # cant preserve spaces so put in wildcards
-	args_wildcard+=("${args_remaining[@]}")
-	args_remaining=()
+	args_wildcard+=("${_args_remaining[@]}")
+	_args_remaining=()
 }
 
 ##############
 # VALIDATIONS
 ##############
 
-is_valid_arg() { # $1 arg_key, $2 arg
+_is_valid_arg() { # $1 arg_key, $2 arg
 	# is_valid_required "$1"
-	is_valid_in "$1" "$2"
+	_is_valid_in "$1" "$2"
 }
 
-is_valid_in() { # $1 arg_key $2 arg
-	in_str=$(get_arg_prop "$1" IN)
-	[[ -z $in_str ]] && return 0 # Np if no in validation
+_is_valid_in() { # $1 arg_key $2 arg
+	local _in_str=$(_get_arg_prop "$1" IN)
+	[[ -z $_in_str ]] && return 0 # Np if no in validation
 
-	IFS='|' read -r -a in_arr <<< $in_str # split by |
+	IFS='|' read -r -a _in_arr <<< $_in_str # split by |
 
 	# check each unless found
-	for in in ${in_arr[@]}; do
-		val=$(eval_variable_or_string "$in")
-		[[ "$2" == "$val" ]] && return 0 # return if found
+	for _in in ${_in_arr[@]}; do
+		local _val=$(eval_variable_or_string "$_in")
+		[[ "$2" == "$_val" ]] && return 0 # return if found
 	done
 
 	return 1
 }
 
-post_validation() {
-	for arg in "${!args_declaration[@]}"; do
-		validate_required "$arg"
+_post_validation() {
+	for _arg in "${!args_declaration[@]}"; do
+		_validate_required "$_arg"
 	done
-	unset arg
+	unset _arg
 }
 
-validate_required() { # $1 arg
-	if [[ -z ${args[$1]} ]] && is_required "$1"; then
-		error_and_exit "$1" 'required'
+_validate_required() { # $1 arg
+	if [[ -z ${args[$1]} ]] && _is_required "$1"; then
+		_error_and_exit "$1" 'required'
 	fi
 }
 
-is_required() { # $1 arg
-	( is_flagged_arg "$1" && get_arg_prop "$1" 'REQUIRED') || \
-	( ! is_flagged_arg "$1" && ! get_arg_prop "$1" 'OPTIONAL')
+_is_required() { # $1 arg
+	( is_flagged_arg "$1" && _get_arg_prop "$1" 'REQUIRED') || \
+	( ! is_flagged_arg "$1" && ! _get_arg_prop "$1" 'OPTIONAL')
 }
 
 
 ###################
 # HELPERS
 ##################
-
-# Returns - if nothing found
-#
-get_arg_prop() { # $1 arg_key, $2 sub_property
-	value=
-	# with [*]=wildcard; CAN_START_FLAGGED prop an invalid flag can init assign to wildcard
-	boolean_props=( REQUIRED OPTIONAL CAN_START_FLAGGED )
+_get_arg_prop() { # $1 arg_key, $2 sub_property
+	local _value=
+	# with [*]/['1'...] and prop CAN_START_WITH_FLAG an invalid flag can init assignment
+	local _boolean_props=( REQUIRED OPTIONAL CAN_START_WITH_FLAG )
 	if [[ "$2" == 'DESCRIPTION' ]]; then # Is first
-		value="$(grepbetween "${args_declaration["$1"]}" '^' '(;|$)')"
-	elif [[ " ${boolean_props[@]} " =~ " $2 " ]]; then
+		_value="$(grepbetween "${args_declaration["$1"]}" '^' '(;|$)')"
+	elif [[ " ${_boolean_props[@]} " =~ " $2 " ]]; then
 		echo "${args_declaration["$1"]}" | grep -q "$2" && return 0
 	else # value props
-		value="$(grepbetween "${args_declaration["$1"]}" "$2: " '(;|$)')"
+		_value="$(grepbetween "${args_declaration["$1"]}" "$2: " '(;|$)')"
 	fi
 
-	if [[ -n "$value" ]]; then
-		echo "$value" && return 0
+	if [[ -n "$_value" ]]; then
+		echo "$_value" && return 0
 	else
 		return 1
 	fi
 }
 
 # shift one = remove first arg from arg array
-shift_args() {
-	steps=${1-1} # 1 default value
-	for (( i = 0; i < $steps; i++ )); do
-		args_remaining=("${args_remaining[@]:1}")
+_shift_args() {
+	local _steps=${1-1} # 1 default value
+	for (( _i = 0; i < $_steps; i++ )); do
+		_args_remaining=("${_args_remaining[@]:1}")
 	done
+	unset _i
 }
 
-error_and_exit() { # $1 arg_key $2 arg_value/required
-	msg="invalid args: $1"
+_error_and_exit() { # $1 arg_key $2 arg_value/required
+	local _msg="invalid args: $1"
 	if [[ "$2" == 'required' ]]; then
-		msg+=" is required"
+		_msg+=" is required"
 	elif [[ -n "$2" ]]; then
-		msg+=" with value $2"
+		_msg+=" with value $2"
 	fi
 
-	msg+="\n\n$(print_args_definition)"
+	_msg+="\n\n$args_explanation"
 
-	raise_error "$msg"
+	orb utils raise_error "$_msg"
 }
 
-# Run main function
-if [[ $1 == "help" ]]; then
-	print_function_help
-	exit 0
-else
-	parse_args
-fi
+

@@ -5,41 +5,49 @@ function orb() {
 	# Overriding nested orb calls with internal function to access caller info in utils
 	# Run nested calls in subshell to prevent changing parent environment
 	(
-		for f in $orb_dir/core/helpers/*; do source "$f"; done
-		source "$orb_dir/core/internal_caller_handler.sh"
-		source "$orb_dir/scripts/utils/dev.sh"
-		source "$orb_dir/scripts/text/format.sh"
+		_core_script_dependencies=(
+			scripts/utils/dev.sh
+			scripts/text/format.sh
+			scripts/utils/core.sh
+		)
 
-		scripts=( orb git utils text )
+		_core_dependencies=(
+			core/helpers/help.sh
+			core/arguments_collector.sh
+			core/globals/caller.sh
+			core/globals/script.sh
+			core/globals/arguments.sh
+			core/script_file_sourcer.sh
+			core/helpers/bootstrap.sh
+		)
 
-		if [[ " ${scripts[@]} " =~ " ${1} " ]]; then
-			# Specified script tag
-			script_name="$1"
-			shift
+		_deps=( ${_core_script_dependencies[@]} ${_core_dependencies[@]} )
+		for _file in "${_deps[@]}"; do
+			source "$orb_dir/$_file"
+		done
+
+
+		_handle_function_is_missing_or_help
+
+		# Parse function args
+		if [[ $1 == "help" ]]; then
+			_print_function_help
+			exit 0
 		else
-			script_name=orb
+			_parse_args "$@"
 		fi
-
-		# First argument is function name
-		function_name=$1; shift
-
-		script_dir="$orb_dir/scripts/$script_name"
-
-		source "$orb_dir/core/script_file_sourcer.sh"
-		handle_function_is_help_or_missing
-
-		source "$orb_dir/core/arguments_collector.sh"
 
 		# Effectively enforcing orb prefix
-		unset_all_functions_except_called_and_wrapper
+		_unset_all_internal_utils
+		_unset_all_underscored
 
-		# Re source script extensions to allow user function calls without orb prefix
-		if [[ -n $orb_extensions && -f $orb_extensions/${script_name}.sh ]]; then
-			source "$orb_extensions/${script_name}.sh"
+		# Re source user script extension to allow internal function calls without orb prefix
+		if [[ -n $_orb_extensions && -f $_orb_extensions/${script_name}.sh ]]; then
+			source "$_orb_extensions/${script_name}.sh"
 		fi
 
-		# Call function
-		$function_name "${args_nrs[@]}" "${args_wildcard[@]}"
+		# Call function in another subshell to prevent meddeling with orb internals
+		( $function_name "${args_nrs[@]}" "${args_wildcard[@]}" )
 	)
 }
 

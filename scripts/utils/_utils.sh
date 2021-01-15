@@ -1,5 +1,5 @@
 #!/bin/bash
-script_files+=(
+_current_script_dependencies+=(
 	dev.sh
-	../../core/helpers/core.sh
+	core.sh
 )

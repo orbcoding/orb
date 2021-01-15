@@ -1,5 +1,5 @@
 #!/bin/bash
-script_files+=(
+_current_script_dependencies+=(
 	docker.sh
 	compose.sh
 )
@@ -19,6 +19,6 @@ if [[ -n  "$compose_file" ]]; then
 
 # compose functions require docker-compose.yml
 elif orb utils has_public_function "$function_name" "$script_dir/compose.sh"; then
-	raise_error "requires docker-compose.yml!"
+	orb utils raise_error "requires docker-compose.yml!"
 fi
 

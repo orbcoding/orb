@@ -1,20 +1,22 @@
+# Core utils
+
 # is_boolean_flag
 declare -A is_boolean_flag_args=(
-	['1']='arg; CAN_START_FLAGGED'
+	['1']='arg; CAN_START_WITH_FLAG'
 ); function is_boolean_flag() { # starts with - or + and has no spaces
 	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
 }
 
 # is_flag_with_arg
 declare -A is_flag_with_arg_args=(
-	['1']='arg; CAN_START_FLAGGED'
+	['1']='arg; CAN_START_WITH_FLAG'
 ); function is_flag_with_arg() { # starts with - and has substr ' arg'
 	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
 }
 
 # is_flagged_arg
 declare -A is_flagged_arg_args=(
-	['1']='arg; CAN_START_FLAGGED'
+	['1']='arg; CAN_START_WITH_FLAG'
 ); function is_flagged_arg() {
 	is_boolean_flag "$1" || is_flag_with_arg "$1"
 }
@@ -93,7 +95,7 @@ declare -A has_public_function_args=(
 	['1']='function'
 	['2']='file'
 ); function has_public_function() { # check if file has function
-	orb utils list_public_functions "$2" | grep -Fxq $1
+	list_public_functions "$2" | grep -Fxq $1
 }
 
 # join_by

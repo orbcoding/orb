@@ -5,11 +5,13 @@ declare -A start_args=(
 	['-s arg']='start single service'
 	['-i']='start idle'
 	['-r']='stop first'
-); function start() { # Start compose containers, $1 = env, -r = restart, -e = spec env if $1 = idle
-	${args[-r]} && orb stop $1 `orb utils passflags "-s arg"`
+); function start() { # Start containers
+	declare
+	# orb utils passflags -tt
+	${args[-r]} && orb stop "$1" $(orb utils passflags "-s arg")
 
 	cmd=(
-		$(orb composecmd "$1" `orb utils passflags -i`)
+		$(orb composecmd "$1" `orb utils passflags '-s arg'`)
 		up -d
 		$([[ -n ${args[-s arg]} ]] && echo " --no-deps ${args[-s arg]}")
 	)
@@ -23,7 +25,7 @@ declare -A stop_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='stop single service'
 ); function stop() { # Stop containers
-	$(orb composecmd "$1") stop "${args[-s arg]}"
+	$(orb composecmd "$1") stop ${args[-s arg]}
 }
 
 # logs
@@ -41,7 +43,7 @@ declare -A clearlogs_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; DEFAULT: web'
 ); function clearlogs() { # Clear container logs
-	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(serviceid $1 `orb utils passflags "-s arg"`))
+	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $(orb serviceid $1 `orb utils passflags "-s arg"`))
 }
 
 # rm
@@ -55,7 +57,7 @@ declare -A rm_args=(
 # pull
 declare -A pull_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
-); function pull() { # Pull compose images
+); function pull() { # Pull compose project images
 	$(orb composecmd "$1") pull
 }
 
@@ -102,7 +104,7 @@ declare -A ssh_args=(
 	['1']='IN: prod|staging|nginx|adminer; OPTIONAL'
 	['-t']='ssh tty; DEFAULT: true'
 	['*']='cmd; OPTIONAL'
-); function ssh() { # Run command on remote, $1 = prod/staging/nginx, $2 = command
+); function ssh() { # Run command on remote
 	cmd=( PATH=\$PATH:~/orb-cli\; cd ${SRV_REPO_PATH}/${args[1]} '&&' )
 
 	${args['*']} && cmd+=( ${args_wildcard[*]} ) || cmd+=( /bin/bash )
@@ -121,11 +123,11 @@ function mountremote() { # Mount remote to _remote
 	fi
 }
 
-function umountremote() { # Unmount _remote
+function umountremote() { # Umount _remote
 	umount -l _remote
 }
 
-function updateremotecli() { # Update remote script
+function updateremotecli() { # Update remote orb-cli
 	ssh -t ${SRV_USER}@${SRV_DOMAIN} "\
 	cd orbcli && git pull"
 }
@@ -137,7 +139,7 @@ function updateremotecli() { # Update remote script
 declare -A composecmd_args=(
 	['1']='env; IN: prod|staging|dev'
 	['-i']='start idle'
-); function composecmd() { # Init composecmd with correct env files
+); function composecmd() { # Init composecmd with correct compose files
 	if [[ ! -f "docker-compose.$1.yml" ]]; then
 		cmd=( docker-compose ) # start without envs
 	else
@@ -156,7 +158,7 @@ declare -A composecmd_args=(
 # currentenv
 declare -A currentenv_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
-); currentenv() {
+); function currentenv() { # eval $(orb currentenv $env) to export current vars
 	cat << EOF
 export CURRENT_ENV=$1
 export CURRENT_ID=$(id -u)
