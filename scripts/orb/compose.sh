@@ -6,8 +6,8 @@ declare -A start_args=(
 	['-i']='start idle'
 	['-r']='stop first'
 ); function start() { # Start containers
-	declare
-	# orb utils passflags -tt
+	# declare
+	orb utils passflags -tt
 	${args[-r]} && orb stop "$1" $(orb utils passflags "-s arg")
 
 	cmd=(

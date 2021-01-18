@@ -2,18 +2,18 @@
 declare -A passflags_args=(
 	['*']='flags to pass; CAN_START_WITH_FLAG'
 ); function passflags() { # pass caller functions flags with values if recieved
-  [[ -z $orb_caller_function_name ]] && orb utils raise_error 'must be used from within a caller function'
-  [[ ! -v orb_caller_args_declaration[@] ]] && orb utils raise_error "$orb_caller_descriptor has no arguments to pass"
+  [[ -z $_orb_caller_function_name ]] && orb utils raise_error 'must be used from within a caller function'
+  [[ ! -v _orb_caller_args_declaration[@] ]] && orb utils raise_error "$_orb_caller_descriptor has no arguments to pass"
   pass=()
 
   for arg in "$@"; do
-    if [[ -z ${orb_caller_args_declaration["$arg"]+abc} ]]; then
-      orb utils raise_error "'$arg' not in $orb_caller_descriptor args declaration\n\n${orb_caller_args_explanation}"
-    elif [[ ${orb_caller_args["$arg"]} == true ]]; then
+    if [[ -z ${_orb_caller_args_declaration["$arg"]+abc} ]]; then
+      orb utils raise_error "'$arg' not in $_orb_caller_descriptor args declaration\n\n${_orb_caller_args_explanation}"
+    elif [[ ${_orb_caller_args["$arg"]} == true ]]; then
       pass+=( "$arg" )
-    elif [[ -n ${orb_caller_args["$arg"]+abc} ]] && orb utils is_flag_with_arg "$arg"; then
+    elif [[ -n ${_orb_caller_args["$arg"]+abc} ]] && orb utils is_flag_with_arg "$arg"; then
       # if non empty and argument ends with ' arg'
-      pass+=( "${arg/ arg/} ${orb_caller_args["$arg"]}" )
+      pass+=( "${arg/ arg/} ${_orb_caller_args["$arg"]}" )
     fi
   done
 
@@ -22,8 +22,8 @@ declare -A passflags_args=(
 
 # print_args
 function printargs() { # print collected arguments, useful for debugging
-	declare -A | grep 'A orb_caller_args=' | cut -d '=' -f2-
-	[[ ${orb_caller_args["*"]} == true ]] && echo "[*]=${orb_caller_args_wildcard[*]}"
+	declare -A | grep 'A _orb_caller_args=' | cut -d '=' -f2-
+	[[ ${_orb_caller_args["*"]} == true ]] && echo "[*]=${_orb_caller_args_wildcard[*]}"
 }
 
 # echoerr
@@ -36,7 +36,7 @@ declare -A echoerr_args=(
 # raise_error
 declare -A raise_error_args=(
   ['1']='error_message; CAN_START_WITH_FLAG'
-  ['-p arg']='script_function_path; DEFAULT: $orb_caller_script_function_path'
+  ['-p arg']='script_function_path; DEFAULT: $_orb_caller_script_function_path'
 ); function raise_error() { # Raise pretty error msg and kill script
   orb utils print_error "$1" $(orb utils passflags "-p arg") && orb utils kill_script
 }
@@ -44,11 +44,11 @@ declare -A raise_error_args=(
 # print_error
 declare -A print_error_args=(
 	['1']='message; CAN_START_WITH_FLAG'
-  ['-p arg']='script_function_path; DEFAULT: $orb_caller_script_function_path'
+  ['-p arg']='script_function_path; DEFAULT: $_orb_caller_script_function_path'
 ); function print_error() { # print pretty error
 	msg=(
     "$(orb text red)$(orb text bold)Error:$(orb text normal)"
-    "${args[-p arg]}"
+    "${_args[-p arg]}"
     "$1"
   )
 
@@ -69,8 +69,7 @@ function print_stack_trace() {
   local function_name
   local file_name
   echo
-  while caller $i; do ((i++)); done | while read line_no function_name file_name; do
-    [[ $function_name == 'orb' ]] && continue
-    echo -e "$file_name:$line_no\t$function_name"
+  while caller $i; do ((i++)); done | while read _line_no _function_name _file_name; do
+    echo -e "$_file_name:$_line_no\t$_function_name"
   done
 }

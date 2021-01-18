@@ -1,5 +1,6 @@
 #!/bin/bash
-orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+_orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+_scripts=( git utils text ) # otherwise defaults to orb
 
 function orb() {
 	# Overriding nested orb calls with internal function to access caller info in utils
@@ -12,20 +13,33 @@ function orb() {
 		)
 
 		_core_dependencies=(
+			core/helpers/bootstrap.sh
 			core/helpers/help.sh
-			core/arguments_collector.sh
+			core/helpers/arguments.sh
 			core/globals/caller.sh
 			core/globals/script.sh
-			core/globals/arguments.sh
-			core/script_file_sourcer.sh
-			core/helpers/bootstrap.sh
 		)
 
 		_deps=( ${_core_script_dependencies[@]} ${_core_dependencies[@]} )
 		for _file in "${_deps[@]}"; do
-			source "$orb_dir/$_file"
-		done
+			source "$_orb_dir/$_file"
+		done; unset _file _deps
 
+		# Source user script extension
+		if _current_script_extension=$(_get_current_script_extension); then
+			source "$_current_script_extension"
+		fi
+		# Source main script file
+		_current_script_dependencies=()
+		if [[ -f "$_script_dir/_${_script_name}.sh" ]]; then
+			source "$_script_dir/_${_script_name}.sh"
+		fi
+		# If function not present yet source internal script files
+		if ! function_exists $_function_name; then
+			for _file in ${_current_script_dependencies[@]}; do
+				source "$_script_dir/${_file}"
+			done; unset _file
+		fi
 
 		_handle_function_is_missing_or_help
 
@@ -37,17 +51,10 @@ function orb() {
 			_parse_args "$@"
 		fi
 
-		# Effectively enforcing orb prefix
-		_unset_all_internal_utils
-		_unset_all_underscored
-
-		# Re source user script extension to allow internal function calls without orb prefix
-		if [[ -n $_orb_extensions && -f $_orb_extensions/${script_name}.sh ]]; then
-			source "$_orb_extensions/${script_name}.sh"
-		fi
+		_unset_redundant_script_functions # effectively enforcing orb prefix
 
 		# Call function in another subshell to prevent meddeling with orb internals
-		( $function_name "${args_nrs[@]}" "${args_wildcard[@]}" )
+		( $_function_name "${_args_nrs[@]}" "${_args_wildcard[@]}" )
 	)
 }
 
