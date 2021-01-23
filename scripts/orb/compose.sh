@@ -8,16 +8,16 @@ declare -A start_args=(
 ); function start() { # Start containers
 	# declare
 	orb utils passflags -tt
-	${args[-r]} && orb stop "$1" $(orb utils passflags "-s arg")
+	# ${args[-r]} && orb stop "$1" $(orb utils passflags "-s arg")
 
-	cmd=(
-		$(orb composecmd "$1" `orb utils passflags '-s arg'`)
-		up -d
-		$([[ -n ${args[-s arg]} ]] && echo " --no-deps ${args[-s arg]}")
-	)
+	# cmd=(
+	# 	$(orb composecmd "$1" `orb utils passflags '-s arg'`)
+	# 	up -d
+	# 	$([[ -n ${args[-s arg]} ]] && echo " --no-deps ${args[-s arg]}")
+	# )
 
-	eval $(orb currentenv $1)
-	"${cmd[@]}"
+	# eval $(orb currentenv $1)
+	# "${cmd[@]}"
 }
 
 # stop

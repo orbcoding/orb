@@ -1,1 +1,3 @@
-_current_script_dependencies+=( history.sh )
+# _script_files+=(
+# 	history.sh
+# )

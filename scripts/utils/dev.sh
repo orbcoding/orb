@@ -8,7 +8,7 @@ declare -A passflags_args=(
 
   for arg in "$@"; do
     if [[ -z ${_orb_caller_args_declaration["$arg"]+abc} ]]; then
-      orb utils raise_error "'$arg' not in $_orb_caller_descriptor args declaration\n\n${_orb_caller_args_explanation}"
+      orb utils raise_error "'$arg' not in $_orb_caller_descriptor args declaration\n\n"
     elif [[ ${_orb_caller_args["$arg"]} == true ]]; then
       pass+=( "$arg" )
     elif [[ -n ${_orb_caller_args["$arg"]+abc} ]] && orb utils is_flag_with_arg "$arg"; then

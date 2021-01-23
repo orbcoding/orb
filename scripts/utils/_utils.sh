@@ -1,5 +1,4 @@
-#!/bin/bash
-_current_script_dependencies+=(
-	dev.sh
-	core.sh
-)
+# _script_files+=(
+# 	core.sh
+#   dev.sh
+# )

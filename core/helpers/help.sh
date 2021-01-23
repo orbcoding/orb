@@ -10,7 +10,7 @@
 
 _print_script_help_introtext() {
 	if [[ $_script_name == 'orb' ]]; then
-		local _intromsg="Main $(bold)orb$(normal) namespace scripts listed below.\n"
+		local _intromsg="Main $(orb -dc text bold))orb$(orb -dc text normal)) namespace scripts listed below.\n"
 		_intromsg+="For other script namespaces see: orb "
 		local _other_scripts=()
 		local _script
@@ -26,7 +26,7 @@ _print_script_help() {
 	_print_script_help_introtext
 
 	local _output=""
-	local _script_files=${_current_script_dependencies[@]}
+	local _script_files=${_script_files[@]}
 
 	if [[ -n $_current_script_extension ]]; then
 		_script_files+=($(realpath --relative-to $_script_dir $_current_script_extension))
@@ -36,9 +36,9 @@ _print_script_help() {
 	for _file in ${_script_files[@]}; do
 		local _filename=$(basename $_file)
 		if [[ "${_filename}" == "${_script_name}.sh" ]]; then
-			_output+="-----------------# $(italic)local _orb_extensions\n$(normal)"
+			_output+="-----------------# $(orb -dc utils italic)local _orb_extensions\n$(orb -dc text normal))"
 		fi
-		_output+="$(bold)${_filename^^}$(normal)\n"
+		_output+="$(orb -dc text bold))${_filename^^}$(orb -dc text normal))\n"
 		_output+=$(grep "^[); ]*function" $_script_dir/$_file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
 		_output+="\n\n"
 	done
@@ -57,7 +57,7 @@ _print_function_help() {
 _print_args_explanation() {
 	[[ -z "${!_args_declaration[@]}" ]] && exit
 	local _props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED' 'OTHER')
-	IFS=';'; local _msg="$(bold)${_props[*]}$(normal)\n"
+	IFS=';'; local _msg="$(tput bold)${_props[*]}$(tput sgr0)\n"
 
 	_msg+=$(for _key in "${!_args_declaration[@]}"; do
 		_sub="$_key"
@@ -66,7 +66,7 @@ _print_args_explanation() {
 			if [[ "$_prop" == 'REQUIRED' ]]; then
 				_is_required "$_key" && _val='true'
 			elif [[ "$_prop" == 'OTHER' ]]; then
-				_can_start_flagged "$_key" && _val='CAN_START_WITH_FLAG (-/+)'
+				_can_start_flagged "$_key" $1 && _val='CAN_START_WITH_FLAG (-/+)'
 			else
 				_val="$(_get_arg_prop "$_key" "$_prop")"
 			fi
@@ -88,6 +88,6 @@ _print_function_comment() {
 
 _print_function_name_and_comment() {
 	local _comment=$(_print_function_comment)
-	echo "$(bold)$_function_name$(normal) $([[ -n "$_comment" ]] && echo "- $_comment")"
+	echo "$(orb -dc text bold))$_function_name$(orb -dc text normal)) $([[ -n "$_comment" ]] && echo "- $_comment")"
 }
 

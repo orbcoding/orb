@@ -1,5 +1,3 @@
-# Core utils
-
 # is_boolean_flag
 declare -A is_boolean_flag_args=(
 	['1']='arg; CAN_START_WITH_FLAG'
@@ -25,7 +23,7 @@ declare -A is_flagged_arg_args=(
 declare -A isnr_args=(
 	['1']='number input'
 ); function isnr() { # check if is nr
-	[[ $1 =~ ^[0-9]+$ ]]
+	[[ "$1" =~ ^[0-9]+$ ]]
 }
 
 declare -A function_exists_args=(
@@ -79,23 +77,6 @@ declare -A eval_variable_or_string_args=(
 	else # is static value
 		echo "$str" # set it and break
 	fi
-}
-
-# list_public_functions
-declare -A list_public_functions_args=(
-	['*']='files'
-); function list_public_functions() {
-	for file in "$@"; do
-		grep "^[); ]*function" $file | sed 's/\(); \)*function //' | cut -d '(' -f1
-	done
-}
-
-# has_public_function
-declare -A has_public_function_args=(
-	['1']='function'
-	['2']='file'
-); function has_public_function() { # check if file has function
-	list_public_functions "$2" | grep -Fxq $1
 }
 
 # join_by

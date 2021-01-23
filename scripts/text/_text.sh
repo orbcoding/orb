@@ -1,1 +1,3 @@
-_current_script_dependencies=( format.sh )
+# _script_files+=(
+# 	format.sh
+# )

@@ -1,4 +1,5 @@
 _get_script_name() {
+	# TODO check list of script extensions
 	if [[ " ${_scripts[@]} " =~ " ${1} " ]]; then
 		echo "$1"
 	else
@@ -7,14 +8,27 @@ _get_script_name() {
 	fi
 }
 
+_collect_script_files() {
+	if ! $_core_files_only && _current_script_extension=$(_get_current_script_extension); then
+		_script_files+=( "$_current_script_extension" )
+	fi
+
+	if [[ -d "$_script_dir" ]]; then
+		# Add all non_underscore script_dir files to script_files
+		local _files
+		readarray -d '' _files < <(find "$_script_dir" -type f -name "*.sh" ! -name '_*' -print0)
+		_script_files+=( "${_files[@]}" )
+	fi
+}
+
 _get_script_function_path() {
 	local _script_function_path="$_script_name"
-	[[ -n $_function_name ]] && _script_function_path+="->$(bold)${_function_name}$(normal)"
+	[[ -n $_function_name ]] && _script_function_path+="->$(tput bold)${_function_name}$(tput sgr0)"
 	echo "$_script_function_path"
 }
 
 _get_current_script_extension() {
-	local _orb_extensions=$(upfind _orb_extensions)
+	# local _orb_extensions=$(orb -dc utils upfind _orb_extensions)
 	if [[ -n $_orb_extensions && -f $_orb_extensions/${_script_name}.sh ]]; then
 		echo "$_orb_extensions/${_script_name}.sh"
 	else
@@ -27,10 +41,23 @@ _handle_function_is_missing_or_help() {
 	if [[ "$_function_name" == 'help' ]]; then
 		_print_script_help && exit 0
 	elif [[ -z $_function_name ]]; then
-		orb utils raise_error "is a script tag - no function provided"
-	elif ! function_exists $_function_name; then
-		orb utils raise_error "undefined"
+		orb -dc utils raise_error "is a script tag - no function provided"
+	elif ! orb -dc utils function_exists $_function_name; then
+		orb -dc utils raise_error "undefined"
 	fi
+}
+
+
+# list_public_functions $1 file
+_list_public_functions() {
+	for file in "$@"; do
+		grep "^[); ]*function" $file | sed 's/\(); \)*function //' | cut -d '(' -f1
+	done
+}
+
+# has_public_function $1 function, $2 file
+_has_public_function() { # check if file has function
+	_list_public_functions "$2" | grep -Fxq $1
 }
 
 # _unset_all_underscored() {
@@ -43,25 +70,25 @@ _handle_function_is_missing_or_help() {
 
 # Unset all commands prefixed with function except for the one called
 # Effectively only allowing functions to be called with orb prefix and arg handling
-_unset_redundant_script_functions() {
-	local _file
-	for _file in "${_core_script_dependencies[@]}"; do
-		_forget_script_functions "$_orb_dir/$_file"
-	done
+# _unset_redundant_script_functions() {
+# 	local _file
+# 	for _file in "${_core_script_dependencies[@]}"; do
+# 		_forget_script_functions "$_orb_dir/$_file"
+# 	done
 
-	for _file in ${_current_script_dependencies[@]}; do
-		_forget_script_functions "$_script_dir/$_file"
-	done
-	unset list_public_functions
-}
+# 	for _file in ${_script_files[@]}; do
+# 		_forget_script_functions "$_script_dir/$_file"
+# 	done
+# 	unset list_public_functions
+# }
 
-_forget_script_functions() { # $1 file
-	local _fn
-	for _fn in $(list_public_functions "$1"); do
-		if [[ $_fn != $_function_name && $_fn != "list_public_functions" ]]; then
-			unset "$_fn"
-			[[ -v ${_fn}_args[@] ]] && unset "${_fn}_args"
-		fi
-	done
-}
+# _forget_script_functions() { # $1 file
+# 	local _fn
+# 	for _fn in $(list_public_functions "$1"); do
+# 		if [[ $_fn != $_function_name && $_fn != "list_public_functions" ]]; then
+# 			unset "$_fn"
+# 			[[ -v ${_fn}_args[@] ]] && unset "${_fn}_args"
+# 		fi
+# 	done
+# }
 

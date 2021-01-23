@@ -1,57 +1,80 @@
 #!/bin/bash
 _orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
 _scripts=( git utils text ) # otherwise defaults to orb
+_core_dependencies=(
+	core/helpers/bootstrap.sh
+	core/helpers/help.sh
+	core/helpers/arguments.sh
+)
+# _core_script_dependencies=(
+# 	scripts/text/format.sh
+# 	scripts/utils/core.sh
+# 	scripts/utils/dev.sh
+# )
+_core_globals=(
+	core/globals/orb.sh
+	core/globals/caller.sh
+	core/globals/script.sh
+)
+
+source $_orb_dir/scripts/utils/dev.sh
+
+for _file in "${_core_dependencies[@]}"; do
+	source "$_orb_dir/$_file"
+done; unset _file
+
+# _underscore_core_script_dependencies
 
 function orb() {
 	# Overriding nested orb calls with internal function to access caller info in utils
 	# Run nested calls in subshell to prevent changing parent environment
 	(
-		_core_script_dependencies=(
-			scripts/utils/dev.sh
-			scripts/text/format.sh
-			scripts/utils/core.sh
-		)
-
-		_core_dependencies=(
-			core/helpers/bootstrap.sh
-			core/helpers/help.sh
-			core/helpers/arguments.sh
-			core/globals/caller.sh
-			core/globals/script.sh
-		)
-
-		_deps=( ${_core_script_dependencies[@]} ${_core_dependencies[@]} )
-		for _file in "${_deps[@]}"; do
+		# Set globals
+		# echoerr 'globals?'
+		for _file in "${_core_globals[@]}"; do
 			source "$_orb_dir/$_file"
-		done; unset _file _deps
+		done; unset _file
 
-		# Source user script extension
-		if _current_script_extension=$(_get_current_script_extension); then
-			source "$_current_script_extension"
-		fi
-		# Source main script file
-		_current_script_dependencies=()
+		# echoerr 'after?'
+		# Source script wrapper
 		if [[ -f "$_script_dir/_${_script_name}.sh" ]]; then
 			source "$_script_dir/_${_script_name}.sh"
 		fi
-		# If function not present yet source internal script files
-		if ! function_exists $_function_name; then
-			for _file in ${_current_script_dependencies[@]}; do
-				source "$_script_dir/${_file}"
-			done; unset _file
-		fi
 
-		_handle_function_is_missing_or_help
+		# echoerr 'after wrapper?'
+
+		_script_files=()
+		_collect_script_files
+		# echoerr 'after collection?'
+
+		# If file has public function, source and call it
+		for _file in ${_script_files[@]}; do
+			if _has_public_function "$_function_name" "$_file"; then
+				source "$_file"
+				break
+			fi
+		done; unset _file
+
+
+		# echoerr "sourced $_function_name"
+
+		# _handle_function_is_missing_or_help
 
 		# Parse function args
-		if [[ $1 == "help" ]]; then
+		if $_direct_call; then
+			( $_function_name "$@" )
+			exit $?
+		elif [[ $1 == "help" ]]; then
 			_print_function_help
 			exit 0
 		else
+			echoerr "parsing args $_function_name"
 			_parse_args "$@"
 		fi
 
-		_unset_redundant_script_functions # effectively enforcing orb prefix
+		# IM GONNA check if extention declares function exists in subhells and return good
+		# before actually sourcing the file here. That should solve this shit
+		# _enforce_orb_prefix # effectively enforcing orb prefix
 
 		# Call function in another subshell to prevent meddeling with orb internals
 		( $_function_name "${_args_nrs[@]}" "${_args_wildcard[@]}" )

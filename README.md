@@ -1,3 +1,5 @@
+# scripts/*/core.sh functions have to be callable as regular bash functions without arguments collection
+
 #_orb_extensions
 if folder _orb_extensions exists above in file system (orb utils upfind). Script files can hook into main `orb` namespace or create/extend other namespaces. Eg:
 
