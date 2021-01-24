@@ -3,7 +3,7 @@
 _vars_to_caller=(
   _script_name
   _function_name
-  _script_function_path
+  _function_descriptor
 )
 
 _arrs_to_caller=(
@@ -15,10 +15,6 @@ _arrs_to_caller=(
 for _var in "${_vars_to_caller[@]}"; do
   [[ -v $_var ]] && declare "_orb_caller${_var}"="${!_var}"
 done; unset _vars_to_caller _var
-
-if [[ -n $_orb_caller_descriptor ]]; then
-  _orb_caller_descriptor="$_orb_caller_script_name->$(orb -dc text bold))$_orb_caller_function_name$(orb -dc text normal))"
-fi
 
 for _arr in ${_arrs_to_caller[@]}; do
   declare -n _arr_ref=$_arr

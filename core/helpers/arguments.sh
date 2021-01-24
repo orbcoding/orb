@@ -52,7 +52,7 @@ _parse_args() {
 	local _args_remaining=("$@") # array of input args each quoted
 	if [[ ! -v _args_declaration[@] ]]; then
 		if [[ ${#_args_remaining[@]} > 0 ]]; then
-			orb -dc utils raise_error "$_function_name does not accept arguments"
+			orb -dc utils raise_error "does not accept arguments"
 		else # no args to parse
 			return 0
 		fi
@@ -65,21 +65,21 @@ _parse_args() {
 
 _set_arg_defaults() {
 	for _arg in "${!_args_declaration[@]}"; do
-		local _value="$(_get_arg_prop "$_arg" DEFAULT)"
+		local _value="$(_arg_default_val)"
 
 		if [[ -z "$_value" ]]; then
 			# default flags and wildcard to false for ez conditions
-			orb -dc utils is_boolean_flag "$_arg" || [[ "$_arg" == '*' ]] && _args["$_arg"]=false
+			_is_boolean_flag "$_arg" || [[ "$_arg" == '*' ]] && _args["$_arg"]=false
 			continue
 		fi
 		# check each if default defined
 		IFS='|' read -r -a _options <<< $_value # split by |
 		for _option in ${_options[@]}; do
-			_value="$(orb -dc utils eval_variable_or_string $_option)"
+			_value="$(_eval_variable_or_string $_option)"
 		done
 
 		_args["$_arg"]="$_value"
-		orb -dc utils isnr "$_arg" && _args_nrs["$args_nr"]="$_value"
+		_isnr "$_arg" && _args_nrs["$args_nr"]="$_value"
 	done
 }
 
@@ -88,7 +88,7 @@ _collect_args() {
 	while [[ ${#_args_remaining[@]} > 0 ]]; do
 		local _arg="${_args_remaining[0]}"
 
-		if orb -dc utils is_flagged_arg "$_arg"; then
+		if _is_flagged_arg "$_arg"; then
 			_parse_flagged_arg "$_arg"
 		else
 			_parse_inline_arg "$_arg"
@@ -151,10 +151,6 @@ _seeks_wildcard() {
 	[[ -n ${_args_declaration['*']} ]]
 }
 
-_can_start_flagged() { # $1 arg
-	_get_arg_prop "$1" "CAN_START_WITH_FLAG"
-}
-
 _assign_flag() {
 	_args["${1/+/-}"]=$(_flag_value "$1")
 	_shift_args
@@ -178,7 +174,7 @@ _assign_inline_arg() {
 }
 
 _try_assign_multiple_flags() { # $1 arg_key
-	if ! orb -dc utils is_boolean_flag "$1"; then
+	if ! _is_boolean_flag "$1"; then
 		_invalid_flags+=( "$1" )
 		return 1 # only boolean flags can be multi-flags
 	fi
@@ -200,12 +196,11 @@ _assign_wildcard() {
 	_args_remaining=()
 }
 
-##############
-# VALIDATIONS
-##############
+###########################
+# VALIDATIONS AND ARG PROPS
+###########################
 
 _is_valid_arg() { # $1 arg_key, $2 arg
-	# is_valid_required "$1"
 	_is_valid_in "$1" "$2"
 }
 
@@ -217,7 +212,7 @@ _is_valid_in() { # $1 arg_key $2 arg
 
 	# check each unless found
 	local _in; for _in in ${_in_arr[@]}; do
-		local _val=$(orb -dc utils eval_variable_or_string "$_in")
+		local _val=$(_eval_variable_or_string "$_in")
 		[[ "$2" == "$_val" ]] && return 0 # return if found
 	done
 
@@ -230,31 +225,40 @@ _post_validation() {
 	done
 }
 
-_validate_required() { # $1 arg
-	if [[ -z ${_args["$1"]} ]] && _is_required "$1"; then
+_validate_required() { # $1 arg, $2 optional args_declaration
+	if [[ -z ${_args["$1"]} ]] && _is_required_arg "$1" $2; then
 		_error_and_exit "$1" 'required'
 	fi
 }
 
-_is_required() { # $1 arg
-	( orb -dc utils is_flagged_arg "$1" && _get_arg_prop "$1" 'REQUIRED') || \
-	( ! orb -dc utils is_flagged_arg "$1" && ! _get_arg_prop "$1" 'OPTIONAL')
+_is_required_arg() { # $1 arg, $2 optional args_declaration
+	( _is_flagged_arg "$1" && _get_arg_prop "$1" 'REQUIRED' $2) || \
+	( ! _is_flagged_arg "$1" && ! _get_arg_prop "$1" 'OPTIONAL' $2)
+}
+
+_can_start_flagged() { # $1 arg, $2 optional args_declaration
+	_get_arg_prop "$1" "CAN_START_WITH_FLAG" $2
+}
+
+_arg_default_val() { # $1 arg, $2 optional args_declaration
+	echo "$(_get_arg_prop "$_arg" DEFAULT $2)"
 }
 
 
 ###################
 # HELPERS
 ##################
-_get_arg_prop() { # $1 arg_key, $2 sub_property
+_get_arg_prop() { # $1 arg_key, $2 sub_property, $3 optional args_declaration_variable
+	declare -n _declaration=${3-"_args_declaration"}
 	local _value=
 	# with [*]/['1'...] and prop CAN_START_WITH_FLAG an invalid flag can init assignment
 	local _boolean_props=( REQUIRED OPTIONAL CAN_START_WITH_FLAG )
 	if [[ "$2" == 'DESCRIPTION' ]]; then # Is first
-		_value="$(orb -dc utils grepbetween "${_args_declaration["$1"]}" '^' '(;|$)')"
+		_value="$(_grepbetween "${_declaration["$1"]}" '^' '(;|$)')"
 	elif [[ " ${_boolean_props[@]} " =~ " $2 " ]]; then
-		echo "${_args_declaration["$1"]}" | grep -q "$2" && return 0
+		echo "${_declaration["$1"]}" | grep -q "$2" && return 0
 	else # value props
-		_value="$(orb -dc utils grepbetween "${_args_declaration["$1"]}" "$2: " '(;|$)')"
+		_value="$(_grepbetween "${_declaration["$1"]}" "$2: " '(;|$)')"
 	fi
 
 	if [[ -n "$_value" ]]; then
@@ -280,8 +284,7 @@ _error_and_exit() { # $1 arg_key $2 arg_value/required
 		_msg+=" with value $2"
 	fi
 
-	_msg+="\n\n"
-	#$(_print_args_explanation)"
+	_msg+="\n\n$(_print_args_explanation)"
 
 	orb -dc utils raise_error "$_msg"
 }

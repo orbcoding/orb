@@ -8,27 +8,8 @@ _get_script_name() {
 	fi
 }
 
-_collect_script_files() {
-	if ! $_core_files_only && _current_script_extension=$(_get_current_script_extension); then
-		_script_files+=( "$_current_script_extension" )
-	fi
-
-	if [[ -d "$_script_dir" ]]; then
-		# Add all non_underscore script_dir files to script_files
-		local _files
-		readarray -d '' _files < <(find "$_script_dir" -type f -name "*.sh" ! -name '_*' -print0)
-		_script_files+=( "${_files[@]}" )
-	fi
-}
-
-_get_script_function_path() {
-	local _script_function_path="$_script_name"
-	[[ -n $_function_name ]] && _script_function_path+="->$(tput bold)${_function_name}$(tput sgr0)"
-	echo "$_script_function_path"
-}
-
-_get_current_script_extension() {
-	# local _orb_extensions=$(orb -dc utils upfind _orb_extensions)
+_get_current_script_extension_file() {
+	local _orb_extensions=$(_upfind _orb_extensions)
 	if [[ -n $_orb_extensions && -f $_orb_extensions/${_script_name}.sh ]]; then
 		echo "$_orb_extensions/${_script_name}.sh"
 	else
@@ -36,13 +17,31 @@ _get_current_script_extension() {
 	fi
 }
 
+_collect_script_files() {
+	if [[ -d "$_script_dir" ]]; then
+		# Add all non_underscore script_dir files to script_files
+		local _files
+		readarray -d '' _files < <(find "$_script_dir" -type f -name "*.sh" ! -name '_*' -print0)
+		_script_files+=( "${_files[@]}" )
+	fi
+
+	if $_current_script_extension_file; then
+		_script_files+=( "$_current_script_extension_file" )
+	fi
+}
+
+_get_function_descriptor() {
+	local _function_descriptor="$_script_name"
+	[[ -n $_function_name ]] && _function_descriptor+="->$(tput bold)${_function_name}$(tput sgr0)"
+	echo "$_function_descriptor"
+}
 
 _handle_function_is_missing_or_help() {
 	if [[ "$_function_name" == 'help' ]]; then
 		_print_script_help && exit 0
 	elif [[ -z $_function_name ]]; then
 		orb -dc utils raise_error "is a script tag - no function provided"
-	elif ! orb -dc utils function_exists $_function_name; then
+	elif ! _function_exists $_function_name; then
 		orb -dc utils raise_error "undefined"
 	fi
 }

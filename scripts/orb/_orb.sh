@@ -1,18 +1,12 @@
-#!/bin/bash
-# _script_files+=(
-# 	docker.sh
-# 	compose.sh
-# )
-
 # Move to closest docker-compose
-compose_file=$(orb -dc utils upfind docker-compose.yml)
+compose_file=$(_upfind docker-compose.yml)
 
 if [[ -n  "$compose_file" ]]; then
 	cd "${compose_file/%\/*}"
 
 	# Parse .env
 	if [ -f '.env' ]; then
-		$(orb -dc utils parseenv .env)
+		$(_parseenv .env)
 	else
 		echo 'No .env file!'
 	fi

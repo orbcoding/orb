@@ -1,58 +1,58 @@
-# is_boolean_flag
-declare -A is_boolean_flag_args=(
+# _is_boolean_flag
+declare -A _is_boolean_flag_args=(
 	['1']='arg; CAN_START_WITH_FLAG'
-); function is_boolean_flag() { # starts with - or + and has no spaces
+); function _is_boolean_flag() { # starts with - or + and has no spaces
 	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
 }
 
-# is_flag_with_arg
-declare -A is_flag_with_arg_args=(
+# _is_flag_with_arg
+declare -A _is_flag_with_arg_args=(
 	['1']='arg; CAN_START_WITH_FLAG'
-); function is_flag_with_arg() { # starts with - and has substr ' arg'
+); function _is_flag_with_arg() { # starts with - and has substr ' arg'
 	[[ ${1:0:1} == '-' ]] && [[ "${1/ arg/}" !=  "$1" ]]
 }
 
-# is_flagged_arg
-declare -A is_flagged_arg_args=(
+# _is_flagged_arg
+declare -A _is_flagged_arg_args=(
 	['1']='arg; CAN_START_WITH_FLAG'
-); function is_flagged_arg() {
-	is_boolean_flag "$1" || is_flag_with_arg "$1"
+); function _is_flagged_arg() {
+	_is_boolean_flag "$1" || _is_flag_with_arg "$1"
 }
 
-# isnr
-declare -A isnr_args=(
+# _isnr
+declare -A _isnr_args=(
 	['1']='number input'
-); function isnr() { # check if is nr
+); function _isnr() { # check if is nr
 	[[ "$1" =~ ^[0-9]+$ ]]
 }
 
-declare -A function_exists_args=(
+declare -A _function_exists_args=(
 	['1']='function_name'
-); function function_exists() {
+); function _function_exists() {
 	declare -f -F $1 > /dev/null
 	return $?
 }
 
 # parsenv
-declare -A parseenv_args=(
+declare -A _parseenv_args=(
 	['1']='path to .env'
-); function parseenv() { # export variables in .env to shell
+); function _parseenv() { # export variables in .env to shell
 	echo "eval $(egrep -v '^#' $1 | sed -e 's/ = /=/g' | xargs -0)"
 }
 
-# grepbetween
-declare -A grepbetween_args=(
+# _grepbetween
+declare -A _grepbetween_args=(
 	['1']='string to grep'
 	['2']='grep between from'
 	['3']='grep between to'
-); function grepbetween() { # grep between two strings, can use (either|or)
+); function _grepbetween() { # grep between two strings, can use (either|or)
 	echo "$(grep -oP "(?<=$2).*?(?=$3)" <<< $1)"
 }
 
-# upfind
-declare -A upfind_args=(
-	['1']='filename to upfind'
-); function upfind() { # Find closest filename upwards in filsystem
+# _upfind
+declare -A _upfind_args=(
+	['1']='filename to _upfind'
+); function _upfind() { # Find closest filename upwards in filsystem
 	x=`pwd`
 	while [ "$x" != "/" ] ; do
 			if [[ -e "$x/$1" ]]; then
@@ -66,10 +66,10 @@ declare -A upfind_args=(
 	exit 1;
 }
 
-# eval_variable_or_string
-declare -A eval_variable_or_string_args=(
+# _eval_variable_or_string
+declare -A _eval_variable_or_string_args=(
 	['1']='$variable/string'
-); function eval_variable_or_string() { # $1 $variable/string (in string format)
+); function _eval_variable_or_string() { # $1 $variable/string (in string format)
 	str="$1"
 	if [[ ${str:0:1} == '$' ]]; then # is variable
 		str="${str:1}" # rm $
@@ -79,10 +79,17 @@ declare -A eval_variable_or_string_args=(
 	fi
 }
 
-# join_by
-declare -A join_by_args=(
+# _join_by
+declare -A _join_by_args=(
 	['1']='delimiter'
 	['*']='to join'
-); function join_by() { # join array by separator
+); function _join_by() { # join array by separator
 	local d=$1; shift; local f=$1; shift; printf %s "$f" "${@/#/$d}";
+}
+
+# _echoerr
+declare -A _echoerr_args=(
+  ['*']='msg; CAN_START_WITH_FLAG'
+); function _echoerr() { # echo to stderr, useful for debugging functions that return values in stdout
+  echo "$@" >&2
 }
