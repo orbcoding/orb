@@ -1,5 +1,5 @@
 #!/bin/bash
-function list() { # List containers and images
+function list()  { # List containers and images
 	docker ps -a
 	echo
 	docker images
