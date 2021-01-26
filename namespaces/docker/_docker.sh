@@ -6,7 +6,7 @@ if [[ -n  "$compose_file" ]]; then
 
 	# Parse .env
 	if [ -f '.env' ]; then
-		$(_parse_env .env)
+		_parse_env .env
 	else
 		echo 'No .env file!'
 	fi

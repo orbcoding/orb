@@ -34,7 +34,7 @@ declare -A raise_error_args=(
 ); function raise_error() { # Raise pretty error msg and kill namespace
   orb -c utils print_error $(orb -c utils passflags "-d arg") "$1"
   ${_args[-t]} && print_stack_trace >&2
-  kill_namespace
+  kill_script
 }
 
 # print_error
@@ -51,11 +51,9 @@ declare -A print_error_args=(
 	echo -e "${msg[*]}" >&2
 };
 
-# kill_namespace
+# kill_script
 # https://stackoverflow.com/a/14152313
-declare -A kill_namespace_args=(
-
-); function kill_namespace() { # kill namespace and dump stack trace
+function kill_script() { # kill script
   kill -PIPE 0
 }
 

@@ -44,7 +44,7 @@ _print_args_explanation() { # $1 optional args_declaration
 	local _declaration_ref=${1-"_args_declaration"}
 	declare -n _declaration="$_declaration_ref"
 
-	[[ -z "${!_declaration[@]}" ]] && exit
+	[[ -z "${!_declaration[@]}" ]] && exit 1
 	local _props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED' 'OTHER')
 	IFS=';'; local _msg="$(_bold)${_props[*]}$(_normal)\n"
 

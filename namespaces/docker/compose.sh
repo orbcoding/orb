@@ -7,17 +7,16 @@ declare -A start_args=(
 	['-r']='stop first'
 ); function start() { # Start containers
 	# declare
-	orb utils passflags -tt
-	# ${args[-r]} && orb stop "$1" $(orb utils passflags "-s arg")
+	${_args[-r]} && orb stop "$1" $(orb utils passflags "-s arg")
 
-	# cmd=(
-	# 	$(orb composecmd "$1" `orb utils passflags '-s arg'`)
-	# 	up -d
-	# 	$([[ -n ${args[-s arg]} ]] && echo " --no-deps ${args[-s arg]}")
-	# )
+	local cmd=(
+		$(orb composecmd "$1" `orb utils passflags '-s arg'`)
+		up -d
+		$([[ -n ${_args[-s arg]} ]] && echo " --no-deps ${_args[-s arg]}")
+	)
 
-	# eval $(orb currentenv $1)
-	# "${cmd[@]}"
+	eval $(orb currentenv $1)
+	"${cmd[@]}"
 }
 
 # stop
@@ -25,7 +24,7 @@ declare -A stop_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='stop single service'
 ); function stop() { # Stop containers
-	$(orb composecmd "$1") stop ${args[-s arg]}
+	$(orb composecmd "$1") stop ${_args[-s arg]}
 }
 
 # logs
@@ -35,7 +34,7 @@ declare -A logs_args=(
 	['-f']='follow; DEFAULT: true;'
 	['-l arg']="lines; DEFAULT: 300"
 ); function logs() { # Get container log
-	$(orb composecmd "$1") logs $(orb utils passflags "-f") --tail "${args[-l arg]}" ${args[-s arg]}
+	$(orb composecmd "$1") logs $(orb utils passflags "-f") --tail "${_args[-l arg]}" ${_args[-s arg]}
 }
 
 # clearlogs
@@ -51,7 +50,7 @@ declare -A rm_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='rm single service'
 ); function rm() { # Rm containers
-	$(orb composecmd "$1") rm --force ${args[-s arg]}
+	$(orb composecmd "$1") rm --force ${_args[-s arg]}
 }
 
 # pull
@@ -67,7 +66,7 @@ declare -A serviceid_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
 	['-s arg']='service; REQUIRED'
 ); serviceid() {
-	$(orb composecmd "$1") ps -q "${args[-s arg]}"
+	$(orb composecmd "$1") ps -q "${_args[-s arg]}"
 }
 
 
@@ -82,18 +81,18 @@ declare -A bash_args=(
 	cmd=( $(orb composecmd $1) )
 
 	# detached
-	if ${args[-d]}; then
-		eval $(orb currentenv)
+	if ${_args[-d]}; then
+		eval $(orb currentenv $1)
 		cmd+=( run --no-deps --rm )
 	else
 		cmd+=( exec )
 	fi
 	# root
-	${args[-r]} && cmd+=( --user 0 )
+	${_args[-r]} && cmd+=( --user 0 )
 	# service
-	cmd+=( ${args['-s arg']} )
+	cmd+=( ${_args['-s arg']} )
 	# bash
-	bash_cmd=`${args['*']} && echo -c \"${args_wildcard[*]}\"`
+	bash_cmd=`${_args['*']} && echo -c \"${_args_wildcard[*]}\"`
 	cmd+=( /bin/sh -c "[[ ! -f /bin/bash ]] && alias bash=/bin/sh; bash $bash_cmd")
 	# exec
 	"${cmd[@]}"
@@ -105,9 +104,9 @@ declare -A ssh_args=(
 	['-t']='ssh tty; DEFAULT: true'
 	['*']='cmd; OPTIONAL'
 ); function ssh() { # Run command on remote
-	cmd=( PATH=\$PATH:~/orb-cli\; cd ${SRV_REPO_PATH}/${args[1]} '&&' )
+	cmd=( PATH=\$PATH:~/orb-cli\; cd ${SRV_REPO_PATH}/${_args[1]} '&&' )
 
-	${args['*']} && cmd+=( ${args_wildcard[*]} ) || cmd+=( /bin/bash )
+	${_args['*']} && cmd+=( ${_args_wildcard[*]} ) || cmd+=( /bin/bash )
 
 	/bin/ssh $(orb utils passflags -t) "${SRV_USER}@${SRV_DOMAIN}" "${cmd[@]}"
 }
@@ -145,7 +144,7 @@ declare -A composecmd_args=(
 	else
 		cmd=( docker-compose -f docker-compose.yml -f docker-compose.$1.yml )
 
-		if [[ "${args[-i]}" == true ]]; then # idle
+		if [[ "${_args[-i]}" == true ]]; then # idle
 			[[ -f "docker-compose.idle.yml" ]] && \
 			cmd+=( -f docker-compose.idle.yml ) || \
 			(echo 'no docker-compose.idle.yml' && exit 1)

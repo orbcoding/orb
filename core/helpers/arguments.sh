@@ -86,14 +86,14 @@ _collect_args() {
 		local _arg="${_args_remaining[0]}"
 
 		if _is_flag "$_arg"; then
-			_parse_flagged_arg "$_arg"
+			_parse_flag_arg "$_arg"
 		else
 			_parse_inline_arg "$_arg"
 		fi
 	done
 }
 
-_parse_flagged_arg() { # $1 arg_key
+_parse_flag_arg() { # $1 arg_key
 	if _seeks_flag "$1"; then
 		_assign_flag "$1"
 	elif _seeks_flag_with_arg "$1"; then
@@ -175,7 +175,7 @@ _assign_inline_arg() {
 }
 
 _try_assign_multiple_flags() { # $1 arg_key
-	if ! _is_flag "$1"; then
+	if _is_verbose_flag "$1"; then
 		_invalid_flags+=( "$1" )
 		return 1 # only boolean flags can be multi-flags
 	fi

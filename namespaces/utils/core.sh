@@ -2,7 +2,14 @@
 declare -A _is_flag_args=(
 	['1']='arg; ACCEPTS_FLAGS'
 ); function _is_flag() { # starts with - or + and has no spaces (+ falsifies if default val true)
-	[[ ${1:0:1} == '-' ]] || [[ ${1:0:1} == '+' ]] && [[ "${1/ /}" == "$1" ]]
+	[[ $1 =~ [-+]{1}[-]{0,1}[a-zA-Z_-]+$ ]]
+}
+
+# _is_verbose_flag
+declare -A _is_verbose_flag_args=(
+	['1']='arg; ACCEPTS_FLAGS'
+); function _is_verbose_flag() { # starts with -- and has no spaces.
+	[[ $1 =~ [-]{2}[a-zA-Z_-]+$ ]]
 }
 
 # _is_nr
@@ -19,11 +26,19 @@ declare -A _function_exists_args=(
 	return $?
 }
 
+# has_public_function $1 function, $2 file
+declare -A _has_public_function_args=(
+	['1']='function_name'
+	['2']='file'
+); function _has_public_function() { # check if file has function
+	grep -q "^[); ]*function[ ]*$1[ ]*()[ ]*{" "$2"
+}
+
 # parsenv
 declare -A _parse_env_args=(
 	['1']='path to .env'
 ); function _parse_env() { # export variables in .env to shell
-	echo "eval $(egrep -v '^#' $1 | sed -e 's/ = /=/g' | xargs -0)"
+	set -o allexport; source "$1"; set +o allexport
 }
 
 # _grep_between
@@ -39,7 +54,7 @@ declare -A _grep_between_args=(
 declare -A _find_closest_args=(
 	['1']='filename to _find_closest'
 ); function _find_closest() { # Find closest filename upwards in filsystem
-	x=`pwd`
+	local x=`pwd`
 	while [ "$x" != "/" ] ; do
 			if [[ -e "$x/$1" ]]; then
 				echo "$x/$1"
@@ -56,12 +71,12 @@ declare -A _find_closest_args=(
 declare -A _eval_variable_or_string_args=(
 	['1']='$variable/string'
 ); function _eval_variable_or_string() { # if str starts with $ it is evaluated otherwise string returned
-	str="$1"
+	local str="$1"
 	if [[ ${str:0:1} == '$' ]]; then # is variable
 		str="${str:1}" # rm $
 		echo "${!str}" # eval var name
 	else # is static value
-		echo "$str" # set it and break
+		echo "$str"
 	fi
 }
 
@@ -69,7 +84,7 @@ declare -A _eval_variable_or_string_options_args=(
 	['1']='$option1|$option2|fallback_str'
 ); function _eval_variable_or_string_options() {
 	IFS='|' read -r -a _options <<< $1 # split by |
-	for _option in ${_options[@]}; do
+	local _option; for _option in ${_options[@]}; do
 		local _val="$(_eval_variable_or_string $_option)"
 		if [[ -n $_val ]]; then
 			echo "$_val" && exit 0
