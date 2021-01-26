@@ -1,0 +1,73 @@
+#!/bin/bash
+_orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+_core_dependencies=(
+	core/helpers/bootstrap.sh
+	core/helpers/help.sh
+	core/helpers/arguments.sh
+	namespaces/text/core.sh
+	namespaces/utils/core.sh
+)
+
+_core_globals=(
+	core/globals/orb.sh
+	core/globals/caller.sh
+	core/globals/namespace.sh
+)
+
+for _file in "${_core_dependencies[@]}"; do
+	source "$_orb_dir/$_file"
+done; unset _file
+
+_orb_extensions=$(_find_closest _orb_extensions)
+_core_namespaces=( docker git utils text )
+
+
+function orb() {
+	# Overriding nested orb calls with internal function to access caller info in utils
+	# Run nested calls in subshell to prevent changing parent environment
+	(
+		# Set globals
+		for _file in "${_core_globals[@]}"; do
+			source "$_orb_dir/$_file"
+		done; unset _file
+
+		# Source namespace wrapper
+		if [[ -f "$_namespace_dir/_${_current_namespace}.sh" ]]; then
+			source "$_namespace_dir/_${_current_namespace}.sh"
+		fi
+
+		_collect_namespace_files
+		_handle_help_requested && exit 0
+
+		# Source file with if has public function
+		for _file in ${_namespace_files[@]}; do
+			if _has_public_function "$_function_name" "$_file"; then
+				_file_with_function="$_file"
+				source "$_file"
+				break
+			fi
+		done; unset _file
+
+		_handle_public_function_missing
+
+		# Parse function args
+		if $_direct_call; then
+			( $_function_name "$@" )
+			exit $?
+		elif [[ $1 == "--help" ]]; then
+			_print_function_help
+			exit 0
+		else
+			_parse_args "$@"
+		fi
+
+		# IM GONNA check if extention declares function exists in subhells and return good
+		# before actually sourcing the file here. That should solve this shit
+		# _enforce_orb_prefix # effectively enforcing orb prefix
+
+		# Call function in another subshell to prevent meddeling with orb internals
+		( $_function_name "${_args_nrs[@]}" "${_args_wildcard[@]}" )
+	)
+}
+
+orb "$@"
