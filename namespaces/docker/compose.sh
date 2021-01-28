@@ -6,7 +6,6 @@ declare -A start_args=(
 	['-i']='start idle'
 	['-r']='stop first'
 ); function start() { # Start containers
-	_print_args
 	${_args[-r]} && orb stop "$1" $(orb utils pass_flags -s)
 
 	local cmd=(

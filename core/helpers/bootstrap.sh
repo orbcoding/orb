@@ -11,7 +11,7 @@ _get_current_namespace() {
 	if [[ " ${_namespaces[@]} " =~ " ${1} " ]]; then
 		echo "$1"
 	else
-		echo $(_eval_variable_or_string_options "$ORB_DEFAULT_NAMESPACE|docker")
+		echo $(_eval_variable_or_string_options '$ORB_DEFAULT_NAMESPACE|docker')
 		exit 1
 	fi
 }

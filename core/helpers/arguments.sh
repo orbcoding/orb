@@ -65,18 +65,18 @@ _parse_args() {
 
 _set_arg_defaults() {
 	for _arg in "${!_args_declaration[@]}"; do
-		local _value="$(_arg_default_prop)"
+		local _default _value _def
+		_def="$(_arg_default_prop)" && _default="$_def"
 
-		if [[ -z "$_value" ]]; then
-			# default flags and wildcard to false for ez conditions
+		if [[ -z "${_default+x}" ]]; then
+			# DEFAULT == null => set flags and wildcard to false for ez conditions
 			_is_flag "$_arg" || [[ "$_arg" == '*' ]] && _args["$_arg"]=false
-			continue
+		elif _value=$(_eval_variable_or_string_options "$_default"); then
+			# evaled DEFAULT value != null
+			_args["$_arg"]="$_value"
+			_is_nr "$_arg" && _args_nrs["$args_nr"]="$_value"
+		# else eval DEFAULT value == null => do nothing
 		fi
-		# check each if default defined
-		_value=$(_eval_variable_or_string_options "$_value")
-
-		_args["$_arg"]="$_value"
-		_is_nr "$_arg" && _args_nrs["$args_nr"]="$_value"
 	done
 }
 
@@ -84,6 +84,7 @@ _collect_args() {
 	# Start collecting from first input arg onwards
 	while [[ ${#_args_remaining[@]} > 0 ]]; do
 		local _arg="${_args_remaining[0]}"
+		[[ _arg == '""' ]] && _arg="" # "" => empty string
 
 		if _is_flag "$_arg"; then
 			_parse_flag_arg "$_arg"
@@ -95,9 +96,9 @@ _collect_args() {
 
 _parse_flag_arg() { # $1 arg_key
 	if _declared_flag "$1"; then
-		_assign_flag "$1"
+		_assign_flag "$1" && _shift_args
 	elif _declared_flag_with_arg "$1"; then
-		_assign_flag_with_arg "$1"
+		_assign_flag_with_arg "$1" && _shift_args 2
 	else
 		local _invalid_flags=()
 		_try_assign_multiple_flags "$1"
@@ -156,21 +157,19 @@ _declared_wildcard() {
 
 _assign_flag() {
 	_args["${1/+/-}"]=$(_flag_value "$1")
-	_shift_args
 }
 
 # if specified with arg suffix, set value to next arg and shift both
 _assign_flag_with_arg() {
 	if _is_valid_arg "$1 arg" "${_args_remaining[1]}"; then
 		_args["$1 arg"]="${_args_remaining[1]}"
-		_shift_args 2
 	else
-		_error_and_exit "$1 arg ${_args_remaining[1]}"
+		_error_and_exit "$1 arg" "${_args_remaining[1]}"
 	fi
 }
 
 _assign_inline_arg() {
-	_args_nrs[$_args_nrs_count]="$1"
+	_args_nrs[$_args_nrs_count - 1]="$1"
 	_args[$_args_nrs_count]="$1"
 	(( _args_nrs_count++ ))
 	_shift_args
@@ -187,10 +186,9 @@ _try_assign_multiple_flags() { # $1 arg_key
 
 	for _flag in $_flags; do
 		if _declared_flag "-$_flag"; then
-			_args["-$_flag"]="$(_flag_value "$1")"
+			_assign_flag "-$_flag"
 		elif _declared_flag_with_arg "-$_flag"; then
-			_shift_steps=2
-			_args["-$_flag arg"]=${_args_remaining[1]}
+			_assign_flag_with_arg "-$_flag" && _shift_steps=2
 		else
 			_invalid_flags+=(-$_flag)
 		fi
@@ -214,7 +212,7 @@ _assign_wildcard() {
 ###########################
 
 _is_valid_arg() { # $1 arg_key, $2 arg
-	_is_valid_in "$1" "$2"
+	_is_valid_in "$1" "$2" && _is_valid_empty "$1" "$2"
 }
 
 _is_valid_in() { # $1 arg_key $2 arg
@@ -232,6 +230,15 @@ _is_valid_in() { # $1 arg_key $2 arg
 	return 1
 }
 
+_is_valid_empty() { # $1 arg_key, $2 arg
+	if [[ ( -z "$2" && -n ${2+x} ) || "$2" == '""' ]]; then
+		# is empty str
+		if ! _accepts_empty_string "$1"; then
+		 	return 1
+		fi
+	fi
+}
+
 _post_validation() {
 	local _arg; for _arg in "${!_args_declaration[@]}"; do
 		_validate_required "$_arg"
@@ -239,7 +246,7 @@ _post_validation() {
 }
 
 _validate_required() { # $1 arg, $2 optional args_declaration
-	if [[ -z ${_args["$1"]} ]] && _is_required "$1" $2; then
+	if [[ -z ${_args["$1"]+x} ]] && _is_required "$1" $2; then
 		_error_and_exit "$1" 'required'
 	fi
 }
@@ -253,8 +260,12 @@ _accepts_flags() { # $1 arg, $2 optional args_declaration
 	_get_arg_prop "$1" "ACCEPTS_FLAGS" $2
 }
 
+_accepts_empty_string() {
+	_get_arg_prop "$1" "ACCEPTS_EMPTY_STRING" $2
+}
+
 _arg_default_prop() { # $1 arg, $2 optional args_declaration
-	echo "$(_get_arg_prop "$_arg" DEFAULT $2)"
+	_get_arg_prop "$_arg" DEFAULT $2
 }
 
 
@@ -263,18 +274,19 @@ _arg_default_prop() { # $1 arg, $2 optional args_declaration
 ##################
 _get_arg_prop() { # $1 arg_key, $2 sub_property, $3 optional args_declaration_variable
 	declare -n _declaration=${3-"_args_declaration"}
-	local _value=
-	# with [*]/['1'...] and prop ACCEPTS_FLAGS an invalid flag can init assignment
-	local _boolean_props=( REQUIRED OPTIONAL ACCEPTS_FLAGS )
+	local _value
+
+	local _boolean_props=( REQUIRED OPTIONAL ACCEPTS_FLAGS ACCEPTS_EMPTY_STRING)
+
 	if [[ "$2" == 'DESCRIPTION' ]]; then # Is first
-		_value="$(_grep_between "${_declaration["$1"]}" '^' '(;|$)')"
+		local _val="$(_grep_between "${_declaration["$1"]}" '^' '(;|$)')" && _value="$_val"
 	elif [[ " ${_boolean_props[@]} " =~ " $2 " ]]; then
 		echo "${_declaration["$1"]}" | grep -q "$2" && return 0
 	else # value props
-		_value="$(_grep_between "${_declaration["$1"]}" "$2: " '(;|$)')"
+		local _val="$(_grep_between "${_declaration["$1"]}" "$2: " '(;|$)')" && _value="$_val"
 	fi
 
-	if [[ -n "$_value" ]]; then
+	if [[ -n "${_value+x}" ]]; then
 		echo "$_value" && return 0
 	else
 		return 1
@@ -290,11 +302,16 @@ _shift_args() {
 }
 
 _error_and_exit() { # $1 arg_key $2 arg_value/required
-	local _msg="invalid args: $1"
+	local _arg
+	[[ ${1:0:1} == '-' ]] && _arg='flags' || _arg='args'
+	local _msg="invalid $_arg: $1"
 	if [[ "$2" == 'required' ]]; then
 		_msg+=" is required"
-	elif [[ -n "$2" ]]; then
+	elif [[ -n "$2" && "$2" != '""' ]]; then # non empty string
 		_msg+=" with value $2"
+	elif [[ -n "${2+x}" ]]; then # empty string
+		_msg+=" with value \"\""
+		_msg+="\n\n Add ACCEPTS_EMTPY_STRING to $1 declaration if empty string is acceptable"
 	fi
 
 	_msg+="\n\n$(_print_args_explanation)"

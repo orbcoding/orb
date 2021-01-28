@@ -47,7 +47,7 @@ declare -A _grep_between_args=(
 	['2']='grep between from'
 	['3']='grep between to'
 ); function _grep_between() { # grep between two strings, can use (either|or)
-	echo "$(grep -oP "(?<=$2).*?(?=$3)" <<< $1)"
+	grep -oP "(?<=$2).*?(?=$3)" <<< $1
 }
 
 # _find_closest
@@ -71,25 +71,40 @@ declare -A _find_closest_args=(
 declare -A _eval_variable_or_string_args=(
 	['1']='$variable/string'
 ); function _eval_variable_or_string() { # if str starts with $ it is evaluated otherwise string returned
-	local str="$1"
-	if [[ ${str:0:1} == '$' ]]; then # is variable
-		str="${str:1}" # rm $
-		echo "${!str}" # eval var name
-	else # is static value
-		echo "$str"
+	if [[ ${1:0:1} == '$' ]]; then # is variable
+		local var=${1:1} # rm $
+		# echo if var not null
+		if [[ -n ${!var+x} ]]; then
+			echo "${!var}"
+		else
+			return 1
+		fi
+	elif [[ "$1" == '""' ]]; then
+		echo "" # "" reserved for empty string string
+	elif [[ -n ${1+x} ]]; then
+		# echo if not null static value
+		echo "$1"
+	else
+		return 1
 	fi
 }
 
+# _eval_variable_or_string_options
 declare -A _eval_variable_or_string_options_args=(
 	['1']='$option1|$option2|fallback_str'
-); function _eval_variable_or_string_options() {
+); function _eval_variable_or_string_options() { # return first opt that eval. if opts end with | last fallback is empty string
+	local _options
 	IFS='|' read -r -a _options <<< $1 # split by |
-	local _option; for _option in ${_options[@]}; do
-		local _val="$(_eval_variable_or_string $_option)"
-		if [[ -n $_val ]]; then
-			echo "$_val" && exit 0
+
+	local _option; for _option in "${_options[@]}"; do
+		local _val;
+		if _val=$(_eval_variable_or_string "$_option"); then
+			echo "$_val"
+			return 0
 		fi
 	done
+
+	return 1
 }
 
 # _join_by
@@ -105,10 +120,4 @@ declare -A _echoerr_args=(
   ['*']='msg; ACCEPTS_FLAGS'
 ); function _echoerr() { # echo to stderr, useful for debugging without polluting stdout
   echo "$@" >&2
-}
-
-# print_args
-function _print_args() { # print collected arguments, useful for debugging
-	declare -A | grep 'A _caller_args=' | cut -d '=' -f2-
-	[[ ${_caller_args["*"]} == true ]] && echo "[*]=${_caller_args_wildcard[*]}"
 }

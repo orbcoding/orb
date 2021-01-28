@@ -14,7 +14,7 @@ declare -A pass_flags_args=(
     fi
   done
 
-  echo "${pass[@]}" | xargs # trim whitespace
+  echo "${pass[@]}"
 }
 
 pass_flag() { # $1 = flag arg/args
@@ -30,10 +30,14 @@ pass_flag() { # $1 = flag arg/args
     if [[ ${_caller_args["-$flag"]} == true ]]; then
       # has flag == true
       pass+=( "-$flag" )
-    elif [[ -n ${_caller_args["-$flag arg"]+abc} ]]; then
+    elif [[ -n ${_caller_args["-$flag arg"]+x} ]]; then
       # has "flag arg"
-      pass+=( "-$flag ${_caller_args["-$flag arg"]}" )
-    elif [[ -z ${_caller_args_declaration["-$flag"]+abc} && -z ${_caller_args_declaration["-$flag arg"]+abc} ]]; then
+      if [[ -z ${_caller_args["-$flag arg"]} ]]; then # empty str
+        pass+=( "-$flag" '""')
+      else
+        pass+=( "-$flag ${_caller_args["-$flag arg"]}" )
+      fi
+    elif [[ -z ${_caller_args_declaration["-$flag"]+x} && -z ${_caller_args_declaration["-$flag arg"]+x} ]]; then
       # flag never declared
       orb -c utils raise_error "'-$flag' not in $_caller_function_descriptor args declaration\n\n$(_print_args_explanation _caller_args_declaration)"
     fi
@@ -42,8 +46,8 @@ pass_flag() { # $1 = flag arg/args
 
 # raise_error
 declare -A raise_error_args=(
-  ['1']='error_message; ACCEPTS_FLAGS'
-  ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor'
+  ['1']='error_message; DEFAULT: ""; ACCEPTS_EMPTY_STRING'
+  ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor;'
   ['-t']='trace; DEFAULT: true'
 ); function raise_error() { # Raise pretty error msg and kill namespace
   orb -c utils print_error $(orb -c utils pass_flags -d) "$1"
@@ -81,4 +85,10 @@ function print_stack_trace() {
   while caller $i; do ((i++)); done | while read _line_no _function_name _file_name; do
     echo -e "$_file_name:$_line_no\t$_function_name"
   done
+}
+
+# print_args
+function print_args() { # print collected arguments, useful for debugging
+	declare -A | grep 'A _caller_args=' | cut -d '=' -f2-
+	[[ ${_caller_args["*"]} == true ]] && echo "[*]=${_caller_args_wildcard[*]}"
 }
