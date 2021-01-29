@@ -1,45 +1,58 @@
-# pass_flags
-declare -A pass_flags_args=(
+# args_to_arr
+declare -A args_to_arr_args=(
+  ['1']='array'
 	['*']='flags to pass; ACCEPTS_FLAGS'
-); function pass_flags() { # pass caller functions flags with values if recieved
-  [[ -z $_caller_function_name ]] && orb -c utils raise_error 'must be used from within a caller function'
-  [[ ! -v _caller_args_declaration[@] ]] && orb -c utils raise_error "$_caller_function_descriptor has no arguments to pass"
+); function args_to_arr() { # `eval $(orb utils args_to_arr arr_name -f --v-flag 1 2 *)` to pass args to array _arr_name
+  local arr_name=$1
 
-  pass=()
-  local arg; for arg in "$@"; do
+  [[ -z $_caller_function_name ]] && orb -c utils raise_error 'must be used from within a caller function'
+  [[ ! -v _caller_args_declaration[@] ]] && orb -c utils raise_error "$_caller_function_descriptor has no arguments to cmd"
+
+  if [[ -v "${arr_name}[@]" ]]; then
+    cmd=( "$arr_name+=(" ) # append to if arr exists
+  else
+    cmd=( "$arr_name=(" )
+  fi
+
+  local arg; for arg in "${_args_wildcard[@]}"; do
     if _is_flag "$arg"; then
-      pass_flag "$arg"
+      flags_to_arr "$arg"
+    elif _is_nr "$arg"; then
+      [[ -n ${_caller_args["$arg"]+x} ]] && \
+      cmd+=( '"${_args['$arg']}"' )
+    elif [[ "$arg" == '*' ]]; then
+      [[ ${_caller_args['*']} == true ]] && \
+      cmd+=( '"${_args_wildcard[@]}"' )
     else
-      orb -c utils raise_error "$arg not a flag"
+      orb -c utils raise_error "$arg not a flag, nr or *"
     fi
   done
 
-  echo "${pass[@]}"
+  cmd+=( ')' )
+
+  echo "${cmd[@]}"
 }
 
-pass_flag() { # $1 = flag arg/args
+flags_to_arr() { # $1 = flag arg/args
   local flags=()
 
   if _is_verbose_flag "$1"; then
     flags+=( "$1" )
   else
-    flags+=( $(echo "${1:1}" | grep -o .) )
+    flags+=( $(echo "${1:1}" | grep -o . | sed  s/^/-/g) )
   fi
 
   local flag; for flag in ${flags[@]}; do
-    if [[ ${_caller_args["-$flag"]} == true ]]; then
-      # has flag == true
-      pass+=( "-$flag" )
-    elif [[ -n ${_caller_args["-$flag arg"]+x} ]]; then
-      # has "flag arg"
-      if [[ -z ${_caller_args["-$flag arg"]} ]]; then # empty str
-        pass+=( "-$flag" '""')
-      else
-        pass+=( "-$flag ${_caller_args["-$flag arg"]}" )
-      fi
-    elif [[ -z ${_caller_args_declaration["-$flag"]+x} && -z ${_caller_args_declaration["-$flag arg"]+x} ]]; then
-      # flag never declared
-      orb -c utils raise_error "'-$flag' not in $_caller_function_descriptor args declaration\n\n$(_print_args_explanation _caller_args_declaration)"
+    if [[ -n ${_caller_args_declaration["$flag"]+x} ]]; then
+      # declared boolean flag
+      [[ ${_caller_args["$flag"]} == true ]] && \
+      cmd+=( "$flag" )
+    elif [[ -n ${_caller_args_declaration["$flag arg"]+x} ]]; then
+      # declared flag with arg
+      [[ -n ${_caller_args["$flag arg"]+x} ]] && \
+      cmd+=( "$flag "'"${_args["'"$flag arg"'"]}"' )
+    else # undeclared
+      orb -c utils raise_error "'$flag' not in $_caller_function_descriptor args declaration\n\n$(_print_args_explanation _caller_args_declaration)"
     fi
   done
 }
@@ -50,7 +63,9 @@ declare -A raise_error_args=(
   ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor;'
   ['-t']='trace; DEFAULT: true'
 ); function raise_error() { # Raise pretty error msg and kill namespace
-  orb -c utils print_error $(orb -c utils pass_flags -d) "$1"
+  cmd=( orb -c utils print_error )
+  eval $(orb utils args_to_arr cmd -d 1)
+  "${cmd[@]}"
   ${_args[-t]} && print_stack_trace >&2
   kill_script
 }

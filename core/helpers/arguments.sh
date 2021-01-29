@@ -67,8 +67,7 @@ _set_arg_defaults() {
 	for _arg in "${!_args_declaration[@]}"; do
 		local _default _value _def
 		_def="$(_arg_default_prop)" && _default="$_def"
-
-		if [[ -z "${_default+x}" ]]; then
+		if [[ -z ${_default+x} ]]; then
 			# DEFAULT == null => set flags and wildcard to false for ez conditions
 			_is_flag "$_arg" || [[ "$_arg" == '*' ]] && _args["$_arg"]=false
 		elif _value=$(_eval_variable_or_string_options "$_default"); then
@@ -76,7 +75,7 @@ _set_arg_defaults() {
 			_args["$_arg"]="$_value"
 			_is_nr "$_arg" && _args_nrs["$args_nr"]="$_value"
 		# else eval DEFAULT value == null => do nothing
-		fi
+		fi; unset _default _value _def
 	done
 }
 
@@ -181,16 +180,16 @@ _try_assign_multiple_flags() { # $1 arg_key
 		return 1 # only boolean flags can be multi-flags
 	fi
 
-	local _flags=$(echo "${1:1}" | grep -o .)
+	local _flags=$(echo "${1:1}" | grep -o . | sed s/^/-/g )
 	local _shift_steps=1
 
 	for _flag in $_flags; do
-		if _declared_flag "-$_flag"; then
-			_assign_flag "-$_flag"
-		elif _declared_flag_with_arg "-$_flag"; then
-			_assign_flag_with_arg "-$_flag" && _shift_steps=2
+		if _declared_flag "$_flag"; then
+			_assign_flag "$_flag"
+		elif _declared_flag_with_arg "$_flag"; then
+			_assign_flag_with_arg "$_flag" && _shift_steps=2
 		else
-			_invalid_flags+=(-$_flag)
+			_invalid_flags+=($_flag)
 		fi
 	done
 
@@ -279,11 +278,11 @@ _get_arg_prop() { # $1 arg_key, $2 sub_property, $3 optional args_declaration_va
 	local _boolean_props=( REQUIRED OPTIONAL ACCEPTS_FLAGS ACCEPTS_EMPTY_STRING)
 
 	if [[ "$2" == 'DESCRIPTION' ]]; then # Is first
-		local _val="$(_grep_between "${_declaration["$1"]}" '^' '(;|$)')" && _value="$_val"
+		local _val; _val="$(_grep_between "${_declaration["$1"]}" '^' '(;|$)')" && _value="$_val"
 	elif [[ " ${_boolean_props[@]} " =~ " $2 " ]]; then
 		echo "${_declaration["$1"]}" | grep -q "$2" && return 0
 	else # value props
-		local _val="$(_grep_between "${_declaration["$1"]}" "$2: " '(;|$)')" && _value="$_val"
+		local _val; _val="$(_grep_between "${_declaration["$1"]}" "$2: " '(;|$)')" && _value="$_val"
 	fi
 
 	if [[ -n "${_value+x}" ]]; then
