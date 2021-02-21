@@ -10,11 +10,11 @@ The `orb` core comes with some built in commands and utils, mostly related to do
 All you have to do is put your functions inside an orb extension file and declare your functions arguments eg like below:
 
 ```BASH
-touch my_project_root/_orb_extensions/my_namespace.sh
-chmod +x my_project_root/_orb_extensions/my_namespace.sh
+touch my_project_root/_orb_extension/my_namespace.sh
+chmod +x my_project_root/_orb_extension/my_namespace.sh
 
 
-# my_project_root/_orb_extensions/my_namespace.sh
+# my_project_root/_orb_extension/my_namespace.sh
 
 # my_function
 declare -A my_function_args=(
@@ -41,7 +41,7 @@ $ orb my_namespace my_function -bf arg_f arg_1 arg_2 some more args
 
 $ orb my_namespace --help
 # =>
-#  -----------------     local _orb_extensions
+#  -----------------     local _orb_extension
 #  MY_NAMESPACE.SH
 #    my_function         This is my function comment
 
@@ -72,7 +72,7 @@ $ orb my_namespace my_function --help
 
 ## More on arguments and functions
 
-Functions callable through orb and listed in help - aka. "`public functions`" - have to be declared with `function` prefix and `()`. If not it will be considered a "`private function`" that is used internally in the file. See `orb utils _has_public_function`
+Functions callable through orb and listed in help - aka. "`public functions`" - have to be declared with `function` prefix and `()`. If not it will be considered a "`private function`" that is used internally in the file. See `orb core _has_public_function`
 
 ```BASH
  declare -A my_function_args=(

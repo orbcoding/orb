@@ -22,7 +22,7 @@ _print_namespace_help() {
 
 	local _file; for _file in ${_namespace_files[@]}; do
 		if [[ "$_file" == "$_current_namespace_extension_file" ]]; then
-			_output+="-----------------# $(_italic)local _orb_extensions\n$(_normal)"
+			_output+="-----------------# $(_italic)local _orb_extension\n$(_normal)"
 		fi
 		_output+="$(_bold)$(_upcase $(basename $_file))$(_normal)\n"
 		_output+=$(grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()[ ]*{" $_file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
@@ -35,12 +35,12 @@ _print_namespace_help() {
 
 _print_function_help() {
 	_print_function_name_and_comment
-	local _def=$(_print_args_explanation)
+	local _def=$(__print_args_explanation)
 	[[ -n "$_def" ]] && echo -e "\n$_def"
 }
 
 
-_print_args_explanation() { # $1 optional args_declaration
+__print_args_explanation() { # $1 optional args_declaration
 	local _declaration_ref=${1-"_args_declaration"}
 	declare -n _declaration="$_declaration_ref"
 

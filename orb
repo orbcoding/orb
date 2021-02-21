@@ -1,73 +1,72 @@
 #!/bin/bash
-_orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-_core_dependencies=(
-	core/helpers/bootstrap.sh
-	core/helpers/help.sh
-	core/helpers/arguments.sh
-	namespaces/text/core.sh
-	namespaces/utils/core.sh
-)
+function _orb_init() {
+	_orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
+	source "$_orb_dir/core/globals/orb_init.sh"
 
-_core_globals=(
-	core/globals/orb.sh
-	core/globals/caller.sh
-	core/globals/namespace.sh
-)
+	local _file; for _file in "${_core_dependencies[@]}"; do
+		source "$_orb_dir/$_file"
+	done
 
-for _file in "${_core_dependencies[@]}"; do
-	source "$_orb_dir/$_file"
-done; unset _file
+	_collect_orb_extensions
+	_parse_env_extensions
 
-_orb_extensions=$(_find_closest _orb_extensions)
-_core_namespaces=( docker git utils text )
+	_echoerr ${_orb_extensions[@]}
+}
 
 
 function orb() {
-	# Overriding nested orb calls with internal function to access caller info in utils
-	# Run nested calls in subshell to prevent changing parent environment
-	(
-		# Set globals
-		for _file in "${_core_globals[@]}"; do
-			source "$_orb_dir/$_file"
-		done; unset _file
+	# Previous function declarations are dumped and then restored after call.
+	# This makes sure any new declarations wont override existing functions in parent scope,
+	# which removes the need of sourcing and running functions in a subshell,
+	# which allows for exporting and modifying variables in parent scope
+	# Just use local variable prefix when needed
+	local _function_dump="$(declare -f)"
 
-		# Source namespace wrapper
-		if [[ -f "$_namespace_dir/_${_current_namespace}.sh" ]]; then
-			source "$_namespace_dir/_${_current_namespace}.sh"
+	# Set globals
+	local _file; for _file in "${_core_globals[@]}"; do
+		source "$_orb_dir/$_file"
+	done
+
+	# Source namespace wrapper
+	if [[ -f "$_namespace_dir/_${_current_namespace}.sh" ]]; then
+		source "$_namespace_dir/_${_current_namespace}.sh"
+	fi
+
+	_collect_namespace_files
+	_handle_help_requested && exit 0
+
+
+	# Source file with if has public function
+	local _file; for _file in ${_namespace_files[@]}; do
+		if _has_public_function "$_function_name" "$_file"; then
+			_file_with_function="$_file"
+			source "$_file"
+			break
 		fi
+	done
 
-		_collect_namespace_files
-		_handle_help_requested && exit 0
+	_handle_public_function_missing
 
-		# Source file with if has public function
-		for _file in ${_namespace_files[@]}; do
-			if _has_public_function "$_function_name" "$_file"; then
-				_file_with_function="$_file"
-				source "$_file"
-				break
-			fi
-		done; unset _file
+	# Parse function args
+	if $_direct_call; then
+		$_function_name "$@"
+		exit $?
+	elif [[ $1 == "--help" ]]; then
+		_print_function_help
+		exit 0
+	else
+		_parse_args "$@"
+	fi
 
-		_handle_public_function_missing
+	# Call function
+	$_function_name "${_args_nrs[@]}" "${_args_wildcard[@]}"
+	_function_exit_code=$?
 
-		# Parse function args
-		if $_direct_call; then
-			( $_function_name "$@" )
-			exit $?
-		elif [[ $1 == "--help" ]]; then
-			_print_function_help
-			exit 0
-		else
-			_parse_args "$@"
-		fi
+	# Restore functions
+	eval "$_function_dump"
 
-		# IM GONNA check if extention declares function exists in subhells and return good
-		# before actually sourcing the file here. That should solve this shit
-		# _enforce_orb_prefix # effectively enforcing orb prefix
-
-		# Call function in another subshell to prevent meddeling with orb internals
-		( $_function_name "${_args_nrs[@]}" "${_args_wildcard[@]}" )
-	)
+	return $_function_exit_code
 }
 
+_orb_init
 orb "$@"

@@ -1,26 +1,17 @@
-_collect_namespace_extensions() {
-	local _extension_files=( $_orb_extensions/* )
-
-	local _file; for _file in ${_extension_files}; do
-		_namespace=$(basename $_file)
-		_namespaces+=( ${_namespace/.*/} )
-	done
-}
-
 _get_current_namespace() {
 	if [[ " ${_namespaces[@]} " =~ " ${1} " ]]; then
 		echo "$1"
 	else
 		echo $(_eval_variable_or_string_options '$ORB_DEFAULT_NAMESPACE|docker')
-		exit 1
+		return 1
 	fi
 }
 
 _get_current_namespace_extension() {
-	if [[ -n $_orb_extensions && -f $_orb_extensions/${_current_namespace}.sh ]]; then
-		echo "$_orb_extensions/${_current_namespace}.sh"
+	if [[ -n $_orb_extension && -f $_orb_extension/${_current_namespace}.sh ]]; then
+		echo "$_orb_extension/${_current_namespace}.sh"
 	else
-		exit 1
+		return 1
 	fi
 }
 
@@ -47,7 +38,7 @@ _get_function_descriptor() {
 
 _handle_public_function_missing() {
 	if ! _function_exists $_function_name; then
-		orb -c utils raise_error "undefined"
+		orb core _raise_error "undefined"
 	fi
 }
 

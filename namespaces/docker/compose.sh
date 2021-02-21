@@ -6,23 +6,31 @@ declare -A start_args=(
 	['-i']='start idle'
 	['-r']='stop first'
 ); function start() { # Start containers
-	if ${_args[-r]}; then
-		local stop_cmd=( orb stop )
-		eval $(orb utils args_to_arr stop_cmd -s 1)
-		"${stop_cmd[@]}"
-	fi
+	# if ${_args[-r]}; then
+	# 	local cmd=( orb stop ); orb core _args_to cmd -x -- -s 1
+	# fi
 
-	compose_cmd=( orb docker compose_cmd )
-	eval $(orb utils args_to_arr compose_cmd -i 1)
+	# compose_cmd=( orb docker compose_cmd )
+	# eval $(orb core _args_to compose_cmd -i 1)
 
-	local cmd=(
-		$("${compose_cmd[@]}")
-		up -d
-		$([[ -n ${_args[-s arg]} ]] && echo " --no-deps ${_args[-s arg]}")
-	)
+	# echo $TERMINAL_CMD
+	# local cmd=(
+	# 	$("${compose_cmd[@]}")
+	# 	up -d
+	# 	$([[ -n ${_args[-s arg]} ]] && echo " --no-deps ${_args[-s arg]}")
+	# )
+	# orb core _args_to cmd -- -irxx
+	# echo "${cmd[@]}"
+	echo 'starting'
 
-	eval $(orb docker current_env $1)
-	"${cmd[@]}"
+	# orb docker set_current_env $1
+	# echo $CURRENT_ENV
+	# echo $CURRENT_ID
+	# "${cmd[@]}"
+}
+
+yo() {
+	echo 'YO from compose.sh'
 }
 
 # stop
@@ -43,7 +51,7 @@ declare -A logs_args=(
 	['-l arg']="lines; DEFAULT: 300"
 ); function logs() { # Get container log
 	local cmd=( $(orb docker compose_cmd "$1") logs )
-	eval $(orb utils args_to_arr cmd -f)
+	eval $(orb core _args_to cmd -f)
 	cmd+=( --tail "${_args[-l arg]}" ${_args[-s arg]} )
 	"${cmd[@]}"
 }
@@ -54,7 +62,7 @@ declare -A clearlogs_args=(
 	['-s arg']='service; DEFAULT: web'
 ); function clearlogs() { # Clear container logs
 	local service_cmd=( orb docker service_id )
-	eval $(orb utils args_to_arr service_cmd 1 -s)
+	eval $(orb core _args_to service_cmd 1 -s)
 	sudo truncate -s 0 $(docker inspect --format='{{.LogPath}}' $( "${service_cmd[@]}" ))
 }
 
@@ -97,7 +105,7 @@ declare -A bash_args=(
 
 	# detached
 	if ${_args[-d]}; then
-		eval $(orb docker current_env $1)
+		eval $(orb docker set_current_env $1)
 		cmd+=( run --no-deps --rm )
 	else
 		cmd+=( exec )
@@ -120,7 +128,7 @@ declare -A ssh_args=(
 	['*']='cmd; OPTIONAL'
 ); function ssh() { # Run command on remote
 	cmd=( /bin/ssh )
-	eval $(orb utils args_to_arr cmd -t)
+	eval $(orb core _args_to cmd -t)
 	cmd+=( "${SRV_USER}@${SRV_DOMAIN}" PATH="\$PATH:~/orb-cli"\; cd "${SRV_REPO_PATH}/${_args[1]}" '&&' )
 	${_args['*']} && cmd+=( ${_args_wildcard[*]} ) || cmd+=( /bin/bash )
 	"${cmd[@]}"
@@ -161,22 +169,19 @@ declare -A compose_cmd_args=(
 
 		if [[ "${_args[-i]}" == true ]]; then # idle
 			[[ -f "docker-compose.idle.yml" ]] && \
-			cmd+=( -f docker-compose.idle.yml ) || \
-			orb utils raise_error "no docker-compose.idle.yml in $PWD"
+			cmd+=( -f docker-compose.idle.yml )
 		fi
 	fi
 
 	echo "${cmd[@]}"
 }
 
-# current_env
-declare -A current_env_args=(
+# set_current_env
+declare -A set_current_env_args=(
 	['1']='env; DEFAULT: $DEFAULT_ENV|dev; IN: prod|staging|dev'
-); function current_env() { # eval $(orb docker current_env $env) to export current vars
-	cat << EOF
-export CURRENT_ENV=$1
-export CURRENT_ID=$(id -u)
-export CURRENT_GID=$(id -g)
-EOF
+); function set_current_env() { # export current env vars
+	export CURRENT_ENV=$1
+	export CURRENT_ID=$(id -u)
+	export CURRENT_GID=$(id -g)
 }
 

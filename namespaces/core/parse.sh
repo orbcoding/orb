@@ -2,14 +2,20 @@
 declare -A _is_flag_args=(
 	['1']='arg; ACCEPTS_FLAGS'
 ); function _is_flag() { # starts with - or + and has no spaces (+ falsifies if default val true)
-	[[ $1 =~ [-+]{1}[-]{0,1}[a-zA-Z_-]+$ ]]
+	[[ $1 =~ [-+]{1}[-]{0,1}[a-zA-Z_][a-zA-Z_-]*$ ]]
 }
 
 # _is_verbose_flag
 declare -A _is_verbose_flag_args=(
 	['1']='arg; ACCEPTS_FLAGS'
 ); function _is_verbose_flag() { # starts with -- and has no spaces.
-	[[ $1 =~ [-]{2}[a-zA-Z_-]+$ ]]
+	[[ $1 =~ [-]{2}[a-zA-Z_][a-zA-Z_-]*$ ]]
+}
+
+declare -A _is_wildcard_args=(
+	['1']='arg'
+); function _is_wildcard() { # '*' or '-- *'
+	[[ "$1" == '*' || "$1" == '-- *' ]]
 }
 
 # _is_nr
@@ -53,18 +59,32 @@ declare -A _grep_between_args=(
 # _find_closest
 declare -A _find_closest_args=(
 	['1']='filename to _find_closest'
+	['2']='starting path; DEFAULT: $PWD'
 ); function _find_closest() { # Find closest filename upwards in filsystem
-	local x=`pwd`
+	local x="$PWD"
+	[[ -n "$2" ]] && x="$2"
+
+
+	# _echoerr "x=$x"
+	# _echoerr "1=$1"
+	# _echoerr "2=$2"
 	while [ "$x" != "/" ] ; do
 			if [[ -e "$x/$1" ]]; then
 				echo "$x/$1"
-				break;
-				exit 0;
+				return 0;
 			fi
 			x=`dirname "$x"`
 	done
 
-	exit 1;
+	return 1;
+}
+
+# _join_by
+declare -A _join_by_args=(
+	['1']='delimiter'
+	['*']='to join'
+); function _join_by() { # join array by separator
+	local d=$1; shift; local f=$1; shift; printf %s "$f" "${@/#/$d}";
 }
 
 # _eval_variable_or_string
@@ -107,17 +127,15 @@ declare -A _eval_variable_or_string_options_args=(
 	return 1
 }
 
-# _join_by
-declare -A _join_by_args=(
-	['1']='delimiter'
-	['*']='to join'
-); function _join_by() { # join array by separator
-	local d=$1; shift; local f=$1; shift; printf %s "$f" "${@/#/$d}";
+function _got_orb_prefix() {
+  local _caller=${FUNCNAME[1]}
+  local _condition=$_function_name
+
+  if [[ $_caller == 'orb' ]]; then
+    _caller=${FUNCNAME[2]}
+    _condition=$_caller_function_name
+  fi
+
+  [[ "$_caller" == "$_condition" ]]
 }
 
-# _echoerr
-declare -A _echoerr_args=(
-  ['*']='msg; ACCEPTS_FLAGS'
-); function _echoerr() { # echo to stderr, useful for debugging without polluting stdout
-  echo "$@" >&2
-}

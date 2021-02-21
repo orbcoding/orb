@@ -7,7 +7,7 @@ declare -A forget_args=(
 		local reply
 		read reply
 	else
-		orb -c utils raise_error +t "file not found"
+		orb core _raise_error +t "file not found"
 		echo 'file not found'
 		exit 1
 	fi;
@@ -20,5 +20,5 @@ declare -A forget_args=(
 
 function validate_is_repo() {
 	local validate_is_repo=$([ -d .git ] && echo .git || git rev-parse --git-dir > /dev/null 2>&1)
-	[[ -z "$validate_is_repo" ]] && orb -c utils raise_error 'not in git repo'
+	[[ -z "$validate_is_repo" ]] && orb core _raise_error 'not in git repo'
 }

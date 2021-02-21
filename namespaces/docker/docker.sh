@@ -12,19 +12,19 @@ function df() { # Get docker disk usage
 declare -A pruneall_args=(
 	['-f']='force'
 ); function pruneall() { # Prune all stopped and unused including volumes
-	docker system prune --all --volumes $(orb utils pass_flags -f);
+	docker system prune --all --volumes $(orb core pass_flags -f);
 }
 
 declare -A prunecontainers_args=(
 	['-f']='force'
 ); function prunecontainers() { # Prune all stopped containers, -f = force
-	docker container prune $(orb utils pass_flags -f);
+	docker container prune $(orb core pass_flags -f);
 }
 
 declare -A pruneimages_args=(
 	['-f']='force'
 ); function pruneimages() { # remove all images, -f = force
-	docker image prune $(orb utils pass_flags -f)
+	docker image prune $(orb core pass_flags -f)
 }
 
 function stopall() { # stop all containers

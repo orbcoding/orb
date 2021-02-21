@@ -25,4 +25,3 @@ function _nocolor() { # $(orb text nocolor)text...
 function _upcase() { # upcase all characters in text
 	echo "$1" | tr a-z A-Z
 }
-

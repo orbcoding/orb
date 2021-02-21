@@ -52,7 +52,7 @@ _parse_args() {
 	local _args_remaining=("$@") # array of input args each quoted
 	if [[ ! -v _args_declaration[@] ]]; then
 		if [[ ${#_args_remaining[@]} > 0 ]]; then
-			orb -c utils raise_error "does not accept arguments"
+			orb core _raise_error "does not accept arguments"
 		else # no args to parse
 			return 0
 		fi
@@ -64,18 +64,18 @@ _parse_args() {
 }
 
 _set_arg_defaults() {
-	for _arg in "${!_args_declaration[@]}"; do
-		local _default _value _def
+	local _arg; for _arg in "${!_args_declaration[@]}"; do
+		local _def _default _value
 		_def="$(_arg_default_prop)" && _default="$_def"
 		if [[ -z ${_default+x} ]]; then
 			# DEFAULT == null => set flags and wildcard to false for ez conditions
-			_is_flag "$_arg" || [[ "$_arg" == '*' ]] && _args["$_arg"]=false
+			_is_flag "$_arg" || _is_wildcard "$1" && _args["$_arg"]=false
 		elif _value=$(_eval_variable_or_string_options "$_default"); then
 			# evaled DEFAULT value != null
 			_args["$_arg"]="$_value"
 			_is_nr "$_arg" && _args_nrs["$args_nr"]="$_value"
 		# else eval DEFAULT value == null => do nothing
-		fi; unset _default _value _def
+		fi; unset _def _default _value # have to unset to make sure
 	done
 }
 
@@ -102,7 +102,7 @@ _parse_flag_arg() { # $1 arg_key
 		local _invalid_flags=()
 		_try_assign_multiple_flags "$1"
 		if [[ $? == 1 ]]; then
-			if _declared_inline_arg && _accepts_flags "$_args_nrs_count" && _is_valid_arg "$_args_nrs_count" "$1"; then
+			if _declared_inline_arg "$_args_nrs_count" && _accepts_flags "$_args_nrs_count" && _is_valid_arg "$_args_nrs_count" "$1"; then
 				_assign_inline_arg "$1"
 			elif _declared_wildcard && _accepts_flags '*'; then
 				_assign_wildcard
@@ -115,7 +115,9 @@ _parse_flag_arg() { # $1 arg_key
 
 _parse_inline_arg() { # $1 = arg_key
 	# add numbered args to args and _args_nrs
-	if _declared_inline_arg && _is_valid_arg "$_args_nrs_count" "$1"; then
+	if [[ "$1" == '--' ]] && _declared_dash_wildcard; then
+		_assign_dash_wildcard
+	elif _declared_inline_arg "$_args_nrs_count" && _is_valid_arg "$_args_nrs_count" "$1"; then
 		_assign_inline_arg "$1"
 	elif _declared_wildcard; then
 		_assign_wildcard
@@ -146,12 +148,19 @@ _declared_flag_with_arg() { # $1 arg $2 optional args_declaration
 	[[ -n ${_declaration["$1 arg"]} ]]
 }
 
-_declared_inline_arg() {
-	[[ -n ${_args_declaration["$_args_nrs_count"]} ]]
+_declared_inline_arg() { # $1 nr
+	declare -n _declaration=${2-"_args_declaration"}
+	[[ -n ${_declaration["$1"]} ]]
 }
 
 _declared_wildcard() {
-	[[ -n ${_args_declaration['*']} ]]
+	declare -n _declaration=${2-"_args_declaration"}
+	[[ -n ${_declaration['*']} ]]
+}
+
+_declared_dash_wildcard() {
+	declare -n _declaration=${2-"_args_declaration"}
+	[[ -n ${_declaration['-- *']} ]]
 }
 
 _assign_flag() {
@@ -200,8 +209,15 @@ _try_assign_multiple_flags() { # $1 arg_key
 	fi
 }
 
+_assign_dash_wildcard() {
+	_shift_args
+	[[ ${#_args_remaining[@]} > 0 ]] && _args['-- *']=true
+	_args_wildcard+=("${_args_remaining[@]}")
+	_args_remaining=()
+}
+
 _assign_wildcard() {
-	_args['*']=true # cant preserve spaces so put in wildcards
+	_args['*']=true
 	_args_wildcard+=("${_args_remaining[@]}")
 	_args_remaining=()
 }
@@ -245,13 +261,18 @@ _post_validation() {
 }
 
 _validate_required() { # $1 arg, $2 optional args_declaration
-	if [[ -z ${_args["$1"]+x} ]] && _is_required "$1" $2; then
+	if ( \
+		[[ "$1" == '*' && ${_args['*']} == false ]] || \
+		[[ "$1" == '-- *' && ${_args['-- *']} == false ]] || \
+		[[ -z ${_args["$1"]+x} ]] \
+	) \
+	&&_is_required "$1" $2; then
 		_error_and_exit "$1" 'required'
 	fi
 }
 
 _is_required() { # $1 arg, $2 optional args_declaration
-	( (_is_flag "$1" || _is_flag_with_arg "$1") && _get_arg_prop "$1" 'REQUIRED' $2) || \
+	( _is_flag_with_arg "$1" && _get_arg_prop "$1" 'REQUIRED' $2) || \
 	( (! _is_flag "$1" && ! _is_flag_with_arg "$1") && ! _get_arg_prop "$1" 'OPTIONAL' $2)
 }
 
@@ -313,9 +334,9 @@ _error_and_exit() { # $1 arg_key $2 arg_value/required
 		_msg+="\n\n Add ACCEPTS_EMTPY_STRING to $1 declaration if empty string is acceptable"
 	fi
 
-	_msg+="\n\n$(_print_args_explanation)"
+	_msg+="\n\n$(__print_args_explanation)"
 
-	orb -c utils raise_error "$_msg"
+	orb core _raise_error "$_msg"
 }
 
 
