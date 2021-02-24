@@ -1,28 +1,28 @@
 # _raise_error
 declare -A _raise_error_args=(
-  ['1']='error_message'
+  ['1']='error_message;'
   ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor;'
   ['-t']='trace; DEFAULT: true'
 ); function _raise_error() { # Raise pretty error msg and kill namespace
-  if ! _got_orb_prefix; then orb core $FUNCNAME "$@"; return; fi
+  source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 
-  cmd=( orb core _print_error )
-  orb core _args_to cmd -x -- -d 1 # not using -x as would change caller_info
+  cmd=( _print_error )
+  _args_to cmd -x -- -d 1 # not using -x as would change caller_info
   ${_args[-t]} && _print_stack_trace >&2
   _kill_script
 }
 
 # _print_error
 declare -A _print_error_args=(
-	['1']='message; ACCEPTS_FLAGS'
+	['1']='message; ACCEPTS_FLAGS;'
   ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor'
 ); function _print_error() { # print pretty error
-  if ! _got_orb_prefix; then orb core $FUNCNAME "$@"; return; fi
+  source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 
 	msg=(
     "$(_red)$(_bold)Error:$(_normal)"
     "${_args[-d arg]}"
-    "$1"
+    "${_args[1]}"
   )
 
 	echo -e "${msg[*]}" >&2
@@ -36,26 +36,29 @@ function _kill_script() { # kill script
 
 # _print_stack_trace
 function _print_stack_trace() {
-  local i=0
-  local line_no
-  local function_name
-  local file_name
+  local _i=0
+  local _line_no
+  local _function_name
+  local _file_name
   echo
-  while caller $i; do ((i++)); done | while read _line_no _function_name _file_name; do
+  while caller $_i; do ((_i++)); done | while read _line_no _function_name _file_name; do
     echo -e "$_file_name:$_line_no\t$_function_name"
   done
 }
 
 # _print_args
 function _print_args() { # print collected arguments, useful for debugging
+  source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 	declare -A | grep 'A _caller_args=' | cut -d '=' -f2-
-	[[ ${_caller_args["*"]} == true ]] && echo "[*]=${_caller_args_wildcard[*]}"
+	if [[ ${_caller_args["*"]} == true ]] || ${_caller_args["-- *"]} == true ]]; then
+    echo "[*]=${_caller_args_wildcard[*]}"
+  fi
 }
 
-# _echoerr
-declare -A _echoerr_args=(
+# _ee
+declare -A _ee_args=(
   ['*']='msg; ACCEPTS_FLAGS'
-); function _echoerr() { # echo to stderr, useful for debugging without polluting stdout
+); function _ee() { # echo to stderr, useful for debugging without polluting stdout
   echo "$@" >&2
 }
 
@@ -65,23 +68,23 @@ declare -A _args_to_args=(
   ['-s']='skip flag before flag arg, and "--" before "-- *"'
   ['-x']='expand/exec array after adding args: "${array_name[@]}"'
 	['-- *']='flags to pass;'
-); function _args_to() { # cmd=( my_cmd ); orb core _args_to my_cmd -- -fs --v-flag 1 2 *
-  if ! _got_orb_prefix; then orb core $FUNCNAME "$@"; return; fi
+); function _args_to() { # cmd=( my_cmd ); _args_to my_cmd -- -fs --v-flag 1 2 *
+  source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 
-  declare -n _cmd=$1
+  declare -n _cmd=${_args[1]}
 
-  [[ -z $_caller_function_name ]] && orb core _raise_error 'must be used from within a caller function'
-  [[ ! -v _caller_args_declaration[@] ]] && orb core _raise_error "$_caller_function_descriptor has no arguments to pass"
+  [[ -z $_caller_function_name ]] && _raise_error 'must be used from within a caller function'
+  [[ ! -v _caller_args_declaration[@] ]] && _raise_error "$_caller_function_descriptor has no arguments to pass"
 
-  local arg; for arg in "${_args_wildcard[@]}"; do
-    if _is_flag "$arg"; then
-      _args_to_pass_flag "$arg"
-    elif _is_nr "$arg"; then
-      _args_to_pass_nr "$arg"
-    elif [[ "$arg" == '*' || "$arg" == '-- *' ]]; then
-      _args_to_pass_wildcard "$arg"
+  local _arg; for _arg in "${_args_wildcard[@]}"; do
+    if _is_flag "$_arg"; then
+      _args_to_pass_flag "$_arg"
+    elif _is_nr "$_arg"; then
+      _args_to_pass_nr "$_arg"
+    elif [[ "$_arg" == '*' || "$_arg" == '-- *' ]]; then
+      _args_to_pass_wildcard "$_arg"
     else
-      orb core _raise_error "$arg not a flag, nr or wildcard"
+      _raise_error "$_arg not a flag, nr or wildcard"
     fi
   done
 
@@ -89,33 +92,34 @@ declare -A _args_to_args=(
 }
 
 _args_to_pass_flag() { # $1 = flag arg/args
-  local flags=()
+  local _flags=()
 
   if _is_verbose_flag "$1"; then
-    flags+=( "$1" )
+    _flags+=( "$1" )
   else
-    flags+=( $(echo "${1:1}" | grep -o . | sed  s/^/-/g) )
+    _flags+=( $(echo "${1:1}" | grep -o . | sed  s/^/-/g) )
   fi
 
-  local flag; for flag in ${flags[@]}; do
-    if [[ -n ${_caller_args_declaration["$flag"]+x} ]]; then
+  local _flag; for _flag in ${_flags[@]}; do
+    if [[ -n ${_caller_args_declaration["$_flag"]+x} ]]; then
       # declared boolean flag
-      [[ ${_caller_args["$flag"]} == true ]] && \
-      _cmd+=( "$flag" )
-    elif [[ -n ${_caller_args_declaration["$flag arg"]+x} ]]; then
+      [[ ${_caller_args["$_flag"]} == true ]] && \
+      _cmd+=( "$_flag" )
+    elif [[ -n ${_caller_args_declaration["$_flag arg"]+x} ]]; then
       # declared flag with arg
-      [[ -n ${_caller_args["$flag arg"]+x} ]] && \
-      ! ${_args[-s]} && cmd+=( "$flag" )
-      _cmd+=( "${_caller_args["$flag arg"]}" )
+      if [[ -n ${_caller_args["$_flag arg"]+x} ]]; then
+        ! ${_args[-s]} && _cmd+=( "$_flag" )
+        _cmd+=( "${_caller_args["$_flag arg"]}" )
+      fi
     else # undeclared
-      orb core _raise_error "'$flag' not in $_caller_function_descriptor args declaration\n\n$(__print_args_explanation _caller_args_declaration)"
+      _raise_error "'$_flag' not in $_caller_function_descriptor args declaration\n\n$(__print_args_explanation _caller_args_declaration)"
     fi
   done
 }
 
 _args_to_pass_nr() { # $1 = nr arg
-  [[ -n ${_caller_args["$arg"]+x} ]] && \
-  _cmd+=( "${_caller_args["$arg"]}" )
+  [[ -n ${_caller_args["$_arg"]+x} ]] && \
+  _cmd+=( "${_caller_args["$_arg"]}" )
 }
 
 

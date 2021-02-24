@@ -1,31 +1,39 @@
 _get_current_namespace() {
 	if [[ " ${_namespaces[@]} " =~ " ${1} " ]]; then
 		echo "$1"
-	else
-		echo $(_eval_variable_or_string_options '$ORB_DEFAULT_NAMESPACE|docker')
+	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
+		echo $ORB_DEFAULT_NAMESPACE
 		return 1
-	fi
-}
-
-_get_current_namespace_extension() {
-	if [[ -n $_orb_extension && -f $_orb_extension/${_current_namespace}.sh ]]; then
-		echo "$_orb_extension/${_current_namespace}.sh"
 	else
-		return 1
+		_raise_error +t -d "$(_bold)$1$(_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_namespaces[*]}"
 	fi
 }
 
 _collect_namespace_files() {
-	if [[ -d "$_namespace_dir" ]]; then
-		# Add all non_underscore namespace_dir files to namespace_files
-		local _files
-		readarray -d '' _files < <(find "$_namespace_dir" -type f -name "*.sh" ! -name '_*' -print0 | sort -z)
-		_namespace_files+=( "${_files[@]}" )
-	fi
+	local _orb_config_dirs=( $_orb_dir )
 
-	if $_current_namespace_extension_file; then
-		_namespace_files+=( "$_current_namespace_extension_file" )
-	fi
+	! $_core_files_only && _orb_config_dirs+=( "${_orb_extensions[@]}" )
+	local _conf_dir
+
+ 	for _conf_dir in "${_orb_config_dirs[@]}"; do
+	 	local _files _dir="$_conf_dir/namespaces/$_current_namespace"
+
+		if [[ -d "$_dir" ]]; then
+			readarray -d '' _files < <(find $_dir -type f -name "*.sh" ! -name '_*' -print0 | sort -z)
+
+			local _from=${#_namespace_files[@]}
+			local _to=$(( ${#_namespace_files[@]} + ${#_files[@]} - 1 ))
+			local _i; for _i in $(seq $_from $_to ); do
+				_namespace_files_dir_tracker[$_i]="$_conf_dir"
+			done
+
+			_namespace_files+=( "${_files[@]}" )
+
+		elif [[ -f "${_dir}.sh" ]]; then
+			_namespace_files_dir_tracker[${#_namespace_files[@]}]="$_conf_dir"
+			_namespace_files+=( "${_dir}.sh" )
+		fi
+	done
 }
 
 _get_function_descriptor() {
@@ -38,7 +46,7 @@ _get_function_descriptor() {
 
 _handle_public_function_missing() {
 	if ! _function_exists $_function_name; then
-		orb core _raise_error "undefined"
+		_raise_error "undefined"
 	fi
 }
 

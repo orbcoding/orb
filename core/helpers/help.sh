@@ -20,13 +20,18 @@ _print_namespace_help() {
 		_print_global_namespace_help_intro
 	fi
 
-	local _file; for _file in ${_namespace_files[@]}; do
-		if [[ "$_file" == "$_current_namespace_extension_file" ]]; then
-			_output+="-----------------# $(_italic)local _orb_extension\n$(_normal)"
+	local _i=0 _file _current_dir
+	for _file in ${_namespace_files[@]}; do
+		if [[ "${_namespace_files_dir_tracker[$_i]}" != "$_current_dir" ]]; then
+			_current_dir="${_namespace_files_dir_tracker[$_i]}"
+			_output+="-----------------# $(_italic)${_current_dir}\n$(_normal)"
 		fi
+
 		_output+="$(_bold)$(_upcase $(basename $_file))$(_normal)\n"
 		_output+=$(grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()[ ]*{" $_file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
 		_output+="\n\n"
+
+		((_i+=1))
 	done
 
 	# remove last 4 chars \n\n
@@ -55,7 +60,10 @@ __print_args_explanation() { # $1 optional args_declaration
 			if [[ "$_prop" == 'REQUIRED' ]]; then
 				_is_required "$_key" "$_declaration_ref" && _val='true'
 			elif [[ "$_prop" == 'OTHER' ]]; then
-				_accepts_flags "$_key" "$_declaration_ref" && _val='ACCEPTS_FLAGS'
+				_val=()
+				_accepts_flags "$_key" "$_declaration_ref" && _val+=( ACCEPTS_FLAGS )
+				_accepts_empty_string "$_key" "$_declaration_ref" && _val+=( ACCEPTS_EMPTY_STRING )
+				_val=$(_join_by ', ' ${_val[*]})
 			else
 				_val="$(_get_arg_prop "$_key" "$_prop" "$_declaration_ref")"
 			fi

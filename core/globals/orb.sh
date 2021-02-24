@@ -7,12 +7,14 @@ declare -A _orb_options=(
   ['-d']='direct function call / dont parse/validate arguments declaration'
 )
 
+if [[ "$1" == 'core' ]]; then
+  _core_files_only=true
+fi
+
 # Parse orb flags
 if _is_flag "$1"; then
   if [[ "$1" == '--help' ]]; then
     _global_help_requested=true
-  elif [[ "$1" == 'core' ]]; then
-    _core_files_only=true
   else
     local _flags=($(echo "${1:1}" | grep -o .))
 
@@ -28,7 +30,7 @@ if _is_flag "$1"; then
             _opts+="  $_opt; ${_orb_options[$_opt]}\n"
           done
           _msg+=$(echo -e "$_opts" | column -tes ';')
-          orb core _raise_error "$_msg"
+          _raise_error "$_msg"
           ;;
       esac
     done

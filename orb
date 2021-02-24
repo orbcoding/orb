@@ -1,17 +1,17 @@
 #!/bin/bash
-function _orb_init() {
-	_orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
-	source "$_orb_dir/core/globals/orb_init.sh"
+_orb_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )
 
-	local _file; for _file in "${_core_dependencies[@]}"; do
-		source "$_orb_dir/$_file"
-	done
+source "$_orb_dir/core/helpers/bootstrap.sh"
+source "$_orb_dir/core/helpers/help.sh"
+source "$_orb_dir/core/helpers/arguments.sh"
+source "$_orb_dir/core/helpers/extensions.sh"
+source "$_orb_dir/namespaces/core/dev.sh"
+source "$_orb_dir/namespaces/core/parse.sh"
+source "$_orb_dir/namespaces/core/text.sh"
 
-	_collect_orb_extensions
-	_parse_env_extensions
-
-	_echoerr ${_orb_extensions[@]}
-}
+_orb_extensions=()
+_collect_orb_extensions
+_parse_env_extensions
 
 
 function orb() {
@@ -23,16 +23,24 @@ function orb() {
 	local _function_dump="$(declare -f)"
 
 	# Set globals
-	local _file; for _file in "${_core_globals[@]}"; do
-		source "$_orb_dir/$_file"
+  source "$_orb_dir/core/globals/orb.sh"
+  source "$_orb_dir/core/globals/caller.sh"
+  source "$_orb_dir/core/globals/namespace.sh"
+
+	# Source namespace _presource.sh in reverse (closest last)
+	local _i; for (( _i=${#_orb_extensions[@]}-1 ; _i>=0 ; _i-- )); do
+		local _ext="${_orb_extensions[$_i]}"
+		if [[ -f "$_ext/namespaces/$_current_namespace/_presource.sh" ]]; then
+			source "$_ext/namespaces/$_current_namespace/_presource.sh"
+		fi
 	done
 
-	# Source namespace wrapper
-	if [[ -f "$_namespace_dir/_${_current_namespace}.sh" ]]; then
-		source "$_namespace_dir/_${_current_namespace}.sh"
-	fi
-
 	_collect_namespace_files
+	# _ee ${_orb_extensions[@]}
+	# _ee ${_current_namespace[@]}
+	# _ee ${_namespaces[@]}
+	# _ee ${_namespace_files[@]}
+	# _ee "${_namespace_files_dir_tracker[@]}"
 	_handle_help_requested && exit 0
 
 
@@ -68,5 +76,5 @@ function orb() {
 	return $_function_exit_code
 }
 
-_orb_init
+
 orb "$@"

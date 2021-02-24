@@ -52,7 +52,7 @@ _parse_args() {
 	local _args_remaining=("$@") # array of input args each quoted
 	if [[ ! -v _args_declaration[@] ]]; then
 		if [[ ${#_args_remaining[@]} > 0 ]]; then
-			orb core _raise_error "does not accept arguments"
+			_raise_error "does not accept arguments"
 		else # no args to parse
 			return 0
 		fi
@@ -69,7 +69,7 @@ _set_arg_defaults() {
 		_def="$(_arg_default_prop)" && _default="$_def"
 		if [[ -z ${_default+x} ]]; then
 			# DEFAULT == null => set flags and wildcard to false for ez conditions
-			_is_flag "$_arg" || _is_wildcard "$1" && _args["$_arg"]=false
+			_is_flag "$_arg" || _is_wildcard "$_arg" && _args["$_arg"]=false
 		elif _value=$(_eval_variable_or_string_options "$_default"); then
 			# evaled DEFAULT value != null
 			_args["$_arg"]="$_value"
@@ -227,7 +227,7 @@ _assign_wildcard() {
 ###########################
 
 _is_valid_arg() { # $1 arg_key, $2 arg
-	_is_valid_in "$1" "$2" && _is_valid_empty "$1" "$2"
+	_is_valid_in "$1" "$2"
 }
 
 _is_valid_in() { # $1 arg_key $2 arg
@@ -245,18 +245,10 @@ _is_valid_in() { # $1 arg_key $2 arg
 	return 1
 }
 
-_is_valid_empty() { # $1 arg_key, $2 arg
-	if [[ ( -z "$2" && -n ${2+x} ) || "$2" == '""' ]]; then
-		# is empty str
-		if ! _accepts_empty_string "$1"; then
-		 	return 1
-		fi
-	fi
-}
-
 _post_validation() {
 	local _arg; for _arg in "${!_args_declaration[@]}"; do
 		_validate_required "$_arg"
+		_validate_empty "$_arg"
 	done
 }
 
@@ -268,6 +260,15 @@ _validate_required() { # $1 arg, $2 optional args_declaration
 	) \
 	&&_is_required "$1" $2; then
 		_error_and_exit "$1" 'required'
+	fi
+}
+
+_validate_empty() { # $1 arg_key
+	if [[ -z "${_args["$1"]}" && -n ${_args["$1"]+x} ]]; then
+		# is empty str
+		if ! _accepts_empty_string "$1"; then
+			_error_and_exit $_arg ""
+		fi
 	fi
 }
 
@@ -331,12 +332,12 @@ _error_and_exit() { # $1 arg_key $2 arg_value/required
 		_msg+=" with value $2"
 	elif [[ -n "${2+x}" ]]; then # empty string
 		_msg+=" with value \"\""
-		_msg+="\n\n Add ACCEPTS_EMTPY_STRING to $1 declaration if empty string is acceptable"
+		_msg+="\n\n Add ACCEPTS_EMPTY_STRING to arg $1 declaration if empty string is accepted"
 	fi
 
 	_msg+="\n\n$(__print_args_explanation)"
 
-	orb core _raise_error "$_msg"
+	_raise_error "$_msg"
 }
 
 
