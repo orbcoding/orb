@@ -88,7 +88,7 @@ $ orb my_namespace my_function --help
   - `orb_ext_dir/namespaces/my_namespace/_presource.sh` - that will be sourced before you function is called
 - You can also add `.env` files which will be parsed into your scripts as exported variables.
   - `orb_ext_dir/.env`
-- Build in `.env` vars
+- Core uses following `.env` vars
   - `ORB_DEFAULT_NAMESPACE` - if set to `my_namespace`, you can call `orb my_function` directly.
 
 ---
