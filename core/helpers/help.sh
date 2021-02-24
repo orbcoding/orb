@@ -1,17 +1,17 @@
 # Internal help functions
-# print_global_help() {
-# echo "$(cat <<EOF
-# orb [namespace_name(default=d)] [function_name]
-
-# available namespaces: $(echo ${namespaces[*]} | sed 's/ /, /g')
-# EOF
-# )"
-# }
-
 _print_global_namespace_help_intro() {
-	local _intromsg="Default namespace set to $(_bold)$_current_namespace$(_normal). Commands listed below.\n"
-	_intromsg+="Available namespaces: orb "
-	_intromsg+="[$(_join_by '/' "${_namespaces[@]}")] --help\n"
+	local _def_namespace_msg
+
+	if [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
+		_def_namespace_msg="Default namespace \$ORB_DEFAULT_NAMESPACE set to $(_bold)$ORB_DEFAULT_NAMESPACE$(_normal)"
+	else
+		_def_namespace_msg="Default namespace \$ORB_DEFAULT_NAMESPACE not set"
+	fi
+
+	local _intromsg="$_def_namespace_msg.\n\n"
+	_intromsg+="Available namespaces listed below:\n\n"
+	_intromsg+="  $(_join_by ', ' "${_namespaces[@]}").\n\n"
+	_intromsg+="To list commands in a namespace, use \`orb \"namespace\" --help\`"
 	echo -e "$_intromsg"
 }
 

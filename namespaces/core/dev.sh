@@ -68,7 +68,7 @@ declare -A _args_to_args=(
   ['-s']='skip flag before flag arg, and "--" before "-- *"'
   ['-x']='expand/exec array after adding args: "${array_name[@]}"'
 	['-- *']='flags to pass;'
-); function _args_to() { # cmd=( my_cmd ); _args_to my_cmd -- -fs --v-flag 1 2 *
+); function _args_to() { # Pass commands to arr eg: cmd=( my_cmd ); _args_to my_cmd -- -fs 1 2 *
   source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 
   declare -n _cmd=${_args[1]}

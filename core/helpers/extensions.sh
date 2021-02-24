@@ -9,7 +9,10 @@ _collect_namespace_extensions() {
 
     local _file; for _file in $(ls "$_extension/namespaces"); do
       _namespace=$(basename $_file)
-      _namespaces+=( "${_namespace/\.*/}" )
+
+      if [[ ! " ${_namespaces[@]} " =~ " ${_namespace} " ]]; then
+        _namespaces+=( "${_namespace/\.*/}" )
+      fi
     done
   done
 }

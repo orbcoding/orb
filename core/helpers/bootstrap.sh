@@ -4,8 +4,8 @@ _get_current_namespace() {
 	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
 		echo $ORB_DEFAULT_NAMESPACE
 		return 1
-	else
-		_raise_error +t -d "$(_bold)$1$(_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_namespaces[*]}"
+	elif ! $_global_help_requested; then
+		_raise_error +t -d "$(_bold)${1-\"\"}$(_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_namespaces[*]}"
 	fi
 }
 
@@ -51,7 +51,9 @@ _handle_public_function_missing() {
 }
 
 _handle_help_requested() {
-	if $_global_help_requested || $_namespace_help_requested; then
+	if $_global_help_requested; then
+		_print_global_namespace_help_intro
+	elif $_namespace_help_requested; then
 		_print_namespace_help
 	else
 		return 1
