@@ -78,14 +78,14 @@ $ orb my_namespace my_function --help
 ## orb extension folders
 
 - From now on i refer to them as `orb_ext_dir`:
-  - `~/.orb-cli` - is user global orb extension folder. Which can be extended by any number of following two folders found above you in the file system.
+  - `~/.orb-cli` - is user global orb extension folder. Which can be extended by any number of the following two folders found above you in the file system. This makes it easy to add project specific functionality.
   - `.orb-extension`
   - `_orb_extension`
 - Your functions are then placed in either of
   - `orb_ext_dir/namespaces/my_namespace.sh`
   - `orb_ext_dir/namespaces/my_namespace/file.sh` (supports multiple files)
 - If using a dedicated folder you can also add
-  - `orb_ext_dir/namespaces/my_namespace/_presource` - that will be sourced before you function is called
+  - `orb_ext_dir/namespaces/my_namespace/_presource.sh` - that will be sourced before you function is called
 - You can also add `.env` files which will be parsed into your scripts as exported variables.
   - `orb_ext_dir/.env`
 - Build in `.env` vars
