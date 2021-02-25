@@ -1,4 +1,4 @@
-# orb-cli (in alpha)
+# orb-cli (in beta)
 `orb` is a bash cli companion for developers. It functions as a wrapper for your bash commands and provides a simple interface for collecting more advanced arguments such as flags and wildcards. It also helps with setting default values, different types of validations, and the auto generation of help docs.
 
 ---
