@@ -50,7 +50,7 @@ function _print_stack_trace() {
 function _print_args() { # print collected arguments, useful for debugging
   source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 	declare -A | grep 'A _caller_args=' | cut -d '=' -f2-
-	if [[ ${_caller_args["*"]} == true ]] || ${_caller_args["-- *"]} == true ]]; then
+	if [[ ${_caller_args["*"]} == true || ${_caller_args["-- *"]} == true ]]; then
     echo "[*]=${_caller_args_wildcard[*]}"
   fi
 }
