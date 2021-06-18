@@ -61,8 +61,8 @@ __print_args_explanation() { # $1 optional args_declaration
 				_is_required "$_key" "$_declaration_ref" && _val='true'
 			elif [[ "$_prop" == 'OTHER' ]]; then
 				_val=()
-				_accepts_flags "$_key" "$_declaration_ref" && _val+=( ACCEPTS_FLAGS )
-				_accepts_empty_string "$_key" "$_declaration_ref" && _val+=( ACCEPTS_EMPTY_STRING )
+				_catches_any "$_key" "$_declaration_ref" && _val+=( CATCH_ANY )
+				_catches_empty "$_key" "$_declaration_ref" && _val+=( CATCH_EMPTY )
 				_val=$(_join_by ', ' ${_val[*]})
 			else
 				_val="$(_get_arg_prop "$_key" "$_prop" "$_declaration_ref")"

@@ -38,4 +38,11 @@ if ! $_global_help_requested && ! $_namespace_help_requested; then
   declare -A _args # args collector
   local _args_nrs=() # 1, 2, 3...
   local _args_wildcard=() # *
+  local _args_dash_wildcard=() # -- *
+
+  # declare block arrays
+  local _blocks=($(_declared_blocks))
+  local _block; for _block in "${_blocks[@]}"; do
+    declare -a "$(_block_to_arr_name "$_block")"
+  done
 fi

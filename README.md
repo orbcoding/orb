@@ -24,23 +24,39 @@ declare -A my_function_args=(
   ['1']='first inline argument'
   ['2']='second inline argument'
   ['-b']='boolean flag'
-  ['-f arg']='flag followed by argument'
-  ['*']='rest of arguments'
+  ['-f arg']='flagged argument'
+  ['-b-']='matches block between -b- * -b-'
+  ['*']='rest of arguments unless find --'
+  ['-- *']='rest of arguments'
 ); function my_function() { # This is my function comment
-  echo "$1 $2"
-  ${_args[-b]} && echo "got -b"
-  echo "got -f arg: ${_args[-f arg]}"
-  echo "rest of args: ${_args_wildcard[@]}"
+  _print_args # prints your args for debugging
+
+  echo
+  echo "${_args[@]}"
+	# easily check if arg recieved eg:
+	"${_args['*']}" && echo "got wildcard"
+  echo "${_args_wildcard[@]}"
+  echo "${_args_block_b[@]}"
+  echo "${_args_dash_wildcard[@]}"
 }
 
 
 # Then call your function
-$ orb my_namespace my_function -bf arg_f arg_1 arg_2 some more args
+$ orb docker my_function -bf arg_f arg_1 arg_2 -b- my block args -b- first wildcard -- dash wildcard
+
 # =>
-#  arg_1 arg_2
-#  got -b
-#  got -f arg: arg_f
-#  rest of args: some more args
+# ([-b-]="true" [2]="arg_2" [1]="arg_1" ["*"]="true" ["-f arg"]="arg_f" [-b]="true" ["-- *"]="true" )
+# [-b-]=my block args
+# [*]=first wildcard
+# [-- *]=dash wildcard
+
+# -b- 2 1 * -f arg -b -- *
+# true arg_2 arg_1 true arg_f true true
+# got wildcard
+
+# first wildcard
+# my block args
+# dash wildcard
 
 $ orb my_namespace --help
 # =>
@@ -51,14 +67,16 @@ $ orb my_namespace --help
 
 $ orb my_namespace my_function --help
 # =>
-#  my_function - This is my function comment
+# my_function - This is my function comment
 #
-#    ARG     DESCRIPTION                DEFAULT  IN  REQUIRED  OTHER
-#    1       first inline argument      -        -   true      -
-#    2       second inline argument     -        -   true      -
-#    -b      boolean flag               -        -   -         -
-#    -f arg  flag followed by argument  -        -   -         -
-#    *       rest of arguments          -        -   true      -
+#   ARG     DESCRIPTION                       DEFAULT  IN  REQUIRED  OTHER
+#   1       first inline argument             -        -   true      -
+#   2       second inline argument            -        -   true      -
+#   -b      boolean flag                      -        -   -         -
+#   -b-     matches block between -b- * -b-   -        -   -         -
+#   -f arg  flagged argument                  -        -   -         -
+#   -- *    rest of arguments                 -        -   true      -
+#   *       rest of arguments unless find --  -        -   true      -
 ```
 
 ---
@@ -85,7 +103,7 @@ $ orb my_namespace my_function --help
   - `orb_ext_dir/namespaces/my_namespace.sh`
   - `orb_ext_dir/namespaces/my_namespace/file.sh` (supports multiple files)
 - If using a dedicated folder you can also add
-  - `orb_ext_dir/namespaces/my_namespace/_presource.sh` - that will be sourced before you function is called
+  - `orb_ext_dir/namespaces/my_namespace/_presource.sh` - that will be sourced before you functions are called
 - You can also add `.env` files which will be parsed into your scripts as exported variables.
   - `orb_ext_dir/.env`
 - Core uses following `.env` vars
@@ -95,7 +113,7 @@ $ orb my_namespace my_function --help
 
 ## Arguments and functions
 
-Functions callable through orb and listed in help - aka. "`public functions`" - have to be declared with `function` prefix and `()`. If not it will be considered a "`private function`" that is used internally in the file. See `orb core _has_public_function` for internal logic.
+Functions callable through orb and listed in help - aka. "`public functions`" - have to be declared with `function` prefix and `()`. If not it will be considered a "`private function`" that is used internally in the file.
 
 Here is a more advanced argument declaration
 
@@ -104,31 +122,37 @@ Here is a more advanced argument declaration
   ['1']='short description of first arg; IN: value1|value2|value3; DEFAULT: $checkedvar1|$checkedvar2|value3'
   ['2']='second arg; OPTIONAL'
   ['-r']='r flag description; DEFAULT: true'
-  ['-e arg']='-e flag followed by value arg; REQUIRED'
-  ['*']='matches rest of args when args not declared or optional arguments fail IN-validation'
+  ['--verbose-flag']='if desired'
+  ['-e arg']='flagged arg; REQUIRED'
+  ['*']='matches rest of args when args not declared or invalid; CATCH_ANY'
  ); function my_function() { ... }
 
- Boolean flags should be single char to allow multiple flag statements such as -ri
+ If flags are single char you can pass multiple flag statements such as -ri
 
  calling `orb my_function +r` sets [-r]=false. Useful if [-r]=DEFAULT: true - Inspired by bash options https://tldp.org/LDP/abs/html/options.html
 
  Note the available argument properties
  - Numbered args are required unless prop OPTIONAL or supplied DEFAULT
- - Flag args are optional unless prop REQUIRED
+ - Flag and block args are optional unless prop REQUIRED
  - IN lists multiple accepted values with |
  - DEFAULT can eval variables and falls back through | chain when undef.
- - ['*'] or ['1'] (any nr) with ACCEPTS_FLAGS allows unrecognized flag to start assignment. Otherwise invalid flag error is raised.
+ - inline args with CATCH_ANY allows unrecognized flag or block to start assignment. Otherwise invalid argument error is raised.
 
 
  Values are then stored in $_args associative array
  and can be retrieved by eg:
 
- ${_args["-e arg"]} => arg_value if applied
- ${_args[-e]} => true if applied, otherwise false
- ${_args['*']} => true if wildcard arguments assigned, otherwise false
- ${_args_wildcard[@]} holds wildcard args (separate variable as bash does not support nested arrays)
+ ${_args["-e arg"]} => arg_value if flagged_arg received
+ ${_args[-e]} => true if flag received, otherwise false
+ ${_args[-b-]} => true if block received, otherwise false
+ ${_args['*']} => true if wildcard arguments received, otherwise false
+ ${_args['-- *']} => true if dash wildcard arguments received, otherwise false
+ # Using separate variables for array inputs as bash does not support nested arrays
+ ${_args_block_b[@]} holds block args 
+ ${_args_wildcard[@]} holds wildcard args 
+ ${_args_dash_wildcard[@]} holds dash wildcard args 
 
- Numbered args and wildcards also passed as inline args to function call.
+ Numbered args and wildcard args also passed as inline args to function call.
  This allows expected access through: $1, $2, $@/$* etc
 
 

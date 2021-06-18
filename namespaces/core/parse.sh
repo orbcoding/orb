@@ -1,30 +1,3 @@
-# _is_flag
-declare -A _is_flag_args=(
-	['1']='arg; ACCEPTS_FLAGS'
-); function _is_flag() { # starts with - or + and has no spaces (+ falsifies if default val true)
-	[[ $1 =~ [-+]{1}[-]{0,1}[a-zA-Z_][a-zA-Z_-]*$ ]]
-}
-
-# _is_verbose_flag
-declare -A _is_verbose_flag_args=(
-	['1']='arg; ACCEPTS_FLAGS'
-); function _is_verbose_flag() { # starts with -- and has no spaces.
-	[[ $1 =~ [-]{2}[a-zA-Z_][a-zA-Z_-]*$ ]]
-}
-
-declare -A _is_wildcard_args=(
-	['1']='arg'
-); function _is_wildcard() { # '*' or '-- *'
-	[[ "$1" == '*' || "$1" == '-- *' ]]
-}
-
-# _is_nr
-declare -A _is_nr_args=(
-	['1']='number input'
-); function _is_nr() { # check if is nr
-	[[ "$1" =~ ^[0-9]+$ ]]
-}
-
 declare -A _function_exists_args=(
 	['1']='function_name'
 ); function _function_exists() { # check if function has been declared
@@ -116,10 +89,10 @@ declare -A _eval_variable_or_string_args=(
 	['1']='$variable/string'
 ); function _eval_variable_or_string() { # if str starts with $ it is evaluated otherwise string returned
 	if [[ ${1:0:1} == '$' ]]; then # is variable
-		local _var=${1:1} # rm $
+		local _val="$(eval echo "$1")"
 		# echo if var not null
-		if [[ -n ${!_var+x} ]]; then
-			echo "${!_var}"
+		if [[ -n ${_val} ]]; then
+			echo "${_val}"
 		else
 			return 1
 		fi
@@ -129,6 +102,12 @@ declare -A _eval_variable_or_string_args=(
 	else
 		return 1
 	fi
+}
+
+declare -A _is_empty_arr_args=(
+	['1']='arr_name'
+); function _is_empty_arr() {
+	[[ ! -v "$1[@]" ]]
 }
 
 # _eval_variable_or_string_options
