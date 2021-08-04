@@ -16,6 +16,7 @@ _collect_namespace_files() {
 	local _conf_dir
 
  	for _conf_dir in "${_orb_config_dirs[@]}"; do
+	 	# TODO loop through multiple namespaces directories
 	 	local _files _dir="$_conf_dir/namespaces/$_current_namespace"
 
 		if [[ -d "$_dir" ]]; then

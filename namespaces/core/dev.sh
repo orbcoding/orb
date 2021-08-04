@@ -74,25 +74,25 @@ declare -A _ee_args=(
 
 # _args_to
 declare -A _args_to_args=(
-  ['-a arg']='array name where to append args, created if not exists'
-  ['-s']='skip flag before flagged arg, block marks, "--" before "-- *"'
-  ['-x']='expand/exec array/cmd after adding args: "${array_name[@]}, true unless -a arg"; DEFAULT: unset'
-  ['-e']='echo resulting array/cmd'
-  ['*']='array/cmd elements; OPTIONAL'
+  ['-a arg']='array name where to append args'
+  ['-s']='skip: flag before flagged arg, block marks, "--" before "-- *"'
+  ['-x']='expand/exec array/cmd after adding args to -a arg array"'
+  ['*']='array/cmd elements; OPTIONAL; CATCH_ANY'
 	['-- *']='flags to pass;'
 ); function _args_to() { # Pass commands to arr eg: cmd=( my_cmd ); _args_to my_cmd -- -fs 1 2 *
   source "$_orb_dir/core/ensure_core_cmd_orb_handled.sh" core $FUNCNAME "$@"
 
   if [[ -n "${_args['-a arg']}" ]]; then
-    if _is_empty_arr "${_args['-a arg']}"; then
-      declare -ag "${_args['-a arg']}"
-    fi
+    # if _is_empty_arr "${_args['-a arg']}"; then
+    #   _raise_error "array empty, ${_args['-a arg']}"
+    # else
     declare -n _cmd="${_args['-a arg']}"
     ${_args['*']} && _cmd+=("${_args_wildcard[@]}")
+    # fi
   elif ${_args['*']}; then
     declare -n _cmd=_args_wildcard
-  elif ! ${_args['-e']}; then
-    _raise_error "-a arg, -e or * required" 
+  else
+    _raise_error "-a arg or * required" 
   fi
 
 
@@ -115,14 +115,12 @@ declare -A _args_to_args=(
     fi
   done
 
-  ${_args['-e']} && echo "${_cmd[@]}"
-
-  if [[ -n "${_args['-a arg']}" ]] || ${_args['-e']}; then
-    # With -a arg or -e -x has to be explicitly added to exec
+  if [[ -n "${_args['-a arg']}" ]]; then
+    # With -a arg -x has to be explicitly added to exec
     [[ ${_args['-x']} == true ]] && "${_cmd[@]}"
   else
-    # Without -a arg or -e +x has to be explicitly added to not exec
-    [[ ${_args['-x']} == false ]] || "${_cmd[@]}"
+    # Without -a arg always exec
+    "${_cmd[@]}"
   fi
 }
 
