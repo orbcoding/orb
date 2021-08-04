@@ -162,4 +162,4 @@ Note:
  - If flags are single char you can pass multiple flag statements such as `-ri`.
  - Calling `orb my_function +r` sets `[-r]=false`. This is useful if `[-r]=DEFAULT: true` - Inspired by bash options https://tldp.org/LDP/abs/html/options.html
 - Numbered args and wildcard args also passed as inline args to function call.
- This allows expected for bash positional arguments eg: `$1`, `$2`, `$@/$*` etc
+ This allows expected argument access from bash positional arguments eg: `$1`, `$2`, `$@/$*` etc
