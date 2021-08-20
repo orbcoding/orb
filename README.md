@@ -1,6 +1,18 @@
 # orb-cli
 `orb-cli` is a tool for building self-documenting command line utilities in bash. It removes the pain of parsing advanced command line options such as flags, blocks and wildcards. It also helps with argument validation and code organization through namespaces. 
 
+
+## Installation
+```BASH
+mkdir ~/.orb-cli && cd ~/.orb-cli
+git clone https://github.com/sharetransition/orb-cli.git
+# Extend path in ~/.bashrc or ~/.zshrc and resource/restart shell
+PATH=$PATH:~/.orb-cli/orb-cli
+
+# Now you can use the orb command
+orb --help
+```
+
 ## How it works
 
 1. Create an orb extension folder with a namespace file inside
@@ -59,16 +71,6 @@ first wildcard
 dash wildcard
 ```
 
-## Installation
-```BASH
-mkdir ~/.orb-cli && cd ~/.orb-cli
-git clone https://github.com/sharetransition/orb-cli.git
-# Extend path in ~/.bashrc or ~/.zshrc and resource/restart shell
-PATH=$PATH:~/.orb-cli/orb-cli
-
-# Now you can use the orb command
-orb --help
-```
 ---
 ## Print help
 ```
