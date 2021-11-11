@@ -4,6 +4,7 @@ local _vars_to_caller=(
   _current_namespace
   _function_name
   _function_descriptor
+  _function_exit_code
 )
 
 local _arrs_to_caller=(

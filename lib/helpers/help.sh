@@ -1,4 +1,14 @@
 # Internal help functions
+_handle_help_requested() {
+	if ${_orb_options[--help]}; then
+		_print_global_namespace_help_intro
+	elif $_namespace_help_requested; then
+		_print_namespace_help
+	else
+		return 1
+	fi
+}
+
 _print_global_namespace_help_intro() {
 	local _def_namespace_msg
 
@@ -16,7 +26,7 @@ _print_global_namespace_help_intro() {
 }
 
 _print_namespace_help() {
-	if $_global_help_requested; then
+	if ${_orb_options[--help]}; then
 		_print_global_namespace_help_intro
 	fi
 

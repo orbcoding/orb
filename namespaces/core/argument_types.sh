@@ -1,5 +1,5 @@
 # _is_flag
-declare -A _is_flagged_args=(
+declare -A _is_flag_args=(
 	['1']='arg; CATCH_ANY'
 ); function _is_flag() { # starts with - or + and has no spaces (+ falsifies if default val true)
 	[[ $1 =~ ^[-+]{1}[-]{0,1}[a-zA-Z_][a-zA-Z_-]*$ ]] && [[ "${1: -1}" != "-" ]]
@@ -10,7 +10,7 @@ declare -A _is_flagged_args=(
 declare -A _is_verbose_flag_args=(
 	['1']='arg; CATCH_ANY'
 ); function _is_verbose_flag() { # starts with -- and has no spaces.
-	[[ $1 =~ ^[-]{2}[a-zA-Z_][a-zA-Z_-]*$ ]] && [[ "${1: -1}" != "-" ]]
+	[[ $1 =~ ^[+-]{1}[-]{1}[a-zA-Z_][a-zA-Z_-]*$ ]] && [[ "${1: -1}" != "-" ]]
 }
 
 # _is_flagged_arg
@@ -33,7 +33,7 @@ declare -A _is_nr_args=(
 declare -A _is_block_args=(
 	['1']='arg; CATCH_ANY'
 ); function _is_block() { # flag that ends with -
-	[[ $1 =~ ^[-]{1}[a-zA-Z_][a-zA-Z_]*-$ ]]
+	[[ $1 =~ ^[-]{1}[a-zA-Z0-9_-][a-zA-Z0-9_-]*-$ ]]
 }
 
 # _is_wildcard

@@ -1,6 +1,6 @@
-declare -A _function_exists_args=(
+declare -A _function_declared_args=(
 	['1']='function_name'
-); function _function_exists() { # check if function has been declared
+); function _function_declared() { # check if function has been declared
 	declare -f -F $1 > /dev/null
 	return $?
 }
@@ -36,6 +36,8 @@ declare -A _upfind_closest_args=(
 ); function _upfind_closest() { # Find closest filename upwards in filsystem
 	local _p="${2-$PWD}" _sep _options
 
+	[[ ${_p[1]} != '/' ]] && _p="$(pwd)/$_p"
+
 	while [ "$_p" != "/" ] ; do
 			if [[ -e "$_p/$1" ]]; then
 				echo "$_p/$1"
@@ -54,6 +56,9 @@ declare -A _upfind_to_arr=(
 	['3']='starting path; DEFAULT: $PWD'
 ); function _upfind_to_arr() { # finds all files with filename(s) upwards in file system
 	local _p="${3-$PWD}"
+
+	[[ ${_p[1]} != '/' ]] && _p="$(pwd)/$_p"
+
 	declare -n _arr=$1
 	[[ -n "$2" ]] && _path="$2"
 
@@ -104,12 +109,6 @@ declare -A _eval_variable_or_string_args=(
 	fi
 }
 
-declare -A _is_empty_arr_args=(
-	['1']='arr_name'
-); function _is_empty_arr() {
-	[[ ! -v "$1[@]" ]]
-}
-
 # _eval_variable_or_string_options
 declare -A _eval_variable_or_string_options_args=(
 	['1']='$option1|$option2|fallback_str'
@@ -128,10 +127,15 @@ declare -A _eval_variable_or_string_options_args=(
 	return 1
 }
 
+declare -A _is_empty_arr_args=(
+	['1']='arr_name'
+); function _is_empty_arr() {
+	[[ ! -v "$1[@]" ]]
+}
+
 declare -A _got_orb_prefix_args=(
 	['1']='FUNCNAME offset, eg, if check if parent got orb prefix, set 1; DEFAULT: 0'
-)
-function _got_orb_prefix() {
+); function _got_orb_prefix() {
 	local _offset
   local _caller=${FUNCNAME[$((${1-0} + 1))]}
   local _condition=$_function_name

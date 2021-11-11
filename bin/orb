@@ -1,0 +1,12 @@
+#!/bin/bash
+_orb_dir="${BASH_SOURCE%/*/*}"
+
+# declare | grep -i bash
+declare -f -F _orb > /dev/null || source "$_orb_dir/lib/scripts/initialize.sh"
+
+if [[ "${FUNCNAME[0]}" == source ]]; then
+  local _orb_sourced=true
+  source "$_orb_dir/lib/scripts/handle_source.sh"
+else
+  _orb "$@"
+fi

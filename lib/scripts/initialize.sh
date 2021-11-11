@@ -1,0 +1,21 @@
+source "$_orb_dir/lib/helpers/extensions.sh"
+source "$_orb_dir/lib/helpers/help.sh"
+source "$_orb_dir/lib/helpers/current.sh"
+
+source "$_orb_dir/lib/arguments/assignment.sh"
+source "$_orb_dir/lib/arguments/collection.sh"
+source "$_orb_dir/lib/arguments/declaration.sh"
+source "$_orb_dir/lib/arguments/defaults.sh"
+source "$_orb_dir/lib/arguments/properties.sh"
+source "$_orb_dir/lib/arguments/validation.sh"
+
+source "$_orb_dir/namespaces/core/_args_to.sh"
+source "$_orb_dir/namespaces/core/argument_types.sh"
+source "$_orb_dir/namespaces/core/debugging.sh"
+source "$_orb_dir/namespaces/core/error_handling.sh"
+source "$_orb_dir/namespaces/core/parsing.sh"
+source "$_orb_dir/namespaces/core/prompt.sh"
+source "$_orb_dir/namespaces/core/text_format.sh"
+
+source "$_orb_dir/lib/scripts/orb_extensions.sh"
+source "$_orb_dir/lib/scripts/orb_function.sh"
