@@ -1,18 +1,18 @@
-_catches_any() { # $1 arg, $2 optional args_declaration
-	_get_arg_prop "$1" "CATCH_ANY" $2
+_orb_catches_any() { # $1 arg, $2 optional args_declaration
+	_orb_get_arg_prop "$1" "CATCH_ANY" $2
 }
 
-_catches_empty() {
-	_get_arg_prop "$1" "CATCH_EMPTY" $2
+_orb_catches_empty() {
+	_orb_get_arg_prop "$1" "CATCH_EMPTY" $2
 }
 
 
-_arg_default_prop() { # $1 arg, $2 optional args_declaration
-	_get_arg_prop "$_arg" DEFAULT $2
+_orb_arg_default_prop() { # $1 arg, $2 optional args_declaration
+	_orb_get_arg_prop "$_arg" DEFAULT $2
 }
 
-_get_arg_prop() { # $1 arg_key, $2 sub_property, $3 optional args_declaration_variable
-	declare -n _declaration=${3-"_args_declaration"}
+_orb_get_arg_prop() { # $1 arg_key, $2 sub_property, $3 optional args_declaration_variable
+	declare -n _declaration=${3-"_orb_args_declaration"}
 	local _value
 
 	local _boolean_props=( REQUIRED OPTIONAL CATCH_ANY CATCH_EMPTY )

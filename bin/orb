@@ -18,15 +18,15 @@ function orb() {
 
   source "$_orb_dir/lib/scripts/source_presource.sh"
 
-  _collect_namespace_files
-  _handle_help_requested && exit 0
+  _orb_collect_orb_namespace_files
+  _orb_handle_help_requested && exit 0
 
-  source "$_orb_dir/lib/scripts/source_function.sh" || _raise_error "undefined"
+  source "$_orb_dir/lib/scripts/source_function.sh"
 
-  _prepare_args "$@"
+  _orb_prepare_args "$@"
 
   # Call function
-  $_function_name "${_args_positional[@]}"
+  $_orb_function "${_args_positional[@]}"
   local _orb_function_exit_code=$?
 
   ${_orb_settings['-r']} && eval "$_function_dump"

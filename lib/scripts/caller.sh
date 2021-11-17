@@ -1,50 +1,52 @@
 # Save information about nested orb caller
 # Copies/prefixes var => _caller_var
-local _vars_to_caller=(
-  _current_namespace
-  _function_name
-  _function_descriptor
-  _function_exit_code
+local _orb_vars_to_caller=(
+  _orb_namespace
+  _orb_function
+  _orb_function_descriptor
+  _orb_function_exit_code
 )
 
-local _arrs_to_caller=(
+local _orb_arrs_to_caller=(
   _args_wildcard
   _args_dash_wildcard
 )
 
-local _blocks=($(_declared_blocks))
-local _block; for _block in "${_blocks[@]}"; do
-  _arrs_to_caller+=( "$(_block_to_arr_name "$_block")" )
+local _orb_blocks=($(_orb_declared_blocks))
+local _orb_block; for _orb_block in "${_orb_blocks[@]}"; do
+  _orb_arrs_to_caller+=( "$(_orb_block_to_arr_name "$_orb_block")" )
 done
 
-local _associative_arrs_to_caller=(
+local _orb_associative_arrs_to_caller=(
   _args
-  _args_declaration
+  _orb_args_declaration
 )
 
 # vars to caller
-local _var; for _var in "${_vars_to_caller[@]}"; do
-  [[ -v $_var ]] && declare "_caller${_var}"="${!_var}"
+local _orb_var; for _orb_var in "${_orb_vars_to_caller[@]}"; do
+  [[ -v $_orb_var ]] && declare "_orb_caller$(_remove_prefix _orb ${_orb_var})"="${!_orb_var}"
 done
 
 # arrs to caller
-local _arr; for _arr in ${_arrs_to_caller[@]}; do
-  declare -n _arr_ref=$_arr
+local _orb_arr; for _orb_arr in ${_orb_arrs_to_caller[@]}; do
+  declare -n _orb_arr_ref=$_orb_arr
+  local _orb_caller_arr="_orb_caller$(_remove_prefix _orb $_arr)"
   _is_empty_arr "$_arr" && continue
-  declare -a _caller$_arr
-  declare -n _caller_ref=_caller$_arr
+  declare -a $_orb_caller_arr
+  declare -n _orb_caller_ref=$_orb_caller_arr
 
-  _caller_ref=("${_arr_ref[@]}")
+  _orb_caller_ref=("${_orb_arr_ref[@]}")
 done
 
 # associative arrs to caller
-local _arr; for _arr in ${_associative_arrs_to_caller[@]}; do
-  declare -n _arr_ref=$_arr
-  declare -A _caller$_arr
-  _is_empty_arr "$_arr" && continue
-  declare -n _caller_ref=_caller$_arr
+local _orb_arr; for _orb_arr in ${_orb_associative_arrs_to_caller[@]}; do
+  local _orb_caller_arr="_orb_caller$(_remove_prefix _orb $_orb_arr)"
+  declare -n _orb_arr_ref=$_orb_arr
+  declare -A $_orb_caller_arr
+  _is_empty_arr "$_orb_arr" && continue
+  declare -n _orb_caller_ref=$_orb_caller_arr
 
-  local _key; for _key in "${!_arr_ref[@]}"; do
-    _caller_ref["$_key"]=${_arr_ref["$_key"]}
+  local _orb_key; for _orb_key in "${!_orb_arr_ref[@]}"; do
+    _orb_caller_ref["$_orb_key"]=${_orb_arr_ref["$_orb_key"]}
   done
 done

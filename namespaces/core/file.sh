@@ -19,7 +19,7 @@ declare -A _upfind_closest_args=(
 }
 
 # _upfind_to_arr
-declare -A _upfind_to_arr=(
+declare -A _upfind_to_arr_args=(
 	['1']='array name'
 	['2']='filename(s) multiple files sep with & (and) or | (or)'
 	['3']='starting path; DEFAULT: $PWD'
@@ -29,7 +29,7 @@ declare -A _upfind_to_arr=(
 	[[ ${_p[1]} != '/' ]] && _p="$(pwd)/$_p"
 
 	declare -n _arr=$1
-	[[ -n "$2" ]] && _path="$2"
+	[[ -n "$2" ]] && local _path="$2"
 
 	local _sep='&'; [[ $2 == *"|"* ]] && _sep='|'
 

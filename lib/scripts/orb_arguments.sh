@@ -1,4 +1,4 @@
-declare -A _orb_args_declaration=(
+declare -A _orb_arguments=(
   ['--help']='show help'
   ['-d']='direct function call, dont parse argument declaration'
   ['-r']='restore function declarations after call'
@@ -22,8 +22,8 @@ if _is_flag "$1"; then
         *)
           local _msg="invalid option -$_flag\n\nAvailable options:\n\n"
           local _opts=""
-          local _opt; for _opt in "${!_orb_args_declaration[@]}"; do
-            _opts+="  $_opt; ${_orb_args_declaration[$_opt]}\n"
+          local _opt; for _opt in "${!_orb_arguments[@]}"; do
+            _opts+="  $_opt; ${_orb_arguments[$_opt]}\n"
           done
           _msg+=$(echo -e "$_opts" | column -tes ';')
           _raise_error -d "$(_bold)orb$(_normal)" "$_msg"

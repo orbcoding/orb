@@ -1,52 +1,52 @@
-_post_validation() {
-	local _arg; for _arg in "${!_args_declaration[@]}"; do
-		_validate_declaration "$_arg"
-		_validate_required "$_arg"
-		_validate_empty "$_arg"
+_orb_post_validation() {
+	local _arg; for _arg in "${!_orb_args_declaration[@]}"; do
+		_orb_validate_declaration "$_arg"
+		_orb_validate_required "$_arg"
+		_orb_validate_empty "$_arg"
 	done
 }
 
-_validate_declaration() {
+_orb_validate_declaration() {
 	_is_flag "$1" || \
 	_is_flagged_arg "$1" || \
 	_is_nr "$1" || \
 	_is_block "$1" || \
 	_is_wildcard "$1" || \
-	_raise_invalid_arg "$1 invalid declaration"
+	_orb_raise_invalid_arg "$1 invalid declaration"
 }
 
-_validate_required() { # $1 arg, $2 optional args_declaration
+_orb_validate_required() { # $1 arg, $2 optional args_declaration
 	if ( \
 		[[ "$1" == '*' && ${_args['*']} == false ]] || \
 		[[ "$1" == '-- *' && ${_args['-- *']} == false ]] || \
 		(! _is_wildcard "$1" && [[ -z ${_args["$1"]+x} ]]) \
 	) \
-	&& _is_required "$1" $2; then
-		_raise_invalid_arg "$1 is required"
+	&& _orb_is_required "$1" $2; then
+		_orb_raise_invalid_arg "$1 is required"
 	fi
 }
 
-_validate_empty() { # $1 arg_key
+_orb_validate_empty() { # $1 arg_key
 	if [[ -z "${_args["$1"]}" && -n ${_args["$1"]+x} ]]; then
 		# is empty str
-		if ! _catches_empty "$1"; then
-			_raise_invalid_arg "$_arg with value \"\", add CATCH_ANY to allow empty string"
+		if ! _orb_catches_empty "$1"; then
+			_orb_raise_invalid_arg "$_arg with value \"\", add CATCH_ANY to allow empty string"
 		fi
 	fi
 }
 
-_is_required() { # $1 arg, $2 optional args_declaration
-	( _is_flagged_arg "$1" && _get_arg_prop "$1" 'REQUIRED' $2) || \
-	( _is_block "$1" && _get_arg_prop "$1" 'REQUIRED' $2) || \
-	( (! _is_flag "$1" && ! _is_flagged_arg "$1" && ! _is_block "$1" ) && ! _get_arg_prop "$1" 'OPTIONAL' $2)
+_orb_is_required() { # $1 arg, $2 optional args_declaration
+	( _is_flagged_arg "$1" && _orb_get_arg_prop "$1" 'REQUIRED' $2) || \
+	( _is_block "$1" && _orb_get_arg_prop "$1" 'REQUIRED' $2) || \
+	( (! _is_flag "$1" && ! _is_flagged_arg "$1" && ! _is_block "$1" ) && ! _orb_get_arg_prop "$1" 'OPTIONAL' $2)
 }
 
-_is_valid_arg() { # $1 arg_key, $2 arg
-	_is_valid_in "$1" "$2"
+_orb_is_valid_arg() { # $1 arg_key, $2 arg
+	_orb_is_valid_in "$1" "$2"
 }
 
-_is_valid_in() { # $1 arg_key $2 arg
-	local _in_str=$(_get_arg_prop "$1" IN)
+_orb_is_valid_in() { # $1 arg_key $2 arg
+	local _in_str=$(_orb_get_arg_prop "$1" IN)
 	[[ -z $_in_str ]] && return 0 # Np if no in validation
 
 	IFS='|' read -r -a _in_arr <<< $_in_str # split by |
@@ -60,7 +60,7 @@ _is_valid_in() { # $1 arg_key $2 arg
 	return 1
 }
 
-_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
+_orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 	local _arg
 	[[ ${1:0:1} == '-' ]] && ! _is_block "$1" && _arg='flags' || _arg='args'
 	local _msg="invalid $_arg: $1"
@@ -75,7 +75,7 @@ _raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 	# 	_msg+="\n\n Add CATCH_EMPTY to arg $1 declaration if empty string is accepted"
 	# fi
 
-	_msg+="\n\n$(__print_args_explanation)"
+	_msg+="\n\n$(_orb_print_args_explanation)"
 
 	_raise_error "$_msg"
 }

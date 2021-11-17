@@ -5,7 +5,7 @@ Describe '_raise_error'
     return 2
   }
   
-  _function_descriptor=test_caller_descriptor
+  _orb_function_descriptor=test_caller_descriptor
   
   It 'prints error with trace and kills script'
     When call _raise_error "test error"
@@ -53,7 +53,7 @@ Describe '_raise_error'
 End
 
 Describe '_print_error'
-  _function_descriptor=test_caller_descriptor
+  _orb_function_descriptor=test_caller_descriptor
 
   It 'prints pretty error'
     When call _print_error 'test error'

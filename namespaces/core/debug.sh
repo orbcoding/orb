@@ -9,20 +9,20 @@ declare -A _ee_args=(
 function _print_args() { # print collected arguments, useful for debugging
   source orb
 
-	declare -A | grep 'A _caller_args=' | cut -d '=' -f2-
+	declare -A | grep 'A _orb_caller_args=' | cut -d '=' -f2-
 
-  local _blocks=( $(_declared_blocks _caller_args_declaration) )
-  local _block; for _block in "${_blocks[@]}"; do
-    declare -n ref="$(_block_to_arr_name "$_block")"
-    if [[ ${_caller_args["$_block"]} == true ]]; then
-      echo "[$_block]=${ref[*]}"
+  local _orb_blocks=( $(_orb_declared_blocks _orb_caller_args_declaration) )
+  local _orb_block; for _orb_block in "${_orb_blocks[@]}"; do
+    declare -n ref="$(_orb_block_to_arr_name "$_orb_block")"
+    if [[ ${_orb_caller_args["$_orb_block"]} == true ]]; then
+      echo "[$_orb_block]=${ref[*]}"
     fi
   done
   
   # | cut -d '=' -f2-
-	if [[ ${_caller_args["*"]} == true || ${_caller_args["-- *"]} == true ]]; then
-    echo "[*]=${_caller_args_wildcard[*]}"
-    echo "[-- *]=${_caller_args_dash_wildcard[*]}"
+	if [[ ${_orb_caller_args["*"]} == true || ${_orb_caller_args["-- *"]} == true ]]; then
+    echo "[*]=${_orb_caller_args_wildcard[*]}"
+    echo "[-- *]=${_orb_caller_args_dash_wildcard[*]}"
   fi
 }
 

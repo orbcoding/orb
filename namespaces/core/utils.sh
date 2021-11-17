@@ -66,3 +66,15 @@ declare -A _is_empty_arr_args=(
 	[[ ! -v "$1[@]" ]]
 }
 
+
+declare -A _remove_prefix_args=(
+	['1']='prefix to remove'
+	['2']='string to remove from'
+); function _remove_prefix() {
+	if [[ ${2:0:${#1}} == $1 ]]; then # is variable
+		echo ${2:${#1}}
+	else
+		echo $2
+		return 1
+	fi
+}

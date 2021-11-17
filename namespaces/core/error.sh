@@ -1,7 +1,7 @@
 # _raise_error
 declare -A _raise_error_args=(
   ['1']='error_message;'
-  ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor;'
+  ['-d arg']='descriptor; DEFAULT: $_orb_caller_function_descriptor|$_orb_function_descriptor;'
   ['-k']='kill script instead of exit; DEFAULT: true'
   ['-t']='trace; DEFAULT: true'
 ); function _raise_error() { # raise pretty error msg and kills execution
@@ -22,7 +22,7 @@ declare -A _raise_error_args=(
 # _print_error
 declare -A _print_error_args=(
 	['1']='message; CATCH_ANY;'
-  ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor'
+  ['-d arg']='descriptor; DEFAULT: $_orb_caller_function_descriptor|$_orb_function_descriptor'
 ); function _print_error() { # print pretty error
   source orb
 
@@ -45,10 +45,10 @@ function _kill_script() { # kill script
 function _print_stack_trace() {
   local _i=0
   local _line_no
-  local _function_name
+  local _orb_function
   local _file_name
   echo
-  while caller $_i; do ((_i++)); done | while read _line_no _function_name _file_name; do
-    echo -e "$_file_name:$_line_no\t$_function_name"
+  while caller $_i; do ((_i++)); done | while read _line_no _orb_function _file_name; do
+    echo -e "$_file_name:$_line_no\t$_orb_function"
   done
 }

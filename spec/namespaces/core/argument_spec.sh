@@ -100,8 +100,8 @@ Describe '_is_block'
     The status should be success
   End
 
-  It 'succeeds with longer name -long_block-'
-    When call _is_block "-long_block-2-"
+  It 'succeeds with longer name -long_orb_block-'
+    When call _is_block "-long_orb_block-2-"
     The status should be success
   End
 
