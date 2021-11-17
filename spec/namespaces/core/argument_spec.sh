@@ -1,4 +1,4 @@
-Include namespaces/core/argument_types.sh
+Include namespaces/core/argument.sh
 
 # _is_flag
 Describe '_is_flag'

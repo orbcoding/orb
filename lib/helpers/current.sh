@@ -1,20 +1,20 @@
 _get_current_namespace() {
-	if $_orb_sourced; then
-		echo "$(_get_current_namespace_from_sourcer)"
-		return 1 # no shift
-	else
+	if ${_orb_settings['call']}; then
 		local _namespace; _namespace="$(_get_current_namespace_from_args "$@")"
 		local _status=$?
 		echo $_namespace && return $_status
+	else
+		echo "$(_get_current_namespace_from_sourcer)"
+		return 1 # no shift
 	fi
 }
 
 _get_function_name() {
-	if $_orb_sourced; then
+	if ${_orb_settings['call']}; then
+		echo "$1"
+	else
 		echo "$(_get_function_name_from_sourcer)"
 		return 1
-	else
-		echo "$1"
 	fi
 }
 
@@ -24,7 +24,7 @@ _get_current_namespace_from_args() {
 	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
 		echo "$ORB_DEFAULT_NAMESPACE"
 		return 1
-	elif ! ${_orb_options[--help]}; then
+	elif ! ${_orb_settings[--help]}; then
 		_raise_error +t -d "$(_bold)${1-\"\"}$(_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_namespaces[*]}"
 	fi
 }

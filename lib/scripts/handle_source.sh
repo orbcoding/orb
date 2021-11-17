@@ -1,15 +1,33 @@
-# 'source orb' from within any function to ensure it is orb handled, even if called without orb prefix. 
+# call 'source orb' from within any function to ensure it is orb handled, even if called without orb prefix. 
 #
-# Eg: instead of 'orb my_namespace my_function' you can now call 'my_function' directly
+# Example: 
 #
-# Another solution is to run the following instead of sourcing this file
-# if ! _got_orb_prefix; then orb my_namespace my_function; return; fi
+# my_script.sh
 #
-# However this creates a longer stack trace and cant update local positional arguments
-# This is why sourcing in this way was preferered over any type of function call
-if ! _got_orb_prefix 2; then
-  # Set globals
-  source "$_orb_dir/lib/scripts/orb_options.sh"
+# declare -A my_function_args=(
+#  [1]='first arg'
+#  [-f]='flag' 
+# ); function my_function() {
+#   source orb
+#   _print_args
+# }
+#
+# instead of 'orb my_namespace my_function' you can now call 'my_function' directly
+# $ my_script.sh my_function my_arg -f
+#
+# sourcing orb in this way was prefered over calling orb as a function
+# as it makes it possible to set local variables in scope of calling function
+# without having to write a more verbose and conditional nested orb prefixed call
+# eg: # if ! _got_orb_prefix; then orb --call my_function "$@"; return; fi
+# which couldve become something like =>: orb --call "$@" && return
+# This would've also pollute stack trace when functions are called directly
+# my_function => orb => my_function
+#
+[[ "${FUNCNAME[1]}" != "source" ]] && return 1
+# 'source orb' was called, which then sourced this file, hence both index 0 and 1 == source
+if [[ "${FUNCNAME[3]}" != "orb" ]]; then
+  # index 2 is sourcer function, which was not orb prefixed if index 3 != orb"
+  source "$_orb_dir/lib/scripts/orb_settings.sh" 'source'
   source "$_orb_dir/lib/scripts/caller.sh"
   source "$_orb_dir/lib/scripts/current.sh"
 
@@ -22,6 +40,6 @@ if ! _got_orb_prefix 2; then
   done
 
   _parse_args "$@"
-fi
 
-set "${_args_positional[@]}"
+  set "${_args_positional[@]}"
+fi

@@ -8,6 +8,16 @@
 # with same name as function suffixed with "_args"
 
 # Main function
+_prepare_args() {
+  if [[ $1 == "--help" ]]; then
+    _print_function_help && exit 0
+  elif ${_orb_settings['-d']}; then
+    _args_positional=("$@")
+  else
+    _parse_args "$@"
+  fi
+}
+
 _parse_args() {
 	local _args_nrs_count=1
 	local _args_remaining=("$@") # array of input args each quoted

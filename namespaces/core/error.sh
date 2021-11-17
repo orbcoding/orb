@@ -2,6 +2,7 @@
 declare -A _raise_error_args=(
   ['1']='error_message;'
   ['-d arg']='descriptor; DEFAULT: $_caller_function_descriptor|$_function_descriptor;'
+  ['-k']='kill script instead of exit; DEFAULT: true'
   ['-t']='trace; DEFAULT: true'
 ); function _raise_error() { # raise pretty error msg and kills execution
   source orb
@@ -10,7 +11,11 @@ declare -A _raise_error_args=(
   _args_to -a _cmd _print_error -- -d 1 # not using -x as would change caller_info
   "${_cmd[@]}"
   ${_args[-t]} && _print_stack_trace >&2
-  _kill_script
+  if ${_args[-k]}; then 
+    _kill_script 
+  else
+    exit 1
+  fi
 }
 
 

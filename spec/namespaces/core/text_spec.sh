@@ -1,5 +1,4 @@
-Include namespaces/core/text_format.sh
-
+Include namespaces/core/text.sh
 
 Describe '_bold'
 	It 'makes string bold'

@@ -1,10 +1,10 @@
-function _orb() {
-  local _orb_sourced=false
-
-	# Set globals
-	source "$_orb_dir/lib/scripts/orb_options.sh"
+function orb() {
+  source "$_orb_dir/lib/scripts/orb_settings.sh" 'call'
+  source "$_orb_dir/lib/scripts/orb_arguments.sh"
 	source "$_orb_dir/lib/scripts/caller.sh"
 	source "$_orb_dir/lib/scripts/current.sh"
+
+	${_orb_settings['-r']} && local _function_dump="$(declare -f)"
 
 	# Source namespace _presource.sh in reverse (closest last)
 	local _i; for (( _i=${#_orb_extensions[@]}-1 ; _i>=0 ; _i-- )); do
@@ -33,7 +33,7 @@ function _orb() {
 	if [[ $1 == "--help" ]]; then
 		_print_function_help
 		exit 0
-	elif ${_orb_options['-d']}; then
+	elif ${_orb_settings['-d']}; then
 		_args_positional=("$@")
 	else
 		_parse_args "$@"
@@ -41,7 +41,9 @@ function _orb() {
 
 	# Call function
 	$_function_name "${_args_positional[@]}"
-	_function_exit_code=$?
+	local _function_exit_code=$?
+
+	${_orb_settings['-r']} && eval "$_function_dump"
 
 	return $_function_exit_code
 }

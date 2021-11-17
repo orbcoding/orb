@@ -25,7 +25,7 @@ if _is_flag "$_function_name"; then
 fi
 
 # No more arguments required if requesting help
-${_orb_options[--help]} || $_namespace_help_requested && return
+${_orb_settings[--help]} || $_namespace_help_requested && return
 
 if [[ -z $_function_name ]]; then
   _raise_error +t "is a namespace, no command or function provided\n\n Add --help for list of functions"

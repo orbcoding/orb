@@ -1,6 +1,6 @@
 # Internal help functions
 _handle_help_requested() {
-	if ${_orb_options[--help]}; then
+	if ${_orb_settings[--help]}; then
 		_print_global_namespace_help_intro
 	elif $_namespace_help_requested; then
 		_print_namespace_help
@@ -26,7 +26,7 @@ _print_global_namespace_help_intro() {
 }
 
 _print_namespace_help() {
-	if ${_orb_options[--help]}; then
+	if ${_orb_settings[--help]}; then
 		_print_global_namespace_help_intro
 	fi
 
@@ -52,6 +52,7 @@ _print_function_help() {
 	_print_function_name_and_comment
 	local _def=$(__print_args_explanation)
 	[[ -n "$_def" ]] && echo -e "\n$_def"
+	return 0
 }
 
 

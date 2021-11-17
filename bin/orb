@@ -1,12 +1,37 @@
 #!/bin/bash
-_orb_dir="${BASH_SOURCE%/*/*}"
+_orb_dir="$(which orb)"
+_orb_dir="${_orb_dir%/*/*}"
 
-# declare | grep -i bash
-declare -f -F _orb > /dev/null || source "$_orb_dir/lib/scripts/initialize.sh"
+[[ ! $_orb_initialized ]] && _orb_initialized=true && \
+source "$_orb_dir/lib/scripts/initialize.sh"
+source "$_orb_dir/lib/scripts/handle_source.sh" && return
 
-if [[ "${FUNCNAME[0]}" == source ]]; then
-  local _orb_sourced=true
-  source "$_orb_dir/lib/scripts/handle_source.sh"
-else
-  _orb "$@"
-fi
+# Prefer not sourcing orb function from separate file for minimal stack trace
+[[ ! $_orb_fn_initialized ]] && _orb_fn_initialized=true && \
+function orb() {
+  source "$_orb_dir/lib/scripts/orb_settings.sh" 'call'
+  source "$_orb_dir/lib/scripts/orb_arguments.sh"
+  source "$_orb_dir/lib/scripts/caller.sh"
+  source "$_orb_dir/lib/scripts/current.sh"
+
+  ${_orb_settings['-r']} && local _function_dump="$(declare -f)"
+
+  source "$_orb_dir/lib/scripts/source_presource.sh"
+
+  _collect_namespace_files
+  _handle_help_requested && exit 0
+
+  source "$_orb_dir/lib/scripts/source_function.sh" || _raise_error "undefined"
+
+  _prepare_args "$@"
+
+  # Call function
+  $_function_name "${_args_positional[@]}"
+  local _orb_function_exit_code=$?
+
+  ${_orb_settings['-r']} && eval "$_function_dump"
+
+  return $_orb_function_exit_code
+}
+
+orb "$@"
