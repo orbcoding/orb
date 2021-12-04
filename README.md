@@ -1,4 +1,4 @@
-# orb-cli
+# orb-cli (alpha)
 `orb-cli` is a tool for building self-documenting command line utilities in bash. It removes the pain of parsing advanced command line options such as flags, blocks and wildcards. It also helps with argument validation and code organization through namespaces. 
 
 
