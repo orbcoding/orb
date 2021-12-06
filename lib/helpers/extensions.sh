@@ -10,8 +10,8 @@ _orb_collect_namespace_extensions() {
     local _file; for _file in $(ls "$_extension/namespaces"); do
       local _orb_namespace=$(basename $_file)
 
-      if [[ ! " ${_orb_namespaces[@]} " =~ " ${_namespace} " ]]; then
-        _orb_namespaces+=( "${_namespace/\.*/}" )
+      if [[ ! " ${_orb_namespaces[@]} " =~ " ${_orb_namespace} " ]]; then
+        _orb_namespaces+=( "${_orb_namespace/\.*/}" )
       fi
     done
   done

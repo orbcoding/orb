@@ -19,6 +19,10 @@ if _is_flag "$1"; then
         f)
           _orb_settings['-f']=true
           ;;
+        e)
+          _orb_extensions+=("$2")
+          shift
+          ;;
         *)
           local _msg="invalid option -$_flag\n\nAvailable options:\n\n"
           local _opts=""

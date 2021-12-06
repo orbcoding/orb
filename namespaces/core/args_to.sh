@@ -10,10 +10,10 @@ declare -A _args_to_args=(
 
   if [[ -n "${_args['-a arg']}" ]]; then
     declare -n __cmd="${_args['-a arg']}"
-    ${_args['*']} && __cmd+=("${_args_wildcard[@]}")
+    ${_args['*']} && __cmd+=("${_orb_wildcard[@]}")
   elif ${_args['*']}; then
     # wildcards to be executed
-    declare -n __cmd=_args_wildcard
+    declare -n __cmd=_orb_wildcard
   else
     _raise_error "-a arg or * required" 
   fi
@@ -22,7 +22,7 @@ declare -A _args_to_args=(
   [[ -z $_orb_caller_function ]] && _raise_error 'must be used from within a caller function'
   [[ ! -v _orb_caller_args_declaration[@] ]] && _raise_error "$_orb_caller_function_descriptor has no arguments to pass"
 
-  local _arg; for _arg in "${_args_dash_wildcard[@]}"; do
+  local _arg; for _arg in "${_orb_dash_wildcard[@]}"; do
     if _is_flag "$_arg"; then
       _orb_args_to_pass_flag "$_arg"
     elif _is_block "$_arg"; then
@@ -94,13 +94,13 @@ _orb_args_to_pass_nr() { # $1 = nr arg
 _orb_args_to_pass_wildcard() {
   _orb_declared_wildcard _orb_caller_args_declaration || _orb_raise_undeclared "*"
   ${_orb_caller_args['*']} && \
-  __cmd+=( "${_orb_caller_args_wildcard[@]}" )
+  __cmd+=( "${_orb_caller_wildcard[@]}" )
 }
 
 _orb_args_to_pass_dash_wildcard() {
   _orb_declared_dash_wildcard _orb_caller_args_declaration || _orb_raise_undeclared "-- *"
   ${_orb_caller_args['-- *']} || return
   ${_args[-s]} || __cmd+=( '--' )
-  __cmd+=( "${_orb_caller_args_dash_wildcard[@]}" )
+  __cmd+=( "${_orb_caller_dash_wildcard[@]}" )
 }
 

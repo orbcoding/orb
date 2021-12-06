@@ -34,13 +34,13 @@ function orb() {
 		_orb_print_function_help
 		exit 0
 	elif ${_orb_settings['-d']}; then
-		_args_positional=("$@")
+		_orb_positional=("$@")
 	else
 		_orb_parse_args "$@"
 	fi
 
 	# Call function
-	$_orb_function "${_args_positional[@]}"
+	$_orb_function "${_orb_positional[@]}"
 	local _function_exit_code=$?
 
 	${_orb_settings['-r']} && eval "$_function_dump"

@@ -8,11 +8,11 @@
 # with same name as function suffixed with "_args"
 
 # Main function
-_orb_prepare_args() {
+_orb_parse_orb_prefixed_args() {
   if [[ $1 == "--help" ]]; then
     _orb_print_function_help && exit 0
   elif ${_orb_settings['-d']}; then
-    _args_positional=("$@")
+    _orb_positional=("$@")
   else
     _orb_parse_args "$@"
   fi
@@ -32,7 +32,7 @@ _orb_parse_args() {
 	_orb_collect_args
 	_orb_set_arg_defaults # parse defaults after collection so default could depend on other values mb later
 	_orb_post_validation
-	_orb_set_args_positional
+	_orb_set_orb_positional
 }
 
 _orb_collect_args() {
@@ -134,7 +134,7 @@ _orb_try_parse_multiple_flags() { # $1 arg_key
 	fi
 }
 
-_orb_set_args_positional() {
-	_args_positional=( "${_args_nrs[@]}" "${_args_wildcard[@]}" )
+_orb_set_orb_positional() {
+	_orb_positional=( "${_args_nrs[@]}" "${_orb_wildcard[@]}" )
 }
 

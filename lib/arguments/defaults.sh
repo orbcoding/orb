@@ -21,10 +21,10 @@ _orb_assign_default() {
 	[[ "$_value" == "unset" ]] && return
 
 	if [[ "$_arg" == '*' ]]; then
-		_args_wildcard+=("$_value")
+		_orb_wildcard+=("$_value")
 		_args["$_arg"]=true
 	elif [[ "$_arg" == '-- *' ]]; then
-		_args_dash_wildcard+=("$_value")
+		_orb_dash_wildcard+=("$_value")
 		_args["$_arg"]=true
 	elif _is_block "$_arg"; then
 		local _arr_name="$(_orb_block_to_arr_name "$_arg")"

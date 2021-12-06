@@ -49,7 +49,7 @@ _orb_assign_inline_arg() {
 _orb_assign_dash_wildcard() {
 	_orb_shift_args
 	[[ ${#_args_remaining[@]} > 0 ]] && _args['-- *']=true
-	_args_dash_wildcard+=("${_args_remaining[@]}")
+	_orb_dash_wildcard+=("${_args_remaining[@]}")
 	_args_remaining=()
 }
 
@@ -58,7 +58,7 @@ _orb_assign_wildcard() {
 
 	local _next_index=1
 	local _arg; for _arg in ${_args_remaining[@]}; do
-		_args_wildcard+=( "$_arg" )
+		_orb_wildcard+=( "$_arg" )
 
 		if [[ "${_args_remaining[$_next_index]}" == '--' ]]; then
 			_orb_shift_args $_next_index

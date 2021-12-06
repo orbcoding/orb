@@ -27,3 +27,6 @@ spec_helper_configure() {
 }
 
 _orb_dir='.'
+echo_me() {
+  echo ${FUNCNAME[1]}
+}

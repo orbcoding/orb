@@ -8,8 +8,8 @@ local _orb_vars_to_caller=(
 )
 
 local _orb_arrs_to_caller=(
-  _args_wildcard
-  _args_dash_wildcard
+  _orb_wildcard
+  _orb_dash_wildcard
 )
 
 local _orb_blocks=($(_orb_declared_blocks))
@@ -30,8 +30,8 @@ done
 # arrs to caller
 local _orb_arr; for _orb_arr in ${_orb_arrs_to_caller[@]}; do
   declare -n _orb_arr_ref=$_orb_arr
-  local _orb_caller_arr="_orb_caller$(_remove_prefix _orb $_arr)"
-  _is_empty_arr "$_arr" && continue
+  local _orb_caller_arr="_orb_caller$(_remove_prefix _orb $_orb_arr)"
+  _is_empty_arr "$_orb_arr" && continue
   declare -a $_orb_caller_arr
   declare -n _orb_caller_ref=$_orb_caller_arr
 

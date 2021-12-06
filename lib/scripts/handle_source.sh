@@ -41,5 +41,5 @@ if [[ "${FUNCNAME[3]}" != "orb" ]]; then
 
   _orb_parse_args "$@"
 
-  set "${_args_positional[@]}"
+  set "${_orb_positional[@]}"
 fi

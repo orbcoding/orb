@@ -48,8 +48,8 @@ declare -A my_function_args=(
   # Their actual values are stored in separate variables 
   # (Bash does not support nested arrays)
   echo "${_args_block_b[@]}" # ['-b-']
-  echo "${_args_wildcard[@]}" # ['*']
-  echo "${_args_dash_wildcard[@]}" # ['-- *']
+  echo "${_orb_wildcard[@]}" # ['*']
+  echo "${_orb_dash_wildcard[@]}" # ['-- *']
 
   
   # _print_args is a core function that helps you print recieved args for debugging
