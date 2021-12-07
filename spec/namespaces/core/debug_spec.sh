@@ -8,7 +8,7 @@ Describe '_ee'
 End
 
 Describe '_print_args'
-  Include spec/templates/test_functions.sh
+  Include spec/templates/.orb_extension/namespaces/spec/test_functions.sh
 
   It 'prints args'
     When call test_orb_fn "${test_orb_fn_input_args[@]}"

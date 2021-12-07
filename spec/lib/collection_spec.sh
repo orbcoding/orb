@@ -30,6 +30,7 @@ Describe '_orb_parse_args'
     It 'raises error if receive input args'
       When run _orb_parse_args 1 2 3
       The status should be failure 
+      The output should equal "_raise_error" 
     End
   End
 End

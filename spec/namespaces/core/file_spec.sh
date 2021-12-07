@@ -36,7 +36,7 @@ End
 
 Describe '_parse_env'
   It 'exports variables from .env'
-    When call _parse_env "spec/templates/test.env"
+    When call _parse_env "spec/templates/.orb_extension/test.env"
     The variable MY_TEST_VAR should equal "test"
     The variable MY_TEST_VAR2 should equal "test2"
   End
@@ -44,23 +44,23 @@ End
 
 Describe '_has_public_function'
   It 'succeeds if public function exists in file'
-    # When call _has_public_function "spec/templates/test_functions.sh"
-    When call _has_public_function "test_orb_fn" "spec/templates/test_functions.sh"
+    # When call _has_public_function "spec/templates/.orb_extension/namespaces/spec/test_functions.sh"
+    When call _has_public_function "test_orb_fn" "spec/templates/.orb_extension/namespaces/spec/test_functions.sh"
     The status should be success
   End
 
   It 'fails if function is private (no function prefix)'
-    When call _has_public_function private_function "spec/templates/test_functions.sh"
+    When call _has_public_function private_function "spec/templates/.orb_extension/namespaces/spec/test_functions.sh"
     The status should be failure
   End
 
   It 'fails if function is private (not followed by curly bracket)'
-    When call _has_public_function private_function2 "spec/templates/test_functions.sh"
+    When call _has_public_function private_function2 "spec/templates/.orb_extension/namespaces/spec/test_functions.sh"
     The status should be failure
   End
 
   It 'fails if function does not exist in file'
-    When call _has_public_function non_existent_function "spec/templates/test_functions.sh"
+    When call _has_public_function non_existent_function "spec/templates/.orb_extension/namespaces/spec/test_functions.sh"
     The status should be failure
   End
 End
