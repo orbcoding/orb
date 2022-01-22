@@ -1,37 +1,57 @@
 #!/bin/bash
-_orb_dir="$(which orb)"
+# This script is bash only
+#
+# Because use eg:
+# - arrays. Not supported in sh and in zsh indexes start at 1 instead of 0.
+# - local function variables. Not supported in classic sh shells.
+# - FUNCNAME and BASH_SOURCE lookup. Would have to be adapted for each shell if supported at all.
+# - double bracket regex conditions.
+# - declare and namerefs. requires bash_version >= 4.3, released 2014
+#   https://wiki.bash-hackers.org/commands/builtin/declare#nameref
+#
+
+if [ -z "$BASH" ]; then
+  echo "Please use orb with bash" && return 1
+elif ! (( ${BASH_VERSINFO[0]}${BASH_VERSINFO[1]} >= 43 )); then
+  echo "Please use a bash version >= 4.3" && return 1
+fi
+
+# Set project root
+_orb_dir="${BASH_SOURCE[0]}"
 _orb_dir="${_orb_dir%/*/*}"
 
-[[ ! $_orb_initialized ]] && _orb_initialized=true && \
-source "$_orb_dir/lib/scripts/initialize.sh"
-source "$_orb_dir/lib/scripts/handle_source.sh" && return
+if [ ! $_orb_initialized ]; then
+  source "$_orb_dir/lib/scripts/initialize.sh"
 
-# Prefer not sourcing orb function from separate file for minimal stack trace
-[[ ! $_orb_fn_initialized ]] && _orb_fn_initialized=true && \
-function orb() {
-  source "$_orb_dir/lib/scripts/orb_settings.sh" 'call'
-  source "$_orb_dir/lib/scripts/orb_arguments.sh"
-  source "$_orb_dir/lib/scripts/caller.sh"
-  source "$_orb_dir/lib/scripts/current.sh"
+  # Prefer declaring orb function here for minimal stack trace
+  orb() {
+    source "$_orb_dir/lib/scripts/orb_extensions.sh"
+    source "$_orb_dir/lib/scripts/orb_settings.sh"
+    source "$_orb_dir/lib/scripts/orb_arguments.sh"
+    source "$_orb_dir/lib/scripts/caller.sh"
+    source "$_orb_dir/lib/scripts/current.sh"
 
-  ${_orb_settings['-r']} && local _function_dump="$(declare -f)"
+    $_orb_setting_reload_functions && local _orb_function_dump="$(declare -f)"
 
-  source "$_orb_dir/lib/scripts/source_presource.sh"
+    source "$_orb_dir/lib/scripts/source_presource.sh"
 
-  _orb_collect_orb_namespace_files
-  _orb_handle_help_requested && exit 0
+    _orb_collect_orb_namespace_files
+    _orb_handle_help_requested && exit 0
 
-  source "$_orb_dir/lib/scripts/source_function.sh"
+    source "$_orb_dir/lib/scripts/source_function.sh"
 
-  _orb_parse_orb_prefixed_args "$@"
+    _orb_parse_orb_prefixed_args "$@"
 
-  # Call function
-  $_orb_function "${_orb_positional[@]}"
-  local _orb_function_exit_code=$?
+    # Call function
+    $_orb_function "${_orb_positional[@]}"
+    local _orb_function_exit_code=$?
 
-  ${_orb_settings['-r']} && eval "$_function_dump"
+    _orb_setting_reload_functions && eval "$_orb_function_dump"
 
-  return $_orb_function_exit_code
-}
+    return $_orb_function_exit_code
+  }
 
-orb "$@"
+  _orb_initialized=1
+fi
+
+source "$_orb_dir/lib/scripts/handle_source.sh" || orb "$@"

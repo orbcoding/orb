@@ -52,7 +52,7 @@ declare -A my_function_args=(
   echo "${_orb_dash_wildcard[@]}" # ['-- *']
 
   
-  # _print_args is a core function that helps you print recieved args for debugging
+  # orb_print_args is a core function that helps you print recieved args for debugging
   # see orb core --help for more
 }
 ```
@@ -116,9 +116,9 @@ Your namespaces are defined by either a file or a folder with multiple files
 - All core functions can be called directly from within your own orb functions without orb prefix.
 
 Some useful functions
-- `_print_args` - prints received args after parsing
-- `_args_to` - pass recevied args to array if received. Useful for creating command interfaces.
-- `_raise_error` - raises formatted error and kills script
+- `orb_print_args` - prints received args after parsing
+- `orb_pass` - pass recevied args to array if received. Useful for creating command interfaces.
+- `orb_raise_error` - raises formatted error and kills script
 
 
   

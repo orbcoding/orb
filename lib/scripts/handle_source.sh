@@ -9,7 +9,7 @@
 #  [-f]='flag' 
 # ); function my_function() {
 #   source orb
-#   _print_args
+#   orb_print_args
 # }
 #
 # instead of 'orb my_namespace my_function' you can now call 'my_function' directly
@@ -23,14 +23,17 @@
 # This would've also pollute stack trace when functions are called directly
 # my_function => orb => my_function
 #
-[[ "${FUNCNAME[1]}" != "source" ]] && return 1
+[[ "${_orb_function_trace[1]}" != "source" ]] && return 1
 # 'source orb' was called, which then sourced this file, hence both index 0 and 1 == source
-if [[ "${FUNCNAME[3]}" != "orb" ]]; then
+if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
   # index 2 is sourcer function, which was not orb prefixed if index 3 != orb"
-  source "$_orb_dir/lib/scripts/orb_settings.sh" 'source'
+  source "$_orb_dir/lib/scripts/orb_settings.sh"
+  _orb_setting_sourced=true
+  
   source "$_orb_dir/lib/scripts/caller.sh"
   source "$_orb_dir/lib/scripts/current.sh"
 
+  # TODO might source source_presource.sh
   # Source namespace _presource.sh in reverse (closest last)
   local _i; for (( _i=${#_orb_extensions[@]}-1 ; _i>=0 ; _i-- )); do
     local _ext="${_orb_extensions[$_i]}"

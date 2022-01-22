@@ -1,36 +1,28 @@
-_orb_get_orb_namespace() {
-	if ${_orb_settings['call']}; then
-		local _namespace; _namespace="$(_orb_get_orb_namespace_from_args "$@")"
-		local _status=$?
-		echo $_namespace && return $_status
+# Return success => shift away namespace argument from positional args
+_orb_get_current_namespace() {
+	if $_orb_setting_sourced; then
+		echo "$(_orb_get_current_namespace_from_file_structure)"
+		return 2 # no shift
 	else
-		echo "$(_orb_get_orb_namespace_from_sourcer)"
-		return 1 # no shift
+		local namespace; namespace="$(_orb_get_current_namespace_from_args "$@")"
+		local status=$?
+		echo $namespace && return $status
 	fi
 }
 
-_orb_get_orb_function() {
-	if ${_orb_settings['call']}; then
-		echo "$1"
-	else
-		echo "$(_orb_get_orb_function_from_sourcer)"
-		return 1
-	fi
-}
-
-_orb_get_orb_namespace_from_args() {
+_orb_get_current_namespace_from_args() {
 	if [[ " ${_orb_namespaces[@]} " =~ " ${1} " ]]; then
 		echo "$1"
 	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
 		echo "$ORB_DEFAULT_NAMESPACE"
-		return 1
-	elif ! ${_orb_settings[--help]}; then
-		_raise_error +t -d "$(_bold)${1-\"\"}$(_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_orb_namespaces[*]}"
+		return 2
+	elif ! $_orb_setting_global_help; then
+		orb_raise_error +t -d "$(orb_bold)${1-\"\"}$(orb_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_orb_namespaces[*]}"
 	fi
 }
 
-_orb_get_orb_namespace_from_sourcer() {
-  local _set_namespacer="$(_orb_get_current_sourcer_file)"
+_orb_get_current_namespace_from_file_structure() {
+  local _set_namespacer="$(_orb_get_current_sourcer_file_path)"
   local _set_namespacer_dir="$(dirname $_set_namespacer)"
   
   if [[ "$(basename "$_set_namespacer_dir")" != namespaces ]]; then
@@ -39,35 +31,76 @@ _orb_get_orb_namespace_from_sourcer() {
   fi
 
   if [[ "$(basename "$_set_namespacer_dir")" == namespaces ]]; then
-    echo "$(basename "$_set_namespacer")"
+    echo "$(basename "${_set_namespacer%.*}")"
+	else
+		return 1
   fi
 }
 
-_orb_get_current_sourcer_file() {
+# Return success => shift away function_name argument from positional args
+_orb_get_current_function() {
+	if $_orb_setting_sourced; then
+		echo "$(_orb_get_current_function_from_source_chain)"
+		return 2
+	else
+		echo "$1"
+	fi
+}
+
+_orb_get_current_sourcer_file_path() {
 	local _i=1
-	local _f; for _f in "${BASH_SOURCE[@]}"; do
+	local _f; for _f in "${_orb_source_trace[@]}"; do
 		if [[ $_f == "$_orb_dir/bin/orb" ]]; then
-			echo "${BASH_SOURCE[$_i]}" 
+			echo "${_orb_source_trace[$_i]}" 
 			return 0
 		fi
 		(( _i++ ))
 	done
 }
 
-_orb_get_orb_function_from_sourcer() {
+_orb_get_current_function_from_source_chain() {
 	local _i=1
-	local _fn; for _fn in "${FUNCNAME[@]}"; do
+	local _fn; for _fn in "${_orb_function_trace[@]}"; do
 		if [[ $_fn == "source" ]]; then
-			echo "${FUNCNAME[$(($_i + 2))]}" && return
+			echo "${_orb_function_trace[$(($_i + 2))]}" && return
 		fi
 		(( _i++ ))
 	done
 }
 
-_orb_get_orb_function_descriptor() { # $1 = $_orb_function $2 = $_orb_namespace
-	if [[ -n $1 ]]; then
-		echo "$2->$(_bold)${1}$(_normal)"
+_orb_get_current_function_descriptor() { # $1 = $_orb_function $2 = $_orb_namespace
+	if [[ -n $2 ]]; then
+		echo "$2->$(orb_bold)${1}$(orb_normal)"
 	else
-		echo "$(_bold)$2$(_normal)"
+		echo "$(orb_bold)$1$(orb_normal)"
 	fi
+}
+
+# TODO add zsh support
+_orb_get_function_trace() {
+	echo FUNCNAME
+}
+
+_orb_get_source_trace() {
+	echo BASH_SOURCE
+}
+
+
+_orb_runtime_shell() {
+	# https://unix.stackexchange.com/a/72475
+	# Determine what (Bourne compatible) shell we are running under.
+	:
+	# local shell=sh
+
+
+	# if test -n "$ZSH_VERSION"; then
+	# 	shell=zsh
+	# elif test -n "$BASH_VERSION"; then
+	# 	shell=bash
+	# elif test -n "$KSH_VERSION" || test -n "$FCEDIT"; then
+	# 	shell=ksh
+	# elif test -n "$PS3"; then
+	# 	shell=unknown
+	# fi
+
 }

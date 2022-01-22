@@ -1,8 +1,8 @@
 # Internal help functions
 _orb_handle_help_requested() {
-	if ${_orb_settings[--help]}; then
+	if $_orb_setting_global_help; then
 		_orb_print_global_namespace_help_intro
-	elif ${_orb_namespace_settings['--help']}; then
+	elif ${_orb_namespace_setting_help}; then
 		_orb_print_namespace_help
 	else
 		return 1
@@ -13,20 +13,26 @@ _orb_print_global_namespace_help_intro() {
 	local _def_namespace_msg
 
 	if [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
-		_def_namespace_msg="Default namespace \$ORB_DEFAULT_NAMESPACE set to $(_bold)$ORB_DEFAULT_NAMESPACE$(_normal)"
+		_def_namespace_msg="Default namespace: $(orb_bold)$ORB_DEFAULT_NAMESPACE$(orb_normal)"
 	else
 		_def_namespace_msg="Default namespace \$ORB_DEFAULT_NAMESPACE not set"
 	fi
 
 	local _intromsg="$_def_namespace_msg.\n\n"
-	_intromsg+="Available namespaces listed below:\n\n"
-	_intromsg+="  $(_join_by ', ' "${_orb_namespaces[@]}").\n\n"
-	_intromsg+="To list commands in a namespace, use \`orb \"namespace\" --help\`"
+
+	if orb_is_empty_arr _orb_namespaces; then
+		_intromsg+="No namespaces found"
+	else
+		_intromsg+="Available namespaces listed below:\n\n"
+		_intromsg+="  $(orb_join_by ', ' "${_orb_namespaces[@]}").\n\n"
+		_intromsg+="To list commands in a namespace, use \`orb \"namespace\" --help\`"
+	fi
+
 	echo -e "$_intromsg"
 }
 
 _orb_print_namespace_help() {
-	if ${_orb_settings[--help]}; then
+	if $_orb_setting_global_help; then
 		_orb_print_global_namespace_help_intro
 	fi
 
@@ -34,14 +40,14 @@ _orb_print_namespace_help() {
 	for _file in ${_orb_namespace_files[@]}; do
 		if [[ "${_orb_namespace_files_dir_tracker[$_i]}" != "$_current_dir" ]]; then
 			_current_dir="${_orb_namespace_files_dir_tracker[$_i]}"
-			_output+="-----------------# $(_italic)${_current_dir}\n$(_normal)"
+			_output+="-----------------# $(orb_italic)${_current_dir}\n$(orb_normal)"
 		fi
 
-		_output+="$(_bold)$(_upcase $(basename $_file))$(_normal)\n"
+		_output+="$(orb_bold)$(orb_upcase $(basename $_file))$(orb_normal)\n"
 		_output+=$(grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()[ ]*{" $_file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
 		_output+="\n\n"
 
-		((_i+=1))
+		((_i++1))
 	done
 
 	# remove last 4 chars \n\n
@@ -50,19 +56,19 @@ _orb_print_namespace_help() {
 
 _orb_print_function_help() {
 	_orb_print_orb_function_and_comment
-	local _def=$(_orb_print_args_explanation)
+	local _def=$(_orborb_print_args_explanation)
 	[[ -n "$_def" ]] && echo -e "\n$_def"
 	return 0
 }
 
 
-_orb_print_args_explanation() { # $1 optional args_declaration
-	local _declaration_ref=${1-"_orb_args_declaration"}
+_orborb_print_args_explanation() { # $1 optional args_declaration
+	local _declaration_ref=${1-"_orb_declaration"}
 	declare -n _declaration="$_declaration_ref"
 
 	[[ -z "${!_declaration[@]}" ]] && exit 1
 	local _props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED' 'OTHER')
-	IFS=';'; local _msg="$(_bold)${_props[*]}$(_normal)\n"
+	IFS=';'; local _msg="$(orb_bold)${_props[*]}$(orb_normal)\n"
 
 	_msg+=$(for _key in "${!_declaration[@]}"; do
 		_sub="$_key"
@@ -74,7 +80,7 @@ _orb_print_args_explanation() { # $1 optional args_declaration
 				_val=()
 				_orb_catches_any "$_key" "$_declaration_ref" && _val+=( CATCH_ANY )
 				_orb_catches_empty "$_key" "$_declaration_ref" && _val+=( CATCH_EMPTY )
-				_val=$(_join_by ', ' ${_val[*]})
+				_val=$(orb_join_by ', ' ${_val[*]})
 			else
 				_val="$(_orb_get_arg_prop "$_key" "$_prop" "$_declaration_ref")"
 			fi
@@ -96,6 +102,6 @@ _orb_print_function_comment() {
 
 _orb_print_orb_function_and_comment() {
 	local _comment=$(_orb_print_function_comment)
-	echo "$(_bold)$_orb_function$(_normal) $([[ -n "$_comment" ]] && echo "- $_comment")"
+	echo "$(orb_bold)$_orb_function$(orb_normal) $([[ -n "$_comment" ]] && echo "- $_comment")"
 }
 

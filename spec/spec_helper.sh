@@ -26,7 +26,11 @@ spec_helper_configure() {
   : import 'support/custom_matcher'
 }
 
-_orb_dir='.'
+# _orb_dir=''
+spec_orb='spec/templates/.orb'
+_orb_dir=$spec_orb/orb
+spec_proxy='spec/templates/proxy.sh'
+
 echo_me() {
   echo ${FUNCNAME[1]}
 }

@@ -1,11 +1,5 @@
-declare -A _orb_settings=(
-  # from input
-  ['--help']='false'
-  ['-d']='false'
-  ['-r']='false'
-  # Internal
-  ['call']='false'
-  ['namespace_help']='false'
-)
-
-[[ $1 == 'call' ]] && _orb_settings['call']=true
+local _orb_setting_global_help=false
+local _orb_setting_namespace_help=false
+local _orb_setting_direct_call=false
+local _orb_setting_reload_functions=false
+local _orb_setting_sourced=false
