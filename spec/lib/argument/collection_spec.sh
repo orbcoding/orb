@@ -1,8 +1,8 @@
-Include lib/argument/collection.sh
-# Include lib/scripts/orb_settings.sh
+Include lib/arguments/collection.sh
+# Include lib/scripts/orb/settings.sh
 
 Describe '_orb_parse_orb_prefixed_args'
-  settings='lib/scripts/orb_settings.sh'
+  settings='lib/scripts/orb/settings.sh'
   call_with_settings() { source "$settings"; "$@"; }
   _orb_print_function_help() { echo_me; }
   _orb_parse_args() { echo_me; }

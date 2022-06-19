@@ -1,7 +1,7 @@
 Describe 'orb_settings.sh'
   It 'Sets default local orb settings'
     # TODO test local variables?
-    # cmd=( echo dude1 && source lib/scripts/orb_settings.sh '&&' echo dude )
+    # cmd=( echo dude1 && source lib/scripts/orb/settings.sh '&&' echo dude )
     # When call source spec/templates/proxy.sh "${cmd[@]}"
     # The output should equal lol
     # The variable _orb_setting_global_help should equal false

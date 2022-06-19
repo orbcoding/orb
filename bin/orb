@@ -25,20 +25,20 @@ if [ ! $_orb_initialized ]; then
 
   # Prefer declaring orb function here for minimal stack trace
   orb() {
-    source "$_orb_dir/lib/scripts/orb_extensions.sh"
-    source "$_orb_dir/lib/scripts/orb_settings.sh"
+    source "$_orb_dir/lib/scripts/source/extensions.sh"
+    source "$_orb_dir/lib/scripts/orb/settings.sh"
     source "$_orb_dir/lib/scripts/orb_arguments.sh"
-    source "$_orb_dir/lib/scripts/caller.sh"
-    source "$_orb_dir/lib/scripts/current.sh"
+    source "$_orb_dir/lib/scripts/caller_trace.sh"
+    source "$_orb_dir/lib/scripts/call/preparation.sh"
 
     $_orb_setting_reload_functions && local _orb_function_dump="$(declare -f)"
 
-    source "$_orb_dir/lib/scripts/source_presource.sh"
+    source "$_orb_dir/lib/scripts/source/presource.sh"
 
     _orb_collect_orb_namespace_files
     _orb_handle_help_requested && exit 0
 
-    source "$_orb_dir/lib/scripts/source_function.sh"
+    source "$_orb_dir/lib/scripts/source/function.sh"
 
     _orb_parse_orb_prefixed_args "$@"
 
@@ -54,4 +54,4 @@ if [ ! $_orb_initialized ]; then
   _orb_initialized=1
 fi
 
-source "$_orb_dir/lib/scripts/handle_source.sh" || orb "$@"
+source "$_orb_dir/lib/scripts/handle_orb_sourced.sh" || orb "$@"

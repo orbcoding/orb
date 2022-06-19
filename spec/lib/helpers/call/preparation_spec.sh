@@ -1,4 +1,4 @@
-Include lib/helpers/current.sh
+Include lib/helpers/call/preparation.sh
 Include lib/utils/text.sh
 
 Describe '_orb_get_current_namespace'

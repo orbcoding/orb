@@ -1,0 +1,21 @@
+# Declaration
+local _orb_declaration
+local _orb_declared_vars # ordered
+local _orb_declared_args
+local _orb_declared_arg_suffixes
+local _orb_declared_arg_requireds
+
+local _orb_declared_arg_defaults
+local _orb_declared_arg_defaults_indexes
+local _orb_declared_arg_defaults_lens
+local _orb_declared_arg_ins
+local _orb_declared_arg_ins_indexes
+local _orb_declared_arg_ins_lens 
+
+
+# Orb settings
+local _orb_setting_global_help=false
+local _orb_setting_namespace_help=false
+local _orb_setting_direct_call=false
+local _orb_setting_reload_functions=false
+local _orb_setting_sourced=false

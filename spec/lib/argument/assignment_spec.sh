@@ -1,4 +1,4 @@
-Include lib/argument/assignment.sh
+Include lib/arguments/assignment.sh
 Include $spec_orb/namespaces/spec/test_functions.sh
 
 Describe '_orb_flag_value'
