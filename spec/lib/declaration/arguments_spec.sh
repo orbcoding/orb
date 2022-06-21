@@ -52,25 +52,25 @@ Describe '_orb_parse_declaration'
 
     When call _orb_parse_declaration
     The variable "_orb_declared_args[@]" should equal "1 -a"
-    The variable "_orb_declared_arg_requireds[@]" should equal "false true"
-    The variable "_orb_declared_arg_comments[@]" should equal "This is first comment This is flagged comment"
-    The variable "_orb_declared_arg_defaults[@]" should equal "value value"
-    The variable "_orb_declared_arg_defaults_indexes[@]" should equal "0 1"
-    The variable "_orb_declared_arg_defaults_lengths[@]" should equal "1 1"
-    The variable "_orb_declared_arg_ins[@]" should equal "first value or other second value or other"
-    The variable "_orb_declared_arg_ins_indexes[@]" should equal "0 4"
-    The variable "_orb_declared_arg_ins_lengths[@]" should equal "4 4"
+    The variable "_orb_declared_requireds[@]" should equal "false true"
+    The variable "_orb_declared_comments[@]" should equal "This is first comment This is flagged comment"
+    The variable "_orb_declared_defaults[@]" should equal "value value"
+    The variable "_orb_declared_defaults_indexes[@]" should equal "0 1"
+    The variable "_orb_declared_defaults_lengths[@]" should equal "1 1"
+    The variable "_orb_declared_ins[@]" should equal "first value or other second value or other"
+    The variable "_orb_declared_ins_indexes[@]" should equal "0 4"
+    The variable "_orb_declared_ins_lengths[@]" should equal "4 4"
   End
 End
 
-# _orb_get_arg_declaration_indexes
-Describe '_orb_get_arg_declaration_indexes'
-  arg_declaration_indexes=()
+# _orb_get_arg_declaration_arg_indexes
+Describe '_orb_get_arg_declaration_arg_indexes'
+  arg_declaration_arg_indexes=()
 
-  It 'stores indexes in arg_declaration_indexes array'
-    When call _orb_get_arg_declaration_indexes
+  It 'stores indexes in arg_declaration_arg_indexes array'
+    When call _orb_get_arg_declaration_arg_indexes
     The status should be success
-    The variable "arg_declaration_indexes[@]" should equal "0 3 9 12 16 19 22"
+    The variable "arg_declaration_arg_indexes[@]" should equal "0 3 9 12 16 19 22"
   End
 End
 
@@ -94,14 +94,14 @@ Describe '_orb_is_arg_declaration_index'
   End
 End
 
-# _orb_get_arg_declaration_lengths
-Describe '_orb_get_arg_declaration_lengths'
-  arg_declaration_indexes=( 0 3 9 12 16 19 22 )
+# _orb_get_arg_declaration_arg_lengths
+Describe '_orb_get_arg_declaration_arg_lengths'
+  arg_declaration_arg_indexes=( 0 3 9 12 16 19 22 )
 
-  It 'stores length in arg_declaration_lengths array'
-    When call _orb_get_arg_declaration_lengths
+  It 'stores length in arg_declaration_arg_lengths array'
+    When call _orb_get_arg_declaration_arg_lengths
     The status should be success
-    The variable "arg_declaration_lengths[@]" should equal "3 6 3 4 3 3 5"
+    The variable "arg_declaration_arg_lengths[@]" should equal "3 6 3 4 3 3 5"
   End
 End
 
@@ -109,18 +109,18 @@ End
 # _orb_parse_declared_args
 Describe '_orb_parse_declared_args'
   It 'calls its functions'
-    _orb_get_arg_declaration_indexes() { spec_fns+=( $(echo_me) ); }
-    _orb_get_arg_declaration_lengths() { spec_fns+=( $(echo_me) ); }
+    _orb_get_arg_declaration_arg_indexes() { spec_fns+=( $(echo_me) ); }
+    _orb_get_arg_declaration_arg_lengths() { spec_fns+=( $(echo_me) ); }
     _orb_store_declared_args() { spec_fns+=( $(echo_me) ); }
     When call _orb_parse_declared_args
     The status should be success
-    The variable 'spec_fns[@]' should equal "_orb_get_arg_declaration_indexes _orb_get_arg_declaration_lengths _orb_store_declared_args"
+    The variable 'spec_fns[@]' should equal "_orb_get_arg_declaration_arg_indexes _orb_get_arg_declaration_arg_lengths _orb_store_declared_args"
   End
 End
 
 # _orb_store_declared_args
 Describe '_orb_store_declared_args'
-  arg_declaration_indexes=( 0 3 9 12 16 19 22 )
+  arg_declaration_arg_indexes=( 0 3 9 12 16 19 22 )
 
   It 'stores variables to _orb_declared_vars'
     When call _orb_store_declared_args

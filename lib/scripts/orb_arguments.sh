@@ -1,3 +1,4 @@
+# TODO this has to be doable through internal parse_args instead
 _orb_arguments=(
   --help  'show help'
   -d      'direct function call'

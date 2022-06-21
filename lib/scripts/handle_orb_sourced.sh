@@ -27,10 +27,10 @@
 # 'source orb' was called, which then sourced this file, hence both index 0 and 1 == source
 if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
   # index 2 is sourcer function, which was not orb prefixed if index 3 != orb"
-  source "$_orb_dir/lib/scripts/orb/settings.sh"
+  source "$_orb_dir/lib/scripts/call/variables.sh"
   _orb_setting_sourced=true
   
-  source "$_orb_dir/lib/scripts/caller_trace.sh"
+  source "$_orb_dir/lib/scripts/call/history.sh"
   source "$_orb_dir/lib/scripts/call/preparation.sh"
 
   # TODO might source source/presource.sh

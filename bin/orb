@@ -1,11 +1,12 @@
 #!/bin/bash
-# This script is bash only
+# This script is bash >= 4.3 only
 #
 # Because use eg:
 # - arrays. Not supported in sh and in zsh indexes start at 1 instead of 0.
 # - local function variables. Not supported in classic sh shells.
 # - FUNCNAME and BASH_SOURCE lookup. Would have to be adapted for each shell if supported at all.
 # - double bracket regex conditions.
+# - associative arrays (used sparsely). requires bash_version >= 4
 # - declare and namerefs. requires bash_version >= 4.3, released 2014
 #   https://wiki.bash-hackers.org/commands/builtin/declare#nameref
 #
@@ -26,9 +27,9 @@ if [ ! $_orb_initialized ]; then
   # Prefer declaring orb function here for minimal stack trace
   orb() {
     source "$_orb_dir/lib/scripts/source/extensions.sh"
-    source "$_orb_dir/lib/scripts/orb/settings.sh"
+    source "$_orb_dir/lib/scripts/call/variables.sh"
     source "$_orb_dir/lib/scripts/orb_arguments.sh"
-    source "$_orb_dir/lib/scripts/caller_trace.sh"
+    source "$_orb_dir/lib/scripts/call/history.sh"
     source "$_orb_dir/lib/scripts/call/preparation.sh"
 
     $_orb_setting_reload_functions && local _orb_function_dump="$(declare -f)"
@@ -46,7 +47,7 @@ if [ ! $_orb_initialized ]; then
     $_orb_function "${_orb_positional[@]}"
     local _orb_function_exit_code=$?
 
-    _orb_setting_reload_functions && eval "$_orb_function_dump"
+    _orb_setting_reload_functions && eval "$_orb_function_dump" && unset _orb_function_dump
 
     return $_orb_function_exit_code
   }

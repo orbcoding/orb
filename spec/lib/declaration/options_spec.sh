@@ -49,19 +49,19 @@ Describe '_orb_parse_args_options_declaration'
         In: second value or other
     )
 
-    arg_declaration_indexes=( 0 14 )
-    arg_declaration_lengths=( 14 15 )
+    arg_declaration_arg_indexes=( 0 14 )
+    arg_declaration_arg_lengths=( 14 15 )
     
     It 'stores options to variables'
       When call _orb_parse_args_options_declaration
-      The variable "_orb_declared_arg_requireds[@]" should equal "false true"
-      The variable "_orb_declared_arg_comments[@]" should equal "This is first comment This is flagged comment"
-      The variable "_orb_declared_arg_defaults[@]" should equal "value value"
-      The variable "_orb_declared_arg_defaults_indexes[@]" should equal "0 1"
-      The variable "_orb_declared_arg_defaults_lengths[@]" should equal "1 1"
-      The variable "_orb_declared_arg_ins[@]" should equal "first value or other second value or other"
-      The variable "_orb_declared_arg_ins_indexes[@]" should equal "0 4"
-      The variable "_orb_declared_arg_ins_lengths[@]" should equal "4 4"
+      The variable "_orb_declared_requireds[@]" should equal "false true"
+      The variable "_orb_declared_comments[@]" should equal "This is first comment This is flagged comment"
+      The variable "_orb_declared_defaults[@]" should equal "value value"
+      The variable "_orb_declared_defaults_indexes[@]" should equal "0 1"
+      The variable "_orb_declared_defaults_lengths[@]" should equal "1 1"
+      The variable "_orb_declared_ins[@]" should equal "first value or other second value or other"
+      The variable "_orb_declared_ins_indexes[@]" should equal "0 4"
+      The variable "_orb_declared_ins_lengths[@]" should equal "4 4"
     End
   End
 End
@@ -72,23 +72,23 @@ Describe '_orb_set_declared_arg_options_defaults'
 
   It 'sets empty suffixes'
     When call _orb_set_declared_arg_options_defaults 0
-    The variable "_orb_declared_arg_suffixes[0]" should equal ""
+    The variable "_orb_declared_suffixes[0]" should equal ""
   End
 
   It 'sets required = false for flags'
     When call _orb_set_declared_arg_options_defaults 0
-    The variable "_orb_declared_arg_requireds[0]" should equal false
+    The variable "_orb_declared_requireds[0]" should equal false
   End
 
   It 'sets required = true for other'
     When call _orb_set_declared_arg_options_defaults 1
-    The variable "_orb_declared_arg_requireds[0]" should equal true
+    The variable "_orb_declared_requireds[0]" should equal true
   End
 
   It 'sets empty default_indexes'
     When call _orb_set_declared_arg_options_defaults 0
-    The variable "_orb_declared_arg_defaults_indexes[0]" should equal ""
-    The variable "_orb_declared_arg_defaults_lengths[0]" should equal ""
+    The variable "_orb_declared_defaults_indexes[0]" should equal ""
+    The variable "_orb_declared_defaults_lengths[0]" should equal ""
   End
 End
 
@@ -108,8 +108,8 @@ Describe '_orb_get_arg_options_declaration'
       In: second value or other
   )
   arg_options_declaration=()
-	arg_declaration_indexes=(0 14)
-	arg_declaration_lengths=(14 15)
+	arg_declaration_arg_indexes=(0 14)
+	arg_declaration_arg_lengths=(14 15)
 
 
   It 'gets options declaration'
@@ -157,13 +157,13 @@ End
 
 # _orb_parse_arg_options_declaration_arg_suffix
 Describe '_orb_parse_arg_options_declaration_arg_suffix'
-  _orb_declared_arg_suffixes=()
+  _orb_declared_suffixes=()
   _orb_declared_args=(-f -a) # ... start of declaration args
 
   It 'succeeds and stores suffix if arg is any flag and suffix is nr'
     When call _orb_parse_arg_options_declaration_arg_suffix 1 6
     The status should be success
-    The variable "_orb_declared_arg_suffixes[1]" should equal "1"
+    The variable "_orb_declared_suffixes[1]" should equal "1"
   End
 
   It 'otherwise returns failure'
@@ -225,7 +225,7 @@ Describe '_orb_get_arg_option_declaration_indexes'
       In: spec
     )
     _orb_declared_args=(-f)
-    _orb_declared_arg_suffixes=(1)
+    _orb_declared_suffixes=(1)
 
     When call _orb_get_arg_option_declaration_indexes 0
     The variable "arg_option_declaration_indexes[@]" should equal "0 2 4"
@@ -333,7 +333,7 @@ Describe '_orb_is_valid_arg_option'
   _orb_raise_invalid_declaration() { echo "$@"; return 1; }
 
   _orb_declared_args=(-f 1 ...)
-  _orb_declared_arg_suffixes=("" "" "")
+  _orb_declared_suffixes=("" "" "")
   arg_options_declaration=(
     Default: value
     In: value
@@ -381,14 +381,14 @@ Describe '_orb_store_declared_arg_options'
 
   It 'stores options to variables'
     When call _orb_store_declared_arg_options 
-    The variable "_orb_declared_arg_requireds[@]" should equal true
-    The variable "_orb_declared_arg_comments[@]" should equal "This is my comment"
-    The variable "_orb_declared_arg_defaults[@]" should equal "some value"
-    The variable "_orb_declared_arg_defaults_indexes[@]" should equal "0"
-    The variable "_orb_declared_arg_defaults_lengths[@]" should equal "2"
-    The variable "_orb_declared_arg_ins[@]" should equal "value or other"
-    The variable "_orb_declared_arg_ins_indexes[@]" should equal "0"
-    The variable "_orb_declared_arg_ins_lengths[@]" should equal "3"
+    The variable "_orb_declared_requireds[@]" should equal true
+    The variable "_orb_declared_comments[@]" should equal "This is my comment"
+    The variable "_orb_declared_defaults[@]" should equal "some value"
+    The variable "_orb_declared_defaults_indexes[@]" should equal "0"
+    The variable "_orb_declared_defaults_lengths[@]" should equal "2"
+    The variable "_orb_declared_ins[@]" should equal "value or other"
+    The variable "_orb_declared_ins_indexes[@]" should equal "0"
+    The variable "_orb_declared_ins_lengths[@]" should equal "3"
   End
 End
 
@@ -409,9 +409,9 @@ Describe '_orb_postvalidate_declared_args_options'
   )
 
   _orb_declared_args=(1 -a)
-  _orb_declared_arg_suffixes=("" 1)
-  _orb_declared_arg_defaults=(value value)
-  _orb_declared_arg_requireds=(false true)
+  _orb_declared_suffixes=("" 1)
+  _orb_declared_defaults=(value value)
+  _orb_declared_requireds=(false true)
   _orb_declared_comments=("This is first comment" "This is flagged comment")
   # ...
 

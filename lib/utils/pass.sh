@@ -57,11 +57,11 @@ _orb_pass_flag() { # $1 = flag arg/args
   fi
 
   local _flag; for _flag in ${_flags[@]}; do
-    if _orb_declared_flag "$_flag" _orb_caller_args_declaration; then
+    if _orb_is_declared_boolean_flag "$_flag" _orb_caller_args_declaration; then
       # declared boolean flag
       ${_orb_caller_args["$_flag"]} && \
       __cmd+=( "$_flag" )
-    elif _orb_declared_flagged_arg "$_flag" _orb_caller_args_declaration; then
+    elif _orb_is_declared_flagged_arg "$_flag" _orb_caller_args_declaration; then
       # declared flag with arg
       if [[ -n ${_orb_caller_args["$_flag arg"]+x} ]]; then
         ! ${_args[-s]} && __cmd+=( "$_flag" )

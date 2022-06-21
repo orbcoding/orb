@@ -12,17 +12,18 @@ _orb_parse_orb_prefixed_args() {
   if [[ $1 == "--help" ]]; then
     _orb_print_function_help && exit 0
   elif $_orb_setting_direct_call; then
-    _orb_positional=("$@")
+    _orb_args_positional=("$@")
   else
     _orb_parse_args "$@"
   fi
 }
 
 _orb_parse_args() {
-	local _args_nrs_count=1
-	local _args_remaining=("$@") # array of input args each quoted
+	local args_count=1
+	local args_remaining=( "$@" ) # array of input args each quoted
+	
 	if [[ ! -v _orb_declaration[@] ]]; then
-		if [[ ${#_args_remaining[@]} > 0 ]]; then
+		if [[ ${#args_remaining[@]} > 0 ]]; then
 			orb_raise_error "does not accept arguments"
 		else # no args to parse
 			return 0
@@ -31,41 +32,43 @@ _orb_parse_args() {
 
 	_orb_collect_args
 	_orb_set_arg_defaults # parse defaults after collection so default could depend on other values mb later
-	_orb_post_validation
-	_orb_set_orb_positional
+	_orb_args_post_validation
+	_orb_set_args_positional
 }
 
 _orb_collect_args() {
 	# Start collecting from first input arg onwards
-	while [[ ${#_args_remaining[@]} > 0 ]]; do
-		local _arg="${_args_remaining[0]}"
-		[[ _arg == '""' ]] && _arg="" # "" => empty string
+	while [[ ${#args_remaining[@]} > 0 ]]; do
+		local arg="${args_remaining[0]}"
 
-		if orb_is_flag "$_arg"; then 
-			_orb_parse_flag_arg "$_arg"
-		elif orb_is_block "$_arg"; then
-			_orb_parse_block_arg "$_arg"
+		if orb_is_flag "$arg"; then 
+			_orb_collect_flag_arg "$arg"
+		elif orb_is_block "$arg"; then
+			_orb_collect_block_arg "$arg"
 		else
-			_orb_parse_inline_arg "$_arg"
+			_orb_collect_inline_arg "$arg"
 		fi
 	done
 }
 
-_orb_parse_flag_arg() { # $1 arg_key
-	if _orb_declared_flag "$1"; then
-		_orb_assign_flag "$1"
-	elif _orb_declared_flagged_arg "$1"; then
-		_orb_assign_flagged_arg "$1"
+_orb_collect_flag_arg() { # $1 arg_key
+	local arg=$1
+	local args_i
+
+	if _orb_is_declared_boolean_flag $arg; then
+		_orb_assign_flag "$arg"
+	elif _orb_is_declared_flagged_arg "$arg"; then
+		_orb_assign_flagged_arg "$arg"
 	else
-		local _invalid_flags=()
-		_orb_try_parse_multiple_flags "$1"
+		local invalid_flags=()
+		_orb_try_parse_multiple_flags "$arg"
 		if [[ $? == 1 ]]; then 
-			_orb_try_inline_arg_fallback "$1" "${_invalid_flags[*]}"
+			_orb_try_inline_arg_fallback "$arg" "${invalid_flags[*]}"
 		fi
 	fi
 }
 
-_orb_parse_block_arg() {
+_orb_collect_block_arg() {
 	if _orb_declared_block "$1"; then
 		_orb_assign_orb_block "$1"
 	else
@@ -73,22 +76,22 @@ _orb_parse_block_arg() {
 	fi
 }
 
-_orb_parse_inline_arg() { # $1 = arg_key
+_orb_collect_inline_arg() { # $1 = arg_key
 	# add numbered args to args and _args_nrs
 	if [[ "$1" == '--' ]] && _orb_declared_dash_wildcard; then
 		_orb_assign_dash_wildcard
-	elif _orb_declared_inline_arg "$_args_nrs_count" && _orb_is_valid_arg "$_args_nrs_count" "$1"; then
+	elif _orb_declared_inline_arg "$args_count" && _orb_is_valid_arg "$args_count" "$1"; then
 		_orb_assign_inline_arg "$1"
 	elif _orb_declared_wildcard; then
 		_orb_assign_wildcard
 	else
-		_orb_raise_invalid_arg "$_args_nrs_count with value ${1:-\"\"}"
+		_orb_raise_invalid_arg "$args_count with value ${1:-\"\"}"
 	fi
 }
 
 _orb_try_inline_arg_fallback() {
 	# If failed to parse flags, fall back to inline args 
-	if _orb_declared_inline_arg "$_args_nrs_count" && _orb_catches_any "$_args_nrs_count" && _orb_is_valid_arg "$_args_nrs_count" "$1"; then
+	if _orb_declared_inline_arg "$args_count" && _orb_catches_any "$args_count" && _orb_is_valid_arg "$args_count" "$1"; then
 		_orb_assign_inline_arg "$1"
 	elif _orb_declared_wildcard && _orb_catches_any '*'; then
 		_orb_assign_wildcard
@@ -99,7 +102,7 @@ _orb_try_inline_arg_fallback() {
 
 _orb_try_parse_multiple_flags() { # $1 arg_key
 	if orb_is_verbose_flag "$1"; then
-		_invalid_flags+=( "$1" )
+		invalid_flags+=( "$1" )
 		return 1 # only single boolean flags can be multi-flags
 	fi
 
@@ -109,17 +112,17 @@ _orb_try_parse_multiple_flags() { # $1 arg_key
 	local _to_orb_assign_flagged_args=()
 
 	local _flag; for _flag in $_flags; do
-		if _orb_declared_flag "$_flag"; then
+		if _orb_is_declared_boolean_flag "$_flag"; then
 			_to_orb_assign_flags+=("$_flag")
-		elif _orb_declared_flagged_arg "$_flag"; then
+		elif _orb_is_declared_flagged_arg "$_flag"; then
 			_to_orb_assign_flagged_args+=($_flag)
 		else
-			_invalid_flags+=($_flag)
+			invalid_flags+=($_flag)
 		fi
 	done
 
 	# assign flags only if no invalids
-	if [[ ${#_invalid_flags} == 0 ]]; then
+	if [[ ${#invalid_flags} == 0 ]]; then
 		local _flag; for _flag in "${_to_orb_assign_flags[@]}"; do
 			_orb_assign_flag "$_flag" 0
 		done
@@ -134,7 +137,7 @@ _orb_try_parse_multiple_flags() { # $1 arg_key
 	fi
 }
 
-_orb_set_orb_positional() {
+_orb_set_args_positional() {
 	_orb_positional=( "${_args_nrs[@]}" "${_orb_wildcard[@]}" )
 }
 

@@ -19,20 +19,20 @@ _orb_is_invalid_array_option() {
 }
 
 
-_orb_declared_arg_is_boolean_flag() {
+_orb_declared_is_boolean_flag() {
 	local args_i=$1 
 	local arg=${_orb_declared_args[$args_i]}
-	local suffix=${_orb_declared_arg_suffixes[$args_i]}
+	local suffix=${_orb_declared_suffixes[$args_i]}
 
 	orb_is_any_flag $arg && [[ -z $suffix ]]
 }
 
-_orb_declared_arg_is_array() {
+_orb_declared_is_array() {
 	local args_i=$1 
 	local arg=${_orb_declared_args[$args_i]}
 
 	if orb_is_any_flag $arg; then
-		local suffix=${_orb_declared_arg_suffixes[$args_i]}
+		local suffix=${_orb_declared_suffixes[$args_i]}
 		if orb_is_nr $suffix && (( $suffix > 1 )); then 
 			return 0
 		fi

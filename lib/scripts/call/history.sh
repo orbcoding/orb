@@ -19,9 +19,25 @@ for trace in $(seq 0 $trace_length); do
 done
 
 
-_orb_call_0_declared_vars 
-_orb_call_0_declared_args 
-_orb_call_0_declared_arg_suffixes
-_orb_call_0_declared_arg_requireds
-_orb_call_0_declared_arg_ins
-_orb_call_0_declared_arg_defaults
+# Namespace
+_orb_namespace
+_orb_function
+_orb_function_descriptor
+_orb_function_exit_code
+
+_orb_declared_vars
+_orb_declared_args
+_orb_declared_suffixes
+
+# No need
+# _orb_declared_requireds
+# _orb_declared_ins
+# _orb_declared_defaults
+
+_orb_args_values
+_orb_args_values_indexes
+_orb_args_values_lengths
+
+
+# Becomes
+_orb_args_values_history_0

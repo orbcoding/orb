@@ -153,9 +153,9 @@ Here is a more advanced argument declaration
   ['*']='matches rest of args when args not declared or invalid; CATCH_ANY'
  ); function my_function() { ... }
 ```
- Note the available argument properties
- - Numbered args are required unless prop `OPTIONAL` or supplied `DEFAULT`
- - Flag and block args are optional unless prop `REQUIRED`
+ Note the available argument options
+ - Numbered args are required unless option `OPTIONAL` or supplied `DEFAULT`
+ - Flag and block args are optional unless option `REQUIRED`
  - `IN` lists multiple accepted values with `|`
  - `DEFAULT` can eval variables and falls back through `|` chain when undef.
  - Numbered args and wildcards with `CATCH_ANY` allows dash to be first character in assignment. Otherwise the argument would be interpreted as an invalid flag.

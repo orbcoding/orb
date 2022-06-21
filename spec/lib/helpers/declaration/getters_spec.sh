@@ -18,7 +18,7 @@ End
 # _orb_arg_is_required
 Describe '_orb_arg_is_required'
 
-  _orb_declared_arg_requireds=(true false true)
+  _orb_declared_requireds=(true false true)
   
   It 'succeeds if required'
     When call _orb_arg_is_required 0
@@ -34,7 +34,7 @@ End
 
 # _orb_get_arg_comment
 Describe '_orb_get_arg_comment'
-  _orb_declared_arg_comments=("first comment" "" "third comment")
+  _orb_declared_comments=("first comment" "" "third comment")
   
   It 'succeeds and outputs comment if has comment'
     When call _orb_get_arg_comment 0
@@ -49,9 +49,9 @@ End
 
 # _orb_get_arg_default_arr
 Describe '_orb_get_arg_default_arr'
-  _orb_declared_arg_defaults_indexes=(0 "" 5)
-  _orb_declared_arg_defaults_lengths=(5 "" 2)
-  _orb_declared_arg_defaults=(1 2 3 4 5 6 7)
+  _orb_declared_defaults_indexes=(0 "" 5)
+  _orb_declared_defaults_lengths=(5 "" 2)
+  _orb_declared_defaults=(1 2 3 4 5 6 7)
   arg_default=()
   
   It 'adds default values to arg_default'
@@ -73,9 +73,9 @@ End
 
 # _orb_get_arg_default_arr
 Describe '_orb_get_arg_in_arr'
-  _orb_declared_arg_ins_indexes=(0 "" 5)
-  _orb_declared_arg_ins_lengths=(5 "" 2)
-  _orb_declared_arg_ins=(1 2 3 4 5 6 7)
+  _orb_declared_ins_indexes=(0 "" 5)
+  _orb_declared_ins_lengths=(5 "" 2)
+  _orb_declared_ins=(1 2 3 4 5 6 7)
   arg_default=()
   
   It 'adds default values to arg_default'

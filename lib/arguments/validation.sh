@@ -1,4 +1,4 @@
-_orb_post_validation() {
+_orb_args_post_validation() {
 	local _arg; for _arg in "${!_orb_declaration[@]}"; do
 		_orb_validate_declaration "$_arg"
 		_orb_validate_required "$_arg"

@@ -1,45 +1,45 @@
 _orb_parse_args_options_declaration() {
-	local args_i; for args_i in $(seq 0 $((${#_orb_declared_args[@]} - 1))); do
-		_orb_set_declared_arg_options_defaults $args_i
+	local arg; for arg in ${_orb_declared_args[@]}; do
+		_orb_set_declared_arg_options_defaults $arg
 
 		local arg_options_declaration=()
-		_orb_get_arg_options_declaration $args_i
-		_orb_prevalidate_arg_options_declaration $args_i
-		_orb_parse_arg_options_declaration $args_i
+		_orb_get_arg_options_declaration $arg
+		_orb_prevalidate_arg_options_declaration $arg
+		_orb_parse_arg_options_declaration $arg
 	done
 	
 	_orb_postvalidate_declared_args_options
 }
 
 _orb_set_declared_arg_options_defaults() {
-	local arg="${_orb_declared_args[$1]}"
+	local arg=$1
 
-	_orb_declared_arg_suffixes+=("")
-	_orb_declared_arg_comments+=("")
-	_orb_declared_arg_requireds+=( $(orb_is_any_flag $arg && echo false || echo true) )
+	_orb_declared_suffixes[$arg]=("")
+	_orb_declared_comments[$arg]=("")
+	_orb_declared_requireds+=( $(orb_is_any_flag $arg && echo false || echo true) )
 
 	# Below only populated if present in declaration 
-	# _orb_declared_arg_ins
-	# _orb_declared_arg_defaults
+	# _orb_declared_ins
+	# _orb_declared_defaults
 	
 	# Empty indexes means no value set. Allows for empty or array values
-	_orb_declared_arg_defaults_indexes+=("") 
-	_orb_declared_arg_defaults_lengths+=("")
-	_orb_declared_arg_ins_indexes+=("") 
-	_orb_declared_arg_ins_lengths+=("")
+	_orb_declared_defaults_indexes[$arg]=("") 
+	_orb_declared_defaults_lengths[$arg]=("")
+	_orb_declared_ins_indexes[$arg]=("") 
+	_orb_declared_ins_lengths[$arg]=("")
 }
  
 _orb_get_arg_options_declaration() {
-	local args_i=$1
-	local i=${arg_declaration_indexes[$args_i]}
-	local len=${arg_declaration_lengths[$args_i]}
+	local arg=$1
+	local i=${arg_declaration_arg_indexes[$arg]}
+	local len=${arg_declaration_arg_lengths[$arg]}
 	local i_offset=3
 	local options_i=$(( $i + $i_offset ))
 	local options_len=$(( $len - $i_offset ))
 
 	(( $len > $i_offset )) || return # no options after
 	
-	if _orb_parse_arg_options_declaration_arg_suffix $args_i $options_i; then 
+	if _orb_parse_arg_options_declaration_arg_suffix $arg $options_i; then 
 		((i_offset++))
 		(( $len > $i_offset )) || return # no options after  
 		((options_i++))
@@ -51,13 +51,12 @@ _orb_get_arg_options_declaration() {
 
 # Eg -f 1, where 1 is the suffix
 _orb_parse_arg_options_declaration_arg_suffix() {
-	local args_i=$1
+	local arg=$1
 	local suffix_i=$2
 	local suffix="${_orb_declaration[$suffix_i]}"
-	local arg="${_orb_declared_args[$args_i]}"
   
 	if orb_is_any_flag $arg && orb_is_nr "$suffix"; then
-		_orb_declared_arg_suffixes[$args_i]="$suffix"
+		_orb_declared_suffixes[$arg]="$suffix"
 	else
 		return 1
 	fi
@@ -140,11 +139,11 @@ _orb_is_valid_arg_option() {
 
 	_orb_is_available_option $option || return 1
 
-	if _orb_declared_arg_is_boolean_flag $args_i; then 
+	if _orb_declared_is_boolean_flag $args_i; then 
 		if _orb_is_invalid_boolean_flag_option $option; then
 			_orb_raise_invalid_declaration "$arg, $option not valid option for boolean flags"
 		fi
-	elif _orb_declared_arg_is_array $args_i; then
+	elif _orb_declared_is_array $args_i; then
 		if _orb_is_invalid_array_option $option; then
 			_orb_raise_invalid_declaration "$arg, $option not valid option for array arguments"
 		fi
@@ -163,20 +162,20 @@ _orb_store_declared_arg_options() {
     
     case $option in
       'Required:')
-        _orb_declared_arg_requireds[-1]="$value"
+        _orb_declared_requireds[-1]="$value"
         ;;
       'Comment:')
-        _orb_declared_arg_comments[-1]="$value"
+        _orb_declared_comments[-1]="$value"
         ;;
       "Default:")
-        _orb_declared_arg_defaults_indexes[-1]=${#_orb_declared_arg_defaults[@]} # will start after last in array
-        _orb_declared_arg_defaults+=( "${value[@]}" )
-        _orb_declared_arg_defaults_lengths[-1]=$value_len
+        _orb_declared_defaults_indexes[-1]=${#_orb_declared_defaults[@]} # will start after last in array
+        _orb_declared_defaults+=( "${value[@]}" )
+        _orb_declared_defaults_lengths[-1]=$value_len
         ;;
       "In:")
-        _orb_declared_arg_ins_indexes[-1]=${#_orb_declared_arg_ins[@]} # will start after last in array
-        _orb_declared_arg_ins+=( "${value[@]}" )
-        _orb_declared_arg_ins_lengths[-1]=$value_len
+        _orb_declared_ins_indexes[-1]=${#_orb_declared_ins[@]} # will start after last in array
+        _orb_declared_ins+=( "${value[@]}" )
+        _orb_declared_ins_lengths[-1]=$value_len
         ;;
     esac
 
