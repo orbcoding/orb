@@ -49,7 +49,7 @@ End
 
 # _orb_get_arg_default_arr
 Describe '_orb_get_arg_default_arr'
-  _orb_declared_defaults_indexes=(0 "" 5)
+  _orb_declared_defaults_start_indexes=(0 "" 5)
   _orb_declared_defaults_lengths=(5 "" 2)
   _orb_declared_defaults=(1 2 3 4 5 6 7)
   arg_default=()
@@ -73,7 +73,7 @@ End
 
 # _orb_get_arg_default_arr
 Describe '_orb_get_arg_in_arr'
-  _orb_declared_ins_indexes=(0 "" 5)
+  _orb_declared_ins_start_indexes=(0 "" 5)
   _orb_declared_ins_lengths=(5 "" 2)
   _orb_declared_ins=(1 2 3 4 5 6 7)
   arg_default=()

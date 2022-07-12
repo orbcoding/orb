@@ -34,7 +34,7 @@ _orb_get_arg_comment() {
 # sets value to arg_default variable that should be declared local in calling fn
 _orb_get_arg_default_arr() {
   local args_i=$1
-  local i=${_orb_declared_defaults_indexes[$args_i]}
+  local i=${_orb_declared_defaults_start_indexes[$args_i]}
   [[ -z $i ]] && return 1
   local len=${_orb_declared_defaults_lengths[$args_i]}
   arg_default=( "${_orb_declared_defaults[@]:$i:$len}" )
@@ -43,7 +43,7 @@ _orb_get_arg_default_arr() {
 # sets value to arg_in variable that should be declared local in calling fn
 _orb_get_arg_in_arr() {
   local args_i=$1
-  local i=${_orb_declared_ins_indexes[$args_i]}
+  local i=${_orb_declared_ins_start_indexes[$args_i]}
   [[ -z $i ]] && return 1
   local len=${_orb_declared_ins_lengths[$args_i]}
   arg_in=( "${_orb_declared_ins[@]:$i:$len}" )

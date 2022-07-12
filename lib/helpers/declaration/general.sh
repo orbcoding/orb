@@ -25,7 +25,7 @@ _orb_is_declared_flagged_arg() { # $1 arg $2 optional history index
 	orb_is_any_flag $arg || return 1
 	declare -n suffixes="_orb_declared_suffixes$(_orb_history_suffix $2)"
 	local args_i=$(_orb_get_args_index $arg $2)
-	[[ orb_is_nr ${suffixes[$args_i]} ]]
+	orb_is_nr ${suffixes[$args_i]}
 }
 
 # _orb_declared_inline_arg() { # $1 nr

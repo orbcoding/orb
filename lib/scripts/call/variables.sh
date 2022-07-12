@@ -36,9 +36,9 @@ declare -A _orb_declared_comments
 declare -a _orb_declared_defaults
 declare -a _orb_declared_ins
 # Tracked by index and length
-declare -A _orb_declared_defaults_indexes
+declare -A _orb_declared_defaults_start_indexes
 declare -A _orb_declared_defaults_lengths
-declare -A _orb_declared_ins_indexes
+declare -A _orb_declared_ins_start_indexes
 declare -A _orb_declared_ins_lengths
 
 # Call arguments and final argument values
