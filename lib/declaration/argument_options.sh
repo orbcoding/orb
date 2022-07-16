@@ -24,26 +24,26 @@ _orb_get_declared_arg_options() {
 	local options_i=$(( $i + $i_offset ))
 	local options_len=$(( $len - $i_offset ))
 
-	(( $len > $i_offset )) || return # no options after
+	(( $len <= $i_offset )) && return # no options after
 	
 	if _orb_parse_declared_arg_options_arg_suffix $arg $options_i; then 
 		((i_offset++))
-		(( $len > $i_offset )) || return # no options after  
+		(( $len <= $i_offset )) && return # no options after  
 		((options_i++))
 		((options_len--))
   fi
 
-	declared_arg_options=("${_orb_declaration[@]:$options_i:$options_len}")
+	declared_arg_options=("${declaration[@]:$options_i:$options_len}")
 }
 
 # Eg -f 1, where 1 is the suffix
 _orb_parse_declared_arg_options_arg_suffix() {
 	local arg=$1
 	local suffix_i=$2
-	local suffix="${_orb_declaration[$suffix_i]}"
+	local suffix="${declaration[$suffix_i]}"
   
 	if orb_is_any_flag $arg && orb_is_nr "$suffix"; then
-		_orb_declared_suffixes[$arg]="$suffix"
+		_orb_declared_arg_suffixes[$arg]="$suffix"
 	else
 		return 1
 	fi
@@ -53,7 +53,7 @@ _orb_prevalidate_declared_arg_options() {
 	local arg=$1
 	
 	if ! _orb_is_valid_arg_option $arg 0; then
-		_orb_raise_invalid_declaration 'Options must start with valid option'
+		_orb_raise_invalid_declaration "$arg: Invalid option: ${declared_arg_options[0]}. Available options: ${_orb_available_arg_options[@]}"
 	fi
 }
 
@@ -90,10 +90,7 @@ _orb_is_declared_arg_options_start_index() {
 		fi
 
 		if [[ -n $prev_start_i ]] && (( $prev_start_i == $options_i - 1 )); then
-			if ! _orb_is_catch_all_option $prev_option; then
-				# option directly after prev option that does not allow catch all
-				_orb_raise_invalid_declaration "$prev_option invalid value: $current_option"
-			fi
+			_orb_raise_invalid_declaration "$prev_option invalid value: $current_option"
 		elif [[ $options_i == $((${#declared_arg_options[@]} - 1)) ]]; then
 			# option is last str
 			_orb_raise_invalid_declaration "$current_option missing value"
@@ -152,20 +149,14 @@ _orb_store_declared_arg_options() {
         _orb_declared_ins_lengths[$arg]=$value_len
         _orb_declared_ins+=( "${value[@]}" )
         ;;
+      "Catch:")
+        _orb_declared_catchs_start_indexes[$arg]=${#_orb_declared_catchs[@]} # will start after last in array
+        _orb_declared_catchs_lengths[$arg]=$value_len
+        _orb_declared_catchs+=( "${value[@]}" )
+        ;;
     esac
 
     ((options_i++))
   done
 }
 
-_orb_postvalidate_declared_args_options() {
-  return 0
-
-  # TODO
-  i=0
-  for arg in ${_orb_declared_args}; do
-    echo $i
-    echo $arg
-    ((i++))
-  done
-}

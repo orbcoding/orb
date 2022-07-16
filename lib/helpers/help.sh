@@ -56,14 +56,14 @@ _orb_print_namespace_help() {
 
 _orb_print_function_help() {
 	_orb_print_orb_function_and_comment
-	local _def=$(_orborb_print_args_explanation)
+	local _def=$(_orb_print_args_explanation)
 	[[ -n "$_def" ]] && echo -e "\n$_def"
 	return 0
 }
 
 
-_orborb_print_args_explanation() { # $1 optional args_declaration
-	local _declaration_ref=${1-"_orb_declaration"}
+_orb_print_args_explanation() { # $1 optional args_declaration
+	local _declaration_ref=${1-"_orb_function_declaration"}
 	declare -n _declaration="$_declaration_ref"
 
 	[[ -z "${!_declaration[@]}" ]] && exit 1

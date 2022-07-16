@@ -27,7 +27,7 @@ _orb_function_exit_code
 
 _orb_declared_vars
 _orb_declared_args
-_orb_declared_suffixes
+_orb_declared_arg_suffixes
 
 # No need
 # _orb_declared_requireds

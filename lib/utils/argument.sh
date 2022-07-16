@@ -44,14 +44,14 @@ declare -A orb_is_block_args=(
 # orb_is_rest
 declare -A orb_is_rest_args=(
 	['1']='arg'
-); function orb_is_rest() { # '*' or '-- *'
+); function orb_is_rest() {
 	[[ "$1" == "..." ]]
 }
 
 # orb_is_dash
 declare -A orb_is_dash_args=(
 	['1']='arg'
-); function orb_is_dash() { # '*' or '-- *'
+); function orb_is_dash() {
 	[[ "$1" == -- ]]
 }
 

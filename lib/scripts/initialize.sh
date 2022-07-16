@@ -9,7 +9,7 @@ source "$_orb_dir/lib/utils/utils.sh"
 source "$_orb_dir/lib/helpers/extensions.sh"
 source "$_orb_dir/lib/helpers/help.sh"
 source "$_orb_dir/lib/helpers/call/preparation.sh"
-source "$_orb_dir/lib/helpers/declaration/general.sh"
+source "$_orb_dir/lib/declaration/checkers.sh"
 source "$_orb_dir/lib/helpers/declaration/argument_options.sh"
 
 source "$_orb_dir/lib/arguments/assignment.sh"

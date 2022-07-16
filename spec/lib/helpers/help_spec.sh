@@ -2,8 +2,8 @@ Include lib/helpers/help.sh
 Include lib/utils/utils.sh
 
 Describe '_orb_handle_help_requested'
-  _orb_print_global_namespace_help_intro() { echo_me; }
-  _orb_print_namespace_help() { echo_me; }
+  _orb_print_global_namespace_help_intro() { echo_fn; }
+  _orb_print_namespace_help() { echo_fn; }
   _orb_namespace_setting_help=false
   _orb_setting_global_help=false
 

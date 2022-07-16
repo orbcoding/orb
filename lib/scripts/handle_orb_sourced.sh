@@ -32,17 +32,18 @@ if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
   
   source "$_orb_dir/lib/scripts/call/history.sh"
   source "$_orb_dir/lib/scripts/call/preparation.sh"
+  source "$_orb_dir/lib/scripts/source/presource.sh"
 
   # TODO might source source/presource.sh
   # Source namespace _presource.sh in reverse (closest last)
-  local _i; for (( _i=${#_orb_extensions[@]}-1 ; _i>=0 ; _i-- )); do
-    local _ext="${_orb_extensions[$_i]}"
-    if [[ -f "$_ext/namespaces/$_orb_namespace/_presource.sh" ]]; then
-      source "$_ext/namespaces/$_orb_namespace/_presource.sh"
-    fi
-  done
+  # local _i; for (( _i=${#_orb_extensions[@]}-1 ; _i>=0 ; _i-- )); do
+  #   local _ext="${_orb_extensions[$_i]}"
+  #   if [[ -f "$_ext/namespaces/$_orb_namespace/_presource.sh" ]]; then
+  #     source "$_ext/namespaces/$_orb_namespace/_presource.sh"
+  #   fi
+  # done
 
-  _orb_parse_args "$@"
+  _orb_parse_args "${_orb_function_name}_orb" "$@"
 
   set "${_orb_positional[@]}"
 fi

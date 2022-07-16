@@ -1,5 +1,5 @@
 _orb_parse_declaration() {
-	declare -n declaration=${1-"_orb_declaration"}
+	declare -n declaration=${1-"_orb_function_declaration"}
 	_orb_prevalidate_declaration
 
 	# local internal variables

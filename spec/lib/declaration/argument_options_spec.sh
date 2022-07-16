@@ -1,23 +1,14 @@
 Include lib/utils/argument.sh
-# Include lib/utils/utils.sh
 Include lib/declaration/argument_options.sh
-Include lib/helpers/declaration/general.sh
+Include lib/declaration/validation.sh
+Include lib/declaration/checkers.sh
 Include lib/helpers/declaration/argument_options.sh
+Include lib/scripts/call/variables.sh
 
-# _orb_declaration=("${spec_orb_declaration[@]}")
-# _orb_declaration=(
-#   flag = -f
-#   flagged_arg = -a 1
-#     Required: true
-#   verbose_flag = --verbose-flag 
-#   verbose_flagged_arg = --verbose-flagged 1 
-#   block = -b- # i = 16-18
-#   dash_args = --  
-#   rest = ... 
-#     Optional: true
-# )
 _orb_declared_args=(1 -a)
-_orb_declaration=(
+
+# As set in _orb_parse_declaration
+declaration=(
   first = 1
     Required: false
     Comment: "This is first comment"
@@ -32,7 +23,7 @@ _orb_declaration=(
 
 declare -A declared_args_start_indexes=([1]="0" [-a]="14")
 declare -A declared_args_lengths=([1]="14" [-a]="15")
-declare -A _orb_declared_suffixes
+declare -A _orb_declared_arg_suffixes
 
 
 # _orb_parse_declared_args_options
@@ -43,7 +34,7 @@ Describe '_orb_parse_declared_args_options'
     _orb_get_declared_arg_options() { spec_args2+=("$@"); }
     _orb_prevalidate_declared_arg_options() { spec_args3+=("$@");}
     _orb_parse_declared_arg_options() { spec_args4+=("$@"); }
-    _orb_postvalidate_declared_args_options() { echo_me; }
+    _orb_postvalidate_declared_args_options() { echo_fn; }
     
     When call _orb_parse_declared_args_options
     The variable "spec_args[@]" should equal "spec args"
@@ -53,7 +44,7 @@ Describe '_orb_parse_declared_args_options'
     The output should include "_orb_postvalidate_declared_args_options"
   End
 
-  Context 'holistic testing'    
+  Context 'holistic testing'
     It 'stores options to variables'
       When call _orb_parse_declared_args_options
       The variable "_orb_declared_requireds[1]" should equal "false"
@@ -116,7 +107,7 @@ Describe '_orb_parse_declared_arg_options_arg_suffix'
   It 'succeeds and stores suffix if arg is any flag and suffix is nr'
     When call _orb_parse_declared_arg_options_arg_suffix -a 17
     The status should be success
-    The variable "_orb_declared_suffixes[-a]" should equal "1"
+    The variable "_orb_declared_arg_suffixes[-a]" should equal "1"
   End
 
   It 'otherwise returns failure'
@@ -134,9 +125,9 @@ Describe '_orb_prevalidate_declared_arg_options'
     declared_arg_options=(invalid option)
     _orb_declared_args=(-f)
 
-    When call _orb_prevalidate_declared_arg_options 0
+    When call _orb_prevalidate_declared_arg_options -f
     The status should be failure
-    The output should equal "Options must start with valid option"
+    The output should equal "-f: Invalid option: invalid. Available options: Comment: Required: Default: In: Catch:"
   End
 
   It 'should not raise anything if first is valid option'
@@ -199,7 +190,7 @@ Describe '_orb_get_declared_arg_options_start_indexes'
       In: spec
     )
     _orb_declared_args=(-f)
-    _orb_declared_suffixes=(1)
+    _orb_declared_arg_suffixes=(1)
 
     When call _orb_get_declared_arg_options_start_indexes 1
     The variable "declared_arg_options_start_indexes[@]" should equal "0 2 4"
@@ -234,26 +225,6 @@ Describe '_orb_get_declared_arg_options_start_indexes'
     When run _orb_get_declared_arg_options_start_indexes 1
     The status should be failure
     The output should equal "Required: invalid value: Default:"
-  End
-
-  It 'allows option as first value for Default:'
-    declared_arg_options=(
-      Default: Required:
-      Required: true
-    )
-    _orb_declared_args=(-f)
-    When call _orb_get_declared_arg_options_start_indexes 1
-    The variable "declared_arg_options_start_indexes[@]" should equal "0 2"
-  End
-
-  It 'allows option as first value for In:'
-    declared_arg_options=(
-      In: Default: 
-      Required: true
-    )
-    _orb_declared_args=(1)
-    When call _orb_get_declared_arg_options_start_indexes 1
-    The variable "declared_arg_options_start_indexes[@]" should equal "0 2"
   End
 End
 
@@ -299,24 +270,17 @@ End
 # _orb_store_declared_arg_options
 Describe '_orb_store_declared_arg_options'
   _orb_declared_args=(...)
-  declare -A _orb_declared_requireds
-  declare -A _orb_declared_comments
-  declare -a _orb_declared_defaults
-  declare -A _orb_declared_defaults_start_indexes
-  declare -A _orb_declared_defaults_lengths
-  declare -a _orb_declared_ins
-  declare -A _orb_declared_ins_start_indexes
-  declare -A _orb_declared_ins_lengths
 
   declared_arg_options=(
     Default: some value
     In: value or other
     Required: true
     Comment: "This is my comment"
+    Catch: flag block
   )
 
-  declared_arg_options_start_indexes=(0 3 7 9)
-  declared_arg_options_lengths=(3 4 2 2)
+  declared_arg_options_start_indexes=(0 3 7 9 11)
+  declared_arg_options_lengths=(3 4 2 2 3)
   _orb_set_declared_arg_options_defaults ...
 
   It 'stores options to variables'
@@ -329,37 +293,8 @@ Describe '_orb_store_declared_arg_options'
     The variable "_orb_declared_ins[@]" should equal "value or other"
     The variable "_orb_declared_ins_start_indexes[...]" should equal "0"
     The variable "_orb_declared_ins_lengths[...]" should equal "3"
+    The variable "_orb_declared_catchs[@]" should equal "flag block"
+    The variable "_orb_declared_catchs_start_indexes[...]" should equal "0"
+    The variable "_orb_declared_catchs_lengths[...]" should equal "2"
   End
-End
-
-
-# _orb_postvalidate_declared_args_options
-Describe '_orb_postvalidate_declared_args_options'
-  _orb_declaration=(
-    first = 1
-      Required: false
-      Comment: "This is first comment"
-      Default: value
-      In: first value or other
-    flagged_arg = -a 1
-      Required: true
-      Comment: "This is flagged comment"
-      Default: value
-      In: second value or other
-  )
-
-  _orb_declared_args=(1 -a)
-  # _orb_declared_suffixes=("" 1)
-  _orb_declared_defaults=(value value)
-  _orb_declared_requireds=(false true)
-  _orb_declared_comments=("This is first comment" "This is flagged comment")
-  # ...
-
-  It 'succeeds on valid args'
-    When call _orb_postvalidate_declared_args_options
-    The status should be success
-  End
-
-  # It 'fails on invalid...'
-  # End
 End

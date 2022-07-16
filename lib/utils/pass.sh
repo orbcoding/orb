@@ -57,11 +57,11 @@ _orb_pass_flag() { # $1 = flag arg/args
   fi
 
   local _flag; for _flag in ${_flags[@]}; do
-    if _orb_is_declared_boolean_flag "$_flag" _orb_caller_args_declaration; then
+    if _orb_has_declared_boolean_flag "$_flag" _orb_caller_args_declaration; then
       # declared boolean flag
       ${_orb_caller_args["$_flag"]} && \
       __cmd+=( "$_flag" )
-    elif _orb_is_declared_flagged_arg "$_flag" _orb_caller_args_declaration; then
+    elif _orb_has_declared_flagged_arg "$_flag" _orb_caller_args_declaration; then
       # declared flag with arg
       if [[ -n ${_orb_caller_args["$_flag arg"]+x} ]]; then
         ! ${_args[-s]} && __cmd+=( "$_flag" )
@@ -74,7 +74,7 @@ _orb_pass_flag() { # $1 = flag arg/args
 }
 
 _orb_pass_block() {
-  _orb_declared_block "$1" _orb_caller_args_declaration || _orb_raise_undeclared "$1"
+  _orb_has_declared_arg "$1" _orb_caller_args_declaration || _orb_raise_undeclared "$1"
   ${_orb_caller_args["$1"]} || return
   local _arr_name="$(_orb_block_to_arr_name "$1")"
   declare -n _block_ref=$_arr_name

@@ -12,14 +12,14 @@ local _orb_arrs_to_caller=(
   _orb_dash_wildcard
 )
 
-local _orb_blocks=($(_orb_declared_blocks))
+local _orb_blocks=($(_orb_has_declared_args))
 local _orb_block; for _orb_block in "${_orb_blocks[@]}"; do
   _orb_arrs_to_caller+=( "$(_orb_block_to_arr_name "$_orb_block")" )
 done
 
 local _orb_associative_arrs_to_caller=(
   _args
-  _orb_declaration
+  _orb_function_declaration
 )
 
 # vars to caller

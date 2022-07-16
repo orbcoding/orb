@@ -38,7 +38,7 @@ if [[ -z $_orb_function ]]; then
 fi
 
 # declare args declaration and raise if fails
-if ! declare -n _orb_declaration=${_orb_function}_args 2> /dev/null; then
+if ! declare -n _orb_function_declaration=${_orb_function}_orb 2> /dev/null; then
   declare
   orb_raise_error "not a valid option or function name"
 fi
@@ -49,7 +49,7 @@ fi
 # local _orb_dash_wildcard=() # -- *
 
 # declare block arrays
-# local _orb_blocks=($(_orb_declared_blocks))
+# local _orb_blocks=($(_orb_has_declared_args))
 # local _orb_block; for _orb_block in "${_orb_blocks[@]}"; do
 #   declare -a "$(_orb_block_to_arr_name "$_orb_block")"
 # done

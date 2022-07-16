@@ -31,6 +31,8 @@ spec_orb='spec/templates/.orb'
 _orb_dir=$spec_orb/orb
 spec_proxy='spec/templates/proxy.sh'
 
-echo_me() {
-  echo ${FUNCNAME[1]}
+echo_fn() {
+  local output=("${FUNCNAME[1]}")
+  (( "$#" >= 0 )) && output+=("$@")
+  echo "${output[@]}"
 }

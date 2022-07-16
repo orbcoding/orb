@@ -1,5 +1,5 @@
 _orb_set_arg_defaults() {
-	local _arg; for _arg in "${!_orb_declaration[@]}"; do
+	local _arg; for _arg in "${!_orb_function_declaration[@]}"; do
 		[[ -n ${_args["$_arg"]+x} ]] && continue # next if already has value
 
 		local _def _default _value

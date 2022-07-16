@@ -41,7 +41,7 @@ if [ ! $_orb_initialized ]; then
 
     source "$_orb_dir/lib/scripts/source/function.sh"
 
-    _orb_parse_orb_prefixed_args "$@"
+    _orb_parse_function_args "$@"
 
     # Call function
     $_orb_function "${_orb_positional[@]}"

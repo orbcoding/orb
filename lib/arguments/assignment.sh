@@ -1,44 +1,65 @@
+_orb_assign_arg_value() {
+	local arg=$1 && shift
+	local var=${_orb_declared_vars[$arg]}
+	_orb_args_values_start_indexes[$arg]=${#_orb_args_values[@]}
+	_orb_args_values+=("$@")
+	_orb_args_values_lengths[$arg]=$#
+
+	declare -n var_ref=$var
+	if _orb_has_declared_array $arg; then
+		var_ref=("$@")
+	else
+		var_ref="$@"
+	fi
+}
+
+_orb_assign_boolean_flag() {
+	local arg="${1/+/-}"
+	local value=$(_orb_flag_value "$1")
+	_orb_assign_arg_value $arg $value
+	_orb_shift_args ${2:-1}
+}
+
 _orb_flag_value() {
 	[[ ${1:0:1} == '-' ]] && echo true || echo false
 }
 
-_orb_assign_flag() {
-	_args["${1/+/-}"]=$(_orb_flag_value "$1")
-	_orb_shift_args ${2:-1}
-}
-
 # if specified with arg suffix, set value to next arg and shift both
 _orb_assign_flagged_arg() {
-	if _orb_is_valid_arg "$1 arg" "${args_remaining[1]}"; then
-		_args["$1 arg"]="${args_remaining[1]}"
+	local arg=$1
+	local suffix=${_orb_declared_arg_suffixes[$arg]}
+	local value=("${args_remaining[@]:1:$suffix}")
+
+	if _orb_is_valid_arg "$arg" "${value[@]}"; then
+		_orb_assign_arg_value $arg "${value[@]}"
 	else
-		_orb_raise_invalid_arg "$1 arg" "${args_remaining[1]}"
+		_orb_raise_invalid_arg "$arg" "${value[@]}"
 	fi
 
-	_orb_shift_args ${2:-2}
+	_orb_shift_args ${2:-$suffix}
 }
 
-_orb_assign_orb_block() {
-	_orb_shift_args
-	[[ ${#args_remaining[@]} > 0 ]] && \
-	[[ ${args_remaining[0]} != "$1" ]] && \
-	_args["$1"]=true
-	local _arr_name="$(_orb_block_to_arr_name "$1")"
-	declare -n _arr_ref="$_arr_name"
-	local _arg; for _arg in "${args_remaining[@]}"; do
-		if [[ "$_arg" == "$1" ]]; then
+_orb_assign_block() {
+	local arg=$1
+	local value=()
+	_orb_shift_args # shift away first block
+
+	local a; for a in "${args_remaining[@]}"; do
+		if [[ "$a" == "$arg" ]]; then
 			# end of block
 			_orb_shift_args
-			return
+			_orb_assign_arg_value $arg "${value[@]}"
+			return 0
 		else
-			_arr_ref+=("$_arg")
+			value+=("$a")
 			_orb_shift_args
 		fi 
 	done
 
-	orb_raise_error "'$1' missing block end"
+	orb_raise_error "'$arg' missing block end"
 }
 
+# TODO TODO CONTINUE
 _orb_assign_inline_arg() {
 	_args_nrs[$args_count - 1]="$1"
 	_args[$args_count]="$1"
@@ -53,7 +74,7 @@ _orb_assign_dash_wildcard() {
 	args_remaining=()
 }
 
-_orb_assign_wildcard() {
+_orb_assign_rest() {
 	_args['*']=true
 
 	local _next_index=1
@@ -74,8 +95,6 @@ _orb_assign_wildcard() {
 
 # shift one = remove first arg from arg array
 _orb_shift_args() {
-	local _steps=${1-1} # 1 default value
-	local _i; for (( _i = 0; _i < $_steps; _i++ )); do
-		args_remaining=("${args_remaining[@]:1}")
-	done
+	local steps=${1-1}
+	args_remaining=("${args_remaining[@]:${steps}}")
 }

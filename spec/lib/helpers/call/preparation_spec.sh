@@ -2,8 +2,8 @@ Include lib/helpers/call/preparation.sh
 Include lib/utils/text.sh
 
 Describe '_orb_get_current_namespace'
-  _orb_get_current_namespace_from_args() { echo_me && return 3; }
-  _orb_get_current_namespace_from_file_structure() { echo_me; }
+  _orb_get_current_namespace_from_args() { echo_fn && return 3; }
+  _orb_get_current_namespace_from_file_structure() { echo_fn; }
 
   Context 'without _orb_setting_sourced'
     _orb_setting_sourced=false
@@ -51,7 +51,7 @@ Describe '_orb_get_current_namespace_from_args'
 
     Context 'without $ORB_DEFAULT_NAMESPACE'
       It 'raises error unless _orb_setting_global_help'
-        orb_raise_error() { echo_me && exit 1; }
+        orb_raise_error() { echo_fn && exit 1; }
         _orb_setting_global_help=false
         When run _orb_get_current_namespace_from_args hello 1 2
         The status should equal 1
@@ -94,7 +94,7 @@ End
 Describe _orb_get_current_function
   Context 'with _orb_setting_sourced'
     _orb_setting_sourced=true
-    _orb_get_current_function_from_source_chain() { echo_me; }
+    _orb_get_current_function_from_source_chain() { echo_fn; }
 
     It 'calls _orb_get_current_function_from_source_chain and returns 2'
       When call _orb_get_current_function my_function
