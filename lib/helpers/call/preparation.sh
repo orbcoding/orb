@@ -68,7 +68,7 @@ _orb_get_current_function_from_source_chain() {
 	done
 }
 
-_orb_get_current_function_descriptor() { # $1 = $_orb_function $2 = $_orb_namespace
+_orb_get_current_function_descriptor() { # $1 = $_orb_function_name $2 = $_orb_namespace
 	if [[ -n $2 ]]; then
 		echo "$2->$(orb_bold)${1}$(orb_normal)"
 	else

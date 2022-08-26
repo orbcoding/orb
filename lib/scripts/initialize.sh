@@ -10,6 +10,7 @@ source "$_orb_dir/lib/helpers/source/extensions.sh"
 source "$_orb_dir/lib/helpers/call/orb_settings.sh"
 source "$_orb_dir/lib/helpers/call/preparation.sh"
 source "$_orb_dir/lib/helpers/call/preparation.sh"
+source "$_orb_dir/lib/helpers/help.sh"
 
 source "$_orb_dir/lib/declaration/arguments.sh"
 source "$_orb_dir/lib/declaration/argument_options.sh"

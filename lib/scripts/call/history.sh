@@ -1,3 +1,4 @@
+[[ -z $_orb_function_name ]] && return
 # Instead of caller v2
 _orb_call_count=0
 _orb_call_trace_max_length=3 # min 1 needed for orb_pass

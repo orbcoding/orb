@@ -15,7 +15,7 @@ Describe '_orb_parse_function_args'
     The output should equal _orb_print_function_help
   End
 
-	It 'sets directly to positional args if _orb_settings_direct_call'
+	It 'sets directly to positional args if _orb_setting_direct_call'
     _orb_setting_direct_call=true
     When call _orb_parse_function_args 1 2 3
     The variable "_orb_args_positional[@]" should equal "1 2 3"

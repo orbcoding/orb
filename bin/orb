@@ -41,13 +41,14 @@ if [ ! $_orb_initialized ]; then
 
     source "$_orb_dir/lib/scripts/source/function.sh"
 
+    _orb_parse_declaration "${_orb_function_name}_orb"
     _orb_parse_function_args "$@"
 
     # Call function
-    $_orb_function "${_orb_positional[@]}"
+    $_orb_function_name "${_orb_positional[@]}"
     local _orb_function_exit_code=$?
 
-    _orb_setting_reload_functions && eval "$_orb_function_dump" && unset _orb_function_dump
+    $_orb_setting_reload_functions && eval "$_orb_function_dump" && unset _orb_function_dump
 
     return $_orb_function_exit_code
   }

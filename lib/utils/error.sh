@@ -49,6 +49,6 @@ function orb_print_stack_trace() {
   local _file_name
   echo
   while caller $_i; do ((_i++)); done | while read _line_no _orb_function _file_name; do
-    echo -e "$_file_name:$_line_no\t$_orb_function"
+    echo -e "$_file_name:$_line_no\t$_orb_function_name"
   done
 }

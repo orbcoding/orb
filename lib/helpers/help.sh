@@ -2,7 +2,7 @@
 _orb_handle_help_requested() {
 	if $_orb_setting_global_help; then
 		_orb_print_global_namespace_help_intro
-	elif ${_orb_namespace_setting_help}; then
+	elif $_orb_setting_namespace_help; then
 		_orb_print_namespace_help
 	else
 		return 1
@@ -94,7 +94,7 @@ _orb_print_args_explanation() { # $1 optional args_declaration
 }
 
 _orb_print_function_comment() {
-	local _comment_line=$(grep -r "function $_orb_function" "$_file_with_function")
+	local _comment_line=$(grep -r "function $_orb_function_name" "$_file_with_function")
 	if [[ "$_comment_line" != "${_comment_line/\#/}" ]]; then
 	 echo "$_comment_line" | cut -d '#' -f2- | xargs
 	fi
@@ -102,6 +102,6 @@ _orb_print_function_comment() {
 
 _orb_print_orb_function_and_comment() {
 	local comment=$(_orb_print_function_comment)
-	echo "$(orb_bold)$_orb_function$(orb_normal) $([[ -n "$comment" ]] && echo "- $comment")"
+	echo "$(orb_bold)$_orb_function_name$(orb_normal) $([[ -n "$comment" ]] && echo "- $comment")"
 }
 

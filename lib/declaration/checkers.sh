@@ -1,6 +1,7 @@
 declare -a _orb_available_arg_options=( : Required: Default: In: Catch: )
 declare -a _orb_available_arg_options_boolean_flag=( : Required: Default: )
 declare -a _orb_available_arg_options_array_arg=( : Required: Default: Catch: )
+# TODO check catch multiple availability
 declare -a _orb_available_arg_option_catch_values=( flag block dash multiple )
 declare -a _orb_available_arg_option_required_values=( true false )
 
