@@ -1,6 +1,7 @@
 Include lib/helpers/help.sh
 Include lib/utils/utils.sh
 
+# _orb_handle_help_requested
 Describe '_orb_handle_help_requested'
   _orb_print_global_namespace_help_intro() { echo_fn; }
   _orb_print_namespace_help() { echo_fn; }
@@ -26,6 +27,7 @@ Describe '_orb_handle_help_requested'
 End
 
 
+# _orb_print_global_namespace_help_intro
 Describe '_orb_print_global_namespace_help_intro'
   Include lib/utils/text.sh
   
@@ -55,4 +57,25 @@ Available namespaces listed below:
 
 To list commands in a namespace, use `orb "namespace" --help`'
   End
+End
+
+# _orb_print_namespace_help
+Describe '_orb_print_namespace_help'
+
+End
+
+# _orb_print_function_help
+Describe '_orb_print_function_help'
+End
+
+# _orb_print_args_explanation
+Describe '_orb_print_args_explanation'
+End
+
+# _orb_print_function_comment
+Describe '_orb_print_function_comment'
+End
+
+# _orb_print_orb_function_and_comment
+Describe '_orb_print_orb_function_and_comment'
 End

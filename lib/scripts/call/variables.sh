@@ -30,6 +30,15 @@ declare -a _orb_function_declaration
 # Useful for working with call history 
 declare _orb_variable_suffix
 
+# Call arguments and final argument values
+declare -a _orb_args_positional # passed inline to called function
+declare -a _orb_args_values # final arg values
+# Argument as key: eg: -f
+declare -A _orb_args_values_start_indexes
+declare -A _orb_args_values_lengths
+
+
+# Declaration
 declare -a _orb_declared_args # ordered
 # Argument as key: eg: -f
 # TODO might verbose _orb_declared_arg_vars etc
@@ -51,11 +60,3 @@ declare -A _orb_declared_ins_lengths
 declare -a _orb_declared_catchs
 declare -A _orb_declared_catchs_start_indexes
 declare -A _orb_declared_catchs_lengths
-
-# Call arguments and final argument values
-declare -a _orb_args_positional # passed inline to called function
-declare -a _orb_args_values # final arg values
-# Argument as key: eg: -f
-declare -A _orb_args_values_start_indexes
-declare -A _orb_args_values_lengths
-

@@ -1,22 +1,26 @@
+# OBS 
+# All local variables in this file have to be _orb prefixed to not block assignment to declared value variables
+#
 _orb_assign_arg_value() {
-	local arg=$1 && shift
-	local var=${_orb_declared_vars[$arg]}
-	_orb_args_values_start_indexes[$arg]=${#_orb_args_values[@]}
-	_orb_args_values+=("$@")
-	_orb_args_values_lengths[$arg]=$#
+	local _orb_arg=$1 && shift
 
-	declare -n var_ref=$var
-	if _orb_has_declared_array $arg; then
-		var_ref=("$@")
+	if _orb_has_arg_value $_orb_arg && _orb_arg_catches $_orb_arg "multiple"; then
+		_orb_args_values_start_indexes[$_orb_arg]+=" ${#_orb_args_values[@]}"
+		_orb_args_values_lengths[$_orb_arg]+=" $#"
 	else
-		var_ref="$@"
+		_orb_args_values_start_indexes[$_orb_arg]=${#_orb_args_values[@]}
+		_orb_args_values_lengths[$_orb_arg]="$#"
 	fi
+	 
+	_orb_args_values+=("$@")
+	
+	_orb_get_arg_value $_orb_arg ${_orb_declared_vars[$_orb_arg]}
 }
 
 _orb_assign_boolean_flag() {
-	local arg="${1/+/-}"
-	local value=$(_orb_flag_value "$1")
-	_orb_assign_arg_value $arg $value
+	local _orb_arg="${1/+/-}"
+	local _orb_value=$(_orb_flag_value "$1")
+	_orb_assign_arg_value $_orb_arg $_orb_value
 	_orb_shift_args ${2:-1}
 }
 
@@ -26,75 +30,74 @@ _orb_flag_value() {
 
 # if specified with arg suffix, set value to next arg and shift both
 _orb_assign_flagged_arg() {
-	local arg=$1
-	local suffix=${_orb_declared_arg_suffixes[$arg]}
-	local value=("${args_remaining[@]:1:$suffix}")
+	local _orb_arg=$1
+	local _orb_suffix=${_orb_declared_arg_suffixes[$_orb_arg]}
+	local _orb_value=("${_orb_args_remaining[@]:1:$_orb_suffix}")
 
-	if _orb_is_valid_arg "$arg" "${value[@]}"; then
-		_orb_assign_arg_value $arg "${value[@]}"
+	if _orb_is_valid_arg "$_orb_arg" "${_orb_value[@]}"; then
+		_orb_assign_arg_value $_orb_arg "${_orb_value[@]}"
 	else
-		_orb_raise_invalid_arg "$arg" "${value[@]}"
+		_orb_raise_invalid_arg "$_orb_arg" "${_orb_value[@]}"
 	fi
 
-	_orb_shift_args ${2:-$suffix}
+	_orb_shift_args $(( $_orb_suffix + 1 ))
 }
 
 _orb_assign_block() {
-	local arg=$1
-	local value=()
+	local _orb_arg=$1
+	local _orb_value=()
 	_orb_shift_args # shift away first block
 
-	local a; for a in "${args_remaining[@]}"; do
-		if [[ "$a" == "$arg" ]]; then
+	local _orb_a; for _orb_a in "${_orb_args_remaining[@]}"; do
+		if [[ "$_orb_a" == "$_orb_arg" ]]; then
 			# end of block
 			_orb_shift_args
-			_orb_assign_arg_value $arg "${value[@]}"
+			_orb_assign_arg_value $_orb_arg "${_orb_value[@]}"
 			return 0
 		else
-			value+=("$a")
+			_orb_value+=("$_orb_a")
 			_orb_shift_args
 		fi 
 	done
 
-	orb_raise_error "'$arg' missing block end"
+	orb_raise_error "'$_orb_arg' missing block end"
 }
 
-# TODO TODO CONTINUE
 _orb_assign_inline_arg() {
-	_args_nrs[$args_count - 1]="$1"
-	_args[$args_count]="$1"
-	(( args_count++ ))
+	_orb_args_positional+=("$1")
+	_orb_assign_arg_value $_orb_args_count "$1"
+	(( _orb_args_count++ ))
 	_orb_shift_args
 }
 
-_orb_assign_dash_wildcard() {
-	_orb_shift_args
-	[[ ${#args_remaining[@]} > 0 ]] && _args['-- *']=true
-	_orb_dash_wildcard+=("${args_remaining[@]}")
-	args_remaining=()
+_orb_assign_dash() {
+	_orb_assign_arg_value "${_orb_args_remaining[@]}"
+	_orb_args_remaining=()
 }
 
 _orb_assign_rest() {
-	_args['*']=true
+	# variables have to be prefixed not to collide with assignment
+	local _orb_next_i=1
+	local _orb_rest=()
 
-	local _next_index=1
-	local _arg; for _arg in ${args_remaining[@]}; do
-		_orb_wildcard+=( "$_arg" )
+	local _orb_arg; for _orb_arg in ${_orb_args_remaining[@]}; do
+		_orb_rest+=("$_orb_arg")
 
-		if [[ "${args_remaining[$_next_index]}" == '--' ]]; then
-			_orb_shift_args $_next_index
-			_orb_assign_dash_wildcard
-			return 0
+		if [[ "${_orb_args_remaining[$_orb_next_i]}" == '--' ]]; then
+			_orb_shift_args $_orb_next_i
+			_orb_assign_dash
+			break
 		fi
 
-		_next_index=$((_next_index + 1))
+		((_orb_next_i++))
 	done
 
- 	args_remaining=()
+	_orb_assign_arg_value '...' "${_orb_rest[@]}"
+ 	_orb_args_remaining=()
 }
 
 # shift one = remove first arg from arg array
 _orb_shift_args() {
-	local steps=${1-1}
-	args_remaining=("${args_remaining[@]:${steps}}")
+	local _orb_steps=${1-1}
+	_orb_args_remaining=("${_orb_args_remaining[@]:${_orb_steps}}")
 }

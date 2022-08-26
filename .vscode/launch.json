@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      // orb -e ./spec/templates/.orb spec test_orb_print_args -f -a flag --verbose-flag --verbose-flagged arg -b- block args -b- wildcard args -- dash wildcard args
+      // orb -e ./spec/templates/.orb spec test_orb_print_args -f -a flag --verbose-flag --verbose-flagged arg -b- block args -b- rest args -- dash rest args
       "type": "bashdb",
       "request": "launch",
       "name": "orb test",
@@ -25,11 +25,11 @@
         "block",
         "args",
         "-b-",
-        "wildcard",
+        "rest",
         "args",
         "--",
         "dash",
-        "wildcard",
+        "rest",
         "args"
       ],
       "env": {

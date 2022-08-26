@@ -31,9 +31,7 @@ End
 Describe '_orb_parse_args'
   orb_raise_error() { echo "$@"; exit 1; }
   _orb_collect_args() { spec_fns+=($(echo_fn)); }
-  _orb_set_arg_defaults() { spec_fns+=($(echo_fn)); }  
   _orb_args_post_validation() { spec_fns+=($(echo_fn)); }
-  _orb_set_args_positional() { spec_fns+=($(echo_fn)); }
   
   Context 'no args declared'
     It 'raises error if receive input args'
@@ -57,20 +55,20 @@ Describe '_orb_parse_args'
     It 'parses args'
       When call _orb_parse_args 1 2 3
       The status should be success
-      The variable "spec_fns[@]" should equal "_orb_collect_args _orb_set_arg_defaults _orb_args_post_validation _orb_set_args_positional"
+      The variable "spec_fns[@]" should equal "_orb_collect_args _orb_args_post_validation"
     End
 
     It 'continues even if no args received'
       When call _orb_parse_args
       The status should be success
-      The variable "spec_fns[@]" should equal "_orb_collect_args _orb_set_arg_defaults _orb_args_post_validation _orb_set_args_positional"
+      The variable "spec_fns[@]" should equal "_orb_collect_args _orb_args_post_validation"
     End
   End
 End
 
 # _orb_collect_args
 Describe '_orb_collect_args'
-  args_remaining=(-f hello -b-)
+  _orb_args_remaining=(-f hello -b-)
   _orb_collect_flag_arg() { spec_fns+=($(echo_fn)); _orb_shift_args; }
   _orb_collect_block_arg() { spec_fns+=($(echo_fn)); _orb_shift_args; }
   _orb_collect_inline_arg() { spec_fns+=($(echo_fn)); _orb_shift_args; }
@@ -135,17 +133,17 @@ End
 
 # _orb_collect_inline_arg
 Describe '_orb_collect_inline_arg'
-  args_count=1
-  _orb_assign_dash_wildcard() { echo_fn $@; }
+  _orb_args_count=1
+  _orb_assign_dash() { echo_fn $@; }
   _orb_assign_inline_arg() { echo_fn $@; }
   _orb_assign_rest() { echo_fn $@; }
   _orb_raise_invalid_arg() { echo_fn $@ && return 1; }
 
-  It 'collects dash wildcard first'
+  It 'collects dash rest first'
     _orb_declared_args=(--)
     When call _orb_collect_inline_arg --
     The status should be success
-    The output should equal "_orb_assign_dash_wildcard"
+    The output should equal "_orb_assign_dash"
   End
 
   It 'collects numbered args'
@@ -155,14 +153,14 @@ Describe '_orb_collect_inline_arg'
     The output should equal "_orb_assign_inline_arg 1"
   End
 
-  It 'falls back to wildcard if declared'
+  It 'falls back to rest if declared'
     _orb_declared_args=(...)
     When call _orb_collect_inline_arg 1
     The status should be success
     The output should equal "_orb_assign_rest"
   End
 
-  It 'fails if no wildcard fallback declared'
+  It 'fails if no rest fallback declared'
     _orb_declared_args=(-f)
     When call _orb_collect_inline_arg 1
     The status should be failure
@@ -173,11 +171,11 @@ End
 
 # _orb_try_inline_arg_fallback
 Describe '_orb_try_inline_arg_fallback'
-  args_count=1
+  _orb_args_count=1
   _orb_assign_inline_arg() { echo_fn $@; }
   _orb_assign_rest() { echo_fn $@; }
   _orb_raise_invalid_arg() { echo_fn "$@"; exit 1; }
-  args_count=1
+  _orb_args_count=1
   _orb_declared_args=(1 ...)
   declare -a _orb_declared_catchs=(flag block dash)
 

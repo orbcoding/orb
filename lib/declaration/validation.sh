@@ -27,7 +27,7 @@ _orb_postvalidate_declared_args_options() {
 
 _orb_postvalidate_declared_args_options_catchs() {
 	local arg; for arg in ${_orb_declared_args[@]}; do
-		local arg_catch; _orb_get_arg_catch_arr $arg
+		local arg_catch; _orb_get_arg_catch_arr $arg arg_catch
 
 		local value; for value in "${arg_catch[@]}"; do
 			if ! _orb_is_available_catch_value $value; then

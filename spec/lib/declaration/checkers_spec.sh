@@ -148,11 +148,19 @@ End
 
 # _orb_has_declared_array
 Describe '_orb_has_declared_array'
-  _orb_declared_args=(-f -a ... -b- --)
-  declare -A _orb_declared_arg_suffixes=([-f]="2")
+  _orb_declared_args=(-f -m -a ... -b- --)
+  declare -A _orb_declared_arg_suffixes=([-f]="2" [-m]="1")
 
   It 'suceeds for flagged arg with suffix > 1'
     When call _orb_has_declared_array -f
+    The status should be success
+  End
+
+  It 'suceeds for flagged arg with catches multiple'
+    declare -a _orb_declared_catchs=(multiple)
+    declare -A _orb_declared_catchs_start_indexes=([-m]=0)
+    declare -A _orb_declared_catchs_lengths=([-m]=1)
+    When call _orb_has_declared_array -m
     The status should be success
   End
 
@@ -224,7 +232,6 @@ Describe '_orb_get_arg_comment'
   End 
 End
 
-
 # _orb_get_arg_default_arr
 Describe '_orb_get_arg_default_arr'
   declare -A _orb_declared_defaults_start_indexes=([1]=0 [-a]=5)
@@ -233,17 +240,17 @@ Describe '_orb_get_arg_default_arr'
   arg_default=()
   
   It 'adds default values to arg_default'
-    When call _orb_get_arg_default_arr 1
+    When call _orb_get_arg_default_arr 1 arg_default
     The variable "arg_default[@]" should equal "1 2 3 4 5"
   End 
 
   It 'fails if no default for arg'
-    When call _orb_get_arg_default_arr 2
+    When call _orb_get_arg_default_arr 2 arg_default
     The status should be failure
   End 
 
   It 'handles nested values'
-    When call _orb_get_arg_default_arr -a
+    When call _orb_get_arg_default_arr -a arg_default
     The variable "arg_default[@]" should equal "6 7"
   End 
 End
@@ -257,18 +264,18 @@ Describe '_orb_get_arg_in_arr'
   arg_ins=()
   
   It 'adds in values to arg_ins'
-    When call _orb_get_arg_in_arr 1
-    The variable "arg_in[@]" should equal "1 2 3 4 5"
+    When call _orb_get_arg_in_arr 1 arg_ins
+    The variable "arg_ins[@]" should equal "1 2 3 4 5"
   End 
 
   It 'fails if no in for arg'
-    When call _orb_get_arg_in_arr 2
+    When call _orb_get_arg_in_arr 2 arg_ins
     The status should be failure
   End 
 
   It 'handles nested values'
-    When call _orb_get_arg_in_arr -a
-    The variable "arg_in[@]" should equal "6 7"
+    When call _orb_get_arg_in_arr -a arg_ins
+    The variable "arg_ins[@]" should equal "6 7"
   End 
 End
 
@@ -278,20 +285,20 @@ Describe '_orb_get_arg_catch_arr'
   declare -A _orb_declared_catchs_start_indexes=([1]=0 [-a]=5)
   declare -A _orb_declared_catchs_lengths=([1]=5 [-a]=2)
   _orb_declared_catchs=(1 2 3 4 5 6 7)
-  arg_catchs=()
+  arg_catch=()
   
   It 'adds catch values to arg_catchs'
-    When call _orb_get_arg_catch_arr 1
+    When call _orb_get_arg_catch_arr 1 arg_catch
     The variable "arg_catch[@]" should equal "1 2 3 4 5"
   End 
 
   It 'fails if no catchs for arg'
-    When call _orb_get_arg_catch_arr 2
+    When call _orb_get_arg_catch_arr 2 arg_catch
     The status should be failure
   End 
 
   It 'handles nested values'
-    When call _orb_get_arg_catch_arr -a
+    When call _orb_get_arg_catch_arr -a arg_catch
     The variable "arg_catch[@]" should equal "6 7"
   End 
 End

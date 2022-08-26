@@ -2,6 +2,7 @@ Include lib/declaration/validation.sh
 Include lib/declaration/checkers.sh
 Include lib/scripts/call/variables.sh
 Include lib/utils/argument.sh
+Include lib/helpers/help.sh
 
 # _orb_prevalidate_declaration
 Describe '_orb_prevalidate_declaration'
@@ -30,8 +31,8 @@ Describe '_orb_raise_undeclared'
   orb_raise_error() { echo "$@"; }
 
   It 'calls raise error with undeclared error'
-    # When call _orb_raise_undeclared "error message"
-    # The output should equal "Invalid declaration. error message"
+    # When call _orb_raise_undeclared "1"
+    # The output should equal "'1' not in args declaration"
   End
 End
 
@@ -64,7 +65,7 @@ Describe '_orb_postvalidate_declared_args_options_catchs'
     declare -A _orb_declared_catchs_start_indexes=([-f]=0)
     When run _orb_postvalidate_declared_args_options_catchs
     The status should be failure
-    The output should equal "_orb_raise_invalid_declaration -f: Invalid catch value: 1. Available values: flag block dash"
+    The output should equal "_orb_raise_invalid_declaration -f: Invalid catch value: 1. Available values: flag block dash multiple"
   End
 End
 
@@ -88,7 +89,7 @@ Describe '_orb_is_valid_arg_option'
   It 'fails for boolean with invalid boolean option'
     When call _orb_is_valid_arg_option -f 2
     The status should be failure
-    The output should equal "-f: Invalid option: In:. Available options for boolean flags: Comment: Required: Default:"
+    The output should equal "-f: Invalid option: In:. Available options for boolean flags: : Required: Default:"
   End
 
   It 'succeeds for nr with In:'
@@ -99,6 +100,6 @@ Describe '_orb_is_valid_arg_option'
   It 'fails for ... with invalid array option'
     When call _orb_is_valid_arg_option ... 2
     The status should be failure
-    The output should equal "...: Invalid option: In:. Available options for array type arguments: Comment: Required: Default: Catch:"
+    The output should equal "...: Invalid option: In:. Available options for array type arguments: : Required: Default: Catch:"
   End
 End

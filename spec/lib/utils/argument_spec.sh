@@ -237,6 +237,12 @@ Describe 'orb_is_valid_variable_name'
     The status should be success
   End
   
+  # Use eg internally for _orb_settings_declaration
+  It 'succeeds if starts with underscore'
+    When call orb_is_valid_variable_name "_var"
+    The status should be failure
+  End
+  
   It 'succeeds if contains underscore not first'
     When call orb_is_valid_variable_name "Var_name"
     The status should be success
@@ -244,11 +250,6 @@ Describe 'orb_is_valid_variable_name'
   
   It 'fails if starts with number'
     When call orb_is_valid_variable_name "1var"
-    The status should be failure
-  End
-  
-  It 'fails if starts with underscore'
-    When call orb_is_valid_variable_name "_var"
     The status should be failure
   End
 

@@ -1,4 +1,5 @@
 Include lib/arguments/validation.sh
+Include lib/declaration/checkers.sh
 
 # _orb_is_valid_arg
 Describe '_orb_is_valid_arg'
@@ -10,7 +11,7 @@ Describe '_orb_is_valid_arg'
   End
 End
 
-
+# _orb_is_valid_in
 Describe '_orb_is_valid_in'
   Context 'with In declaration'
     declare -A _orb_declared_ins_start_indexes=([1]=1)

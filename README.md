@@ -1,5 +1,5 @@
 # orb-cli
-`orb-cli` is a tool for building self-documenting command line utilities in bash. It removes the pain of parsing advanced command line options such as flags, blocks and wildcards. It also helps with argument validation and code organization through namespaces. 
+`orb-cli` is a tool for building self-documenting command line utilities in bash. It removes the pain of parsing advanced command line options such as flags, blocks and rests. It also helps with argument validation and code organization through namespaces. 
 
 
 ## Installation
@@ -42,14 +42,14 @@ declare -A my_function_args=(
   echo "${_args['-b']}"
   echo "${_args['-f arg']}"
 
-  # Blocks and wildcards only state true/false if received or not
-  "${_args['*']}" && echo "got wildcard"
+  # Blocks and rests only state true/false if received or not
+  "${_args['*']}" && echo "got rest"
 
   # Their actual values are stored in separate variables 
   # (Bash does not support nested arrays)
   echo "${_args_block_b[@]}" # ['-b-']
-  echo "${_orb_wildcard[@]}" # ['*']
-  echo "${_orb_dash_wildcard[@]}" # ['-- *']
+  echo "${_orb_rest[@]}" # ['*']
+  echo "${_orb_dash_rest[@]}" # ['-- *']
 
   
   # orb_print_args is a core function that helps you print recieved args for debugging
@@ -59,16 +59,16 @@ declare -A my_function_args=(
 
 3. Call your function
 ```
-$ orb my_namespace my_function arg_1 arg_2 -bf arg_f -b- my block args -b- first wildcard -- dash wildcard
+$ orb my_namespace my_function arg_1 arg_2 -bf arg_f -b- my block args -b- first rest -- dash rest
 
 arg_1
 arg_2
 true
 arg_f
-got wildcard
+got rest
 my block args
-first wildcard
-dash wildcard
+first rest
+dash rest
 ```
 
 ---
@@ -158,10 +158,10 @@ Here is a more advanced argument declaration
  - Flag and block args are optional unless option `REQUIRED`
  - `IN` lists multiple accepted values with `|`
  - `DEFAULT` can eval variables and falls back through `|` chain when undef.
- - Numbered args and wildcards with `CATCH_ANY` allows dash to be first character in assignment. Otherwise the argument would be interpreted as an invalid flag.
+ - Numbered args and rests with `CATCH_ANY` allows dash to be first character in assignment. Otherwise the argument would be interpreted as an invalid flag.
 
 Note:
  - If flags are single char you can pass multiple flag statements such as `-ri`.
  - Calling `orb my_function +r` sets `[-r]=false`. This is useful if `[-r]=DEFAULT: true` - Inspired by bash options https://tldp.org/LDP/abs/html/options.html
-- Numbered args and wildcard args also passed as inline args to function call.
+- Numbered args and rest args also passed as inline args to function call.
  This allows expected argument access from bash positional arguments eg: `$1`, `$2`, `$@/$*` etc

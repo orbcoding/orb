@@ -4,21 +4,20 @@ Include lib/declaration/checkers.sh
 Include lib/declaration/validation.sh
 
 _orb_function_declaration=(
-  flag = -f
-  flagged_arg = -a 1
+  -f = flag
+  -a 1 = flagged_arg
     Required: true
-  verbose_flag = --verbose-flag 
-  verbose_flagged_arg = --verbose-flagged 1 
-  block = -b- # i = 16-18
-  dash_args = --  
-  rest = ... 
+  --verbose-flag = verbose_flag 
+  --verbose-flagged 1 = verbose_flagged_arg 
+  -b- = block # i = 16-18
+  -- = dash_args  
+  ... = rest 
     Required: false
 )
 
 # _orb_parse_declaration
 Describe '_orb_parse_declaration'
   Include lib/declaration/argument_options.sh
-  Include lib/helpers/declaration/argument_options.sh
 
   It 'calls its nested functions'
     _orb_prevalidate_declaration() { spec_fns+=( $(echo_fn) ); }
@@ -30,17 +29,19 @@ Describe '_orb_parse_declaration'
 
   It 'stores arguments and options to variables'
     _orb_function_declaration=(
-      first = 1
+      1 = first 
+        : "This is first comment"
         Required: false
-        Comment: "This is first comment"
         Default: value
         In: first value or other
-      flagged_arg = -a 1
+      -a 1 = flagged_arg
+        : "This is flagged comment"
         Required: true
-        Comment: "This is flagged comment"
         Default: value
         In: second value or other
     )
+
+    orb_raise_error() { echo "$@" ; }
 
     When call _orb_parse_declaration
     The variable "_orb_declared_args[@]" should equal "1 -a"

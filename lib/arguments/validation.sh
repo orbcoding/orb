@@ -1,13 +1,11 @@
 _orb_is_valid_arg() { # $1 arg_key, $2 arg
-	_orb_is_valid_in "$1" "$@"
+	_orb_is_valid_in $1 ${@:2}
 }
 
 _orb_is_valid_in() {
 	local arg=$1
-	local val="$@"
-	
-	[[ -z ${_orb_declared_ins_start_indexes[$arg]} ]] && return 0
-	local in_arr="${_orb_declared_ins[@]:${_orb_declared_ins_start_indexes[$arg]}:${_orb_declared_ins_lengths[$arg]}}"
+	local val=(${@:2})
+	local in_arr=(); _orb_get_arg_in_arr $arg in_arr || return 0
 
 	[[ " ${in_arr[@]} " =~ " $val " ]]
 }
@@ -33,20 +31,21 @@ _orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 }
 
 
-# _orb_args_post_validation() {
+_orb_args_post_validation() {
+	:
 # 	local _arg; for _arg in "${!_orb_function_declaration[@]}"; do
 # 		_orb_validate_declaration "$_arg"
 # 		_orb_validate_required "$_arg"
 # 		_orb_validate_empty "$_arg"
 # 	done
-# }
+}
 
 # _orb_validate_declaration() {
 # 	orb_is_flag "$1" || \
 # 	orb_is_flag_with_nr "$1" || \
 # 	orb_is_nr "$1" || \
 # 	orb_is_block "$1" || \
-# 	_is_wildcard "$1" || \
+# 	_is_rest "$1" || \
 # 	_orb_raise_invalid_arg "$1 invalid declaration"
 # }
 
@@ -54,7 +53,7 @@ _orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 # 	if ( \
 # 		[[ "$1" == '*' && ${_args['*']} == false ]] || \
 # 		[[ "$1" == '-- *' && ${_args['-- *']} == false ]] || \
-# 		(! _is_wildcard "$1" && [[ -z ${_args["$1"]+x} ]]) \
+# 		(! _is_rest "$1" && [[ -z ${_args["$1"]+x} ]]) \
 # 	) \
 # 	&& _orb_is_required "$1" $2; then
 # 		_orb_raise_invalid_arg "$1 is required"

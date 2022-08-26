@@ -12,8 +12,8 @@ declare -A test_orb_print_args_args=(
   # ['--verbose-flag']='arg'
   # ['--verbose-flagged arg']='verbose flagged arg'
   # ['-b-']='block args'
-  # ['*']='wildcard args'
-  # ['-- *']='dash wildcard args; OPTIONAL'
+  # ['*']='rest args'
+  # ['-- *']='dash rest args; OPTIONAL'
 ); function test_orb_print_args() {
   source orb
   orb_print_args
@@ -31,8 +31,8 @@ test_orb_print_args_input_args=(
 
 test_orb_print_args_output='([--verbose-flag]="true" [-b-]="true" ["-a arg"]="flag" ["*"]="true" [-f]="true" ["-- *"]="true" ["--verbose-flagged arg"]="flagged_arg" )
 [-b-]=block args
-[*]=wildcard args
-[-- *]=dash wildcard args'
+[*]=rest args
+[-- *]=dash rest args'
 
 private_function() {
   :

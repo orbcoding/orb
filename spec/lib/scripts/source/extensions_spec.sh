@@ -1,4 +1,4 @@
-Include lib/helpers/extensions.sh
+Include lib/helpers/source/extensions.sh
 Include lib/utils/file.sh
 
 Describe 'orb_extensions.sh'

@@ -1,4 +1,4 @@
-Include lib/helpers/extensions.sh
+Include lib/helpers/source/extensions.sh
 
 Describe '_orb_collect_orb_extensions'
   _orb_extensions=()
@@ -39,7 +39,7 @@ Describe '_orb_collect_namespace_extensions'
     The variable "_orb_namespaces[2]" should be undefined
   End
 
-  It 'adds multiple'
+  It 'adds from multiple folders'
     _orb_extensions=( spec/templates/.orb spec/templates/_orb )
     When call _orb_collect_namespace_extensions
     The variable "_orb_namespaces[0]" should equal spec
@@ -60,13 +60,14 @@ Describe '_orb_parse_env_extensions'
   End
 End
 
-Describe '_orb_collect_orb_namespace_files'
+Describe '_orb_collect_namespace_files'
   It 'collects namespaces files'
+    _orb_namespace="spec"
     _orb_extensions=( spec/templates/.orb spec/templates/_orb )
-    When call _orb_collect_orb_namespace_files
+
+    When call _orb_collect_namespace_files
     The variable "_orb_namespace_files[0]" should equal spec/templates/.orb/namespaces/spec/test_functions.sh
-    The variable "_orb_namespace_files[1]" should equal spec/templates/.orb/namespaces/spec2/testfile.sh
-    The variable "_orb_namespace_files[2]" should equal spec/templates/_orb/namespaces/spec3.sh
-    The variable "_orb_namespace_files[3]" should be undefined
+    The variable "_orb_namespace_files[1]" should equal spec/templates/_orb/namespaces/spec.sh
+    The variable "_orb_namespace_files[2]" should be undefined
   End
 End

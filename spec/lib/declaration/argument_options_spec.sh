@@ -2,28 +2,27 @@ Include lib/utils/argument.sh
 Include lib/declaration/argument_options.sh
 Include lib/declaration/validation.sh
 Include lib/declaration/checkers.sh
-Include lib/helpers/declaration/argument_options.sh
 Include lib/scripts/call/variables.sh
 
 _orb_declared_args=(1 -a)
 
 # As set in _orb_parse_declaration
 declaration=(
-  first = 1
+  1 = first
+    : "This is first comment"
     Required: false
-    Comment: "This is first comment"
     Default: value
     In: first value or other
-  flagged_arg = -a 1
+  -a 1 = flagged_arg
+    : "This is flagged comment"
     Required: true
-    Comment: "This is flagged comment"
     Default: value
     In: second value or other
 )
 
 declare -A declared_args_start_indexes=([1]="0" [-a]="14")
 declare -A declared_args_lengths=([1]="14" [-a]="15")
-declare -A _orb_declared_arg_suffixes
+declare -A _orb_declared_arg_suffixes=([-a]="1")
 
 
 # _orb_parse_declared_args_options
@@ -86,36 +85,14 @@ End
 Describe '_orb_get_declared_arg_options'
   It 'gets options declaration'
     When call _orb_get_declared_arg_options 1
-    The variable "declared_arg_options[@]" should equal "Required: false Comment: This is first comment Default: value In: first value or other"
+    The variable "declared_arg_options[@]" should equal ": This is first comment Required: false Default: value In: first value or other"
   End
 
   It 'gets options declaration without suffix'
     When call _orb_get_declared_arg_options -a
-    The variable "declared_arg_options[@]" should equal "Required: true Comment: This is flagged comment Default: value In: second value or other"
-  End
-
-  It 'calls _orb_parse_declared_arg_options_arg_suffix with arg and arg_start_i + 3'
-    _orb_parse_declared_arg_options_arg_suffix() { echo "$@"; }
-    When call _orb_get_declared_arg_options -a
-    The output should equal "-a 17"
+    The variable "declared_arg_options[@]" should equal ": This is flagged comment Required: true Default: value In: second value or other"
   End
 End
-
-
-# _orb_parse_declared_arg_options_arg_suffix
-Describe '_orb_parse_declared_arg_options_arg_suffix'
-  It 'succeeds and stores suffix if arg is any flag and suffix is nr'
-    When call _orb_parse_declared_arg_options_arg_suffix -a 17
-    The status should be success
-    The variable "_orb_declared_arg_suffixes[-a]" should equal "1"
-  End
-
-  It 'otherwise returns failure'
-    When call _orb_parse_declared_arg_options_arg_suffix 1 3 
-    The status should be failure
-  End
-End
-
 
 # _orb_prevalidate_declared_arg_options
 Describe '_orb_prevalidate_declared_arg_options'
@@ -127,7 +104,7 @@ Describe '_orb_prevalidate_declared_arg_options'
 
     When call _orb_prevalidate_declared_arg_options -f
     The status should be failure
-    The output should equal "-f: Invalid option: invalid. Available options: Comment: Required: Default: In: Catch:"
+    The output should equal "-f: Invalid option: invalid. Available options: : Required: Default: In: Catch:"
   End
 
   It 'should not raise anything if first is valid option'
@@ -253,7 +230,7 @@ End
 Describe '_orb_get_declared_arg_options_lengths'
   declared_arg_options=(
     Default: Default values
-    Comment: "Value"
+    : "Value"
     Required: true
   )
   declared_arg_options_start_indexes=(0 3 5)
@@ -275,7 +252,7 @@ Describe '_orb_store_declared_arg_options'
     Default: some value
     In: value or other
     Required: true
-    Comment: "This is my comment"
+    : "This is my comment"
     Catch: flag block
   )
 

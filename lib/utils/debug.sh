@@ -21,8 +21,8 @@ function orb_print_args() { # print collected arguments, useful for debugging
   
   # | cut -d '=' -f2-
 	if [[ ${_orb_caller_args["*"]} == true || ${_orb_caller_args["-- *"]} == true ]]; then
-    echo "[*]=${_orb_caller_wildcard[*]}"
-    echo "[-- *]=${_orb_caller_dash_wildcard[*]}"
+    echo "[*]=${_orb_caller_rest[*]}"
+    echo "[-- *]=${_orb_caller_dash_rest[*]}"
   fi
 }
 

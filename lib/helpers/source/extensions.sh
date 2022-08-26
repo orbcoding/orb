@@ -7,13 +7,14 @@ _orb_collect_orb_extensions() { # $1 = start path, $2 = stop path
 }
 
 _orb_collect_namespace_extensions() {
-  local _extension; for _extension in "${_orb_extensions[@]}"; do
+  local ext; for ext in "${_orb_extensions[@]}"; do
 
-    local _file; for _file in $(ls "$_extension/namespaces"); do
-      local _orb_namespace=$(basename $_file)
+    local file; for file in $(ls "$ext/namespaces"); do
+      local namespace=$(basename $file)
+			namespace="${namespace/\.*/}"
 
-      if [[ ! " ${_orb_namespaces[@]} " =~ " ${_orb_namespace} " ]]; then
-        _orb_namespaces+=( "${_orb_namespace/\.*/}" )
+      if [[ ! " ${_orb_namespaces[@]} " =~ " $namespace " ]]; then
+        _orb_namespaces+=( $namespace )
       fi
     done
   done
@@ -27,30 +28,32 @@ _orb_parse_env_extensions() {
   done
 }
 
-_orb_collect_orb_namespace_files() {
+_orb_collect_namespace_files() {
 	# local _orb_config_dirs=( $_orb_dir )
 
 	# _orb_config_dirs+=( "${_orb_extensions[@]}" )
 	# local _conf_dir
 
- 	for _ext in "${_orb_extensions[@]}"; do
+ 	local ext; for ext in "${_orb_extensions[@]}"; do
 	 	# TODO loop through multiple namespaces directories
-	 	local _files _dir="$_ext/namespaces/$_orb_namespace"
+		local dir="$ext/namespaces/$_orb_namespace"
 
-		if [[ -d "$_dir" ]]; then
-			readarray -d '' _files < <(find $_dir -type f -name "*.sh" ! -name '_*' -print0 | sort -z)
+		if [[ -d "$dir" ]]; then
+	 		local files 
+			readarray -d '' files < <(find $dir -type f -name "*.sh" ! -name '_*' -print0 | sort -z)
 
-			local _from=${#_orb_namespace_files[@]}
-			local _to=$(( ${#_orb_namespace_files[@]} + ${#_files[@]} - 1 ))
-			local _i; for _i in $(seq $_from $_to ); do
-				_orb_namespace_files_dir_tracker[$_i]="$_ext"
+			local from=${#_orb_namespace_files[@]}
+			local to=$(( ${#_orb_namespace_files[@]} + ${#files[@]} - 1 ))
+
+			local i; for i in $(seq $from $to ); do
+				_orb_namespace_files_dir_tracker[$i]="$ext"
 			done
 
-			_orb_namespace_files+=( "${_files[@]}" )
+			_orb_namespace_files+=( "${files[@]}" )
 
-		elif [[ -f "${_dir}.sh" ]]; then
-			_orb_namespace_files_dir_tracker[${#_orb_namespace_files[@]}]="$_ext"
-			_orb_namespace_files+=( "${_dir}.sh" )
+		elif [[ -f "${dir}.sh" ]]; then
+			_orb_namespace_files_dir_tracker[${#_orb_namespace_files[@]}]="$ext"
+			_orb_namespace_files+=( "${dir}.sh" )
 		fi
 	done
 }

@@ -60,5 +60,5 @@ function orb_is_input_arg() {
 }
 
 function orb_is_valid_variable_name() {
-	[[ "$1" =~ ^[a-zA-ZwW][a-zA-Z0-9_wW]*$ ]]
+	[[ "$1" =~ ^[a-zA-ZwW_][a-zA-Z0-9_wW]*$ ]]
 }

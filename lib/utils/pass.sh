@@ -10,10 +10,10 @@ declare -A orb_pass_args=(
 
   if [[ -n "${_args['-a arg']}" ]]; then
     declare -n __cmd="${_args['-a arg']}"
-    ${_args['*']} && __cmd+=("${_orb_wildcard[@]}")
+    ${_args['*']} && __cmd+=("${_orb_rest[@]}")
   elif ${_args['*']}; then
-    # wildcards to be executed
-    declare -n __cmd=_orb_wildcard
+    # rests to be executed
+    declare -n __cmd=_orb_rest
   else
     orb_raise_error "-a arg or * required" 
   fi
@@ -22,7 +22,7 @@ declare -A orb_pass_args=(
   [[ -z $_orb_caller_function ]] && orb_raise_error 'must be used from within a caller function'
   [[ ! -v _orb_caller_args_declaration[@] ]] && orb_raise_error "$_orb_caller_function_descriptor has no arguments to pass"
 
-  local _arg; for _arg in "${_orb_dash_wildcard[@]}"; do
+  local _arg; for _arg in "${_orb_dash_rest[@]}"; do
     if orb_is_flag "$_arg"; then
       _orb_pass_flag "$_arg"
     elif orb_is_block "$_arg"; then
@@ -30,11 +30,11 @@ declare -A orb_pass_args=(
     elif orb_is_nr "$_arg"; then
       _orb_pass_nr "$_arg"
     elif [[ "$_arg" == '*' ]]; then
-      _orb_pass_wildcard
+      _orb_pass_rest
     elif [[ "$_arg" == '-- *' ]]; then
-      _orb_pass_dash_wildcard
+      _orb_pass_dash_rest
     else
-      orb_raise_error "$_arg not a flag, block, nr or wildcard"
+      orb_raise_error "$_arg not a flag, block, nr or rest"
     fi
   done
 
@@ -91,16 +91,16 @@ _orb_pass_nr() { # $1 = nr arg
 }
 
 
-_orb_pass_wildcard() {
-  _orb_declared_wildcard _orb_caller_args_declaration || _orb_raise_undeclared "*"
+_orb_pass_rest() {
+  _orb_declared_rest _orb_caller_args_declaration || _orb_raise_undeclared "*"
   ${_orb_caller_args['*']} && \
-  __cmd+=( "${_orb_caller_wildcard[@]}" )
+  __cmd+=( "${_orb_caller_rest[@]}" )
 }
 
-_orb_pass_dash_wildcard() {
-  _orb_declared_dash_wildcard _orb_caller_args_declaration || _orb_raise_undeclared "-- *"
+_orb_pass_dash_rest() {
+  _orb_declared_dash_rest _orb_caller_args_declaration || _orb_raise_undeclared "-- *"
   ${_orb_caller_args['-- *']} || return
   ${_args[-s]} || __cmd+=( '--' )
-  __cmd+=( "${_orb_caller_dash_wildcard[@]}" )
+  __cmd+=( "${_orb_caller_dash_rest[@]}" )
 }
 

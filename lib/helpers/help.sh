@@ -101,7 +101,7 @@ _orb_print_function_comment() {
 }
 
 _orb_print_orb_function_and_comment() {
-	local _comment=$(_orb_print_function_comment)
-	echo "$(orb_bold)$_orb_function$(orb_normal) $([[ -n "$_comment" ]] && echo "- $_comment")"
+	local comment=$(_orb_print_function_comment)
+	echo "$(orb_bold)$_orb_function$(orb_normal) $([[ -n "$comment" ]] && echo "- $comment")"
 }
 

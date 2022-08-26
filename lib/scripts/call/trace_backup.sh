@@ -8,8 +8,8 @@ local _orb_vars_to_caller=(
 )
 
 local _orb_arrs_to_caller=(
-  _orb_wildcard
-  _orb_dash_wildcard
+  _orb_rest
+  _orb_dash_rest
 )
 
 local _orb_blocks=($(_orb_has_declared_args))

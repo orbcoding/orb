@@ -45,8 +45,8 @@ fi
 
 # declare -A _args # args collector
 # local _args_nrs=() # 1, 2, 3...
-# local _orb_wildcard=() # *
-# local _orb_dash_wildcard=() # -- *
+# local _orb_rest=() # *
+# local _orb_dash_rest=() # -- *
 
 # declare block arrays
 # local _orb_blocks=($(_orb_has_declared_args))
