@@ -20,38 +20,58 @@ declare -A orb_upfind_closest_args=(
 
 # orb_upfind_to_arr
 declare -A orb_upfind_to_arr_args=(
-	['1']='array name'
+	['1']='array_name realpath_array_name (latter optional space separated)'
 	['2']='filename(s) multiple files sep with & (and) or | (or)'
 	['3']='start path; DEFAULT: $PWD'
 	['4']='last check path; DEFAULT: /'
 ); function orb_upfind_to_arr() { # finds all files with filename(s) upwards in file system
-	local _p="${3-$PWD}"
-	local _s="${4-/}"
+	# local _orb_arr_names=($1)
+	declare -n _orb_arr=$1
+	local _orb_sep='&'; [[ $2 == *"|"* ]] && _orb_sep='|'
+	local _orb_p="${3-$PWD}"
+	local _orb_stop_p="${4-/}"
 
-	[[ ${_p:0:1} != '/' ]] && _p="$(pwd)/$_p"
-	[[ ${_s:0:1} != '/' ]] && _s="$(pwd)/$_s"
+	[[ ${_orb_p:0:1} != '/' ]] && _orb_p="$(pwd)/$_orb_p"
+	[[ ${_orb_stop_p:0:1} != '/' ]] && _orb_stop_p="$(pwd)/$_orb_stop_p"
 
-	declare -n _arr=$1
-	[[ -n "$2" ]] && local _path="$2"
-
-	local _sep='&'; [[ $2 == *"|"* ]] && _sep='|'
-
-	local _options; IFS="$_sep" read -r -a _options <<< $2 # split by sep
-	local _option
+	local _orb_files _orb_file; IFS="$_orb_sep" read -r -a _orb_files <<< $2 # split by sep
 
 	while true; do
-		local _found=false
+		for _orb_file in "${_orb_files[@]}"; do
+			_orb_fullpath="$_orb_p/$_orb_file"
 
-		for _option in "${_options[@]}"; do
-			if [[ -e "$_p/$_option" ]]; then
-				[[ $_sep == '|' ]] && $_found && break
-				_arr+=( "$_p/$_option" )
+			if [[ -e "$_orb_fullpath" ]]; then
+					_orb_arr+=( "$_orb_p/$_orb_file" )
+					[[ $_orb_sep == '|' ]] && break
 			fi
 		done
 
-		[ "$_p" == "$_s" ] || [ "$_p" == '/' ] && break
-		_p=$(dirname "$_p")
+		[[ "$_orb_p" == "$_orb_stop_p" ]] || [[ "$_orb_p" == '/' ]] && break
+		_orb_p=$(dirname "$_orb_p")
 	done
+}
+
+# orb_trim_uniq_realpaths
+orb_trim_uniq_realpaths_orb=(
+	1 = _orb_input_array "Input path array name"
+	2 = _orb_uniq_array "Array name to store trimmed realpath array version"
+); function orb_trim_uniq_realpaths() {
+	declare -n _orb_i_array=$1
+	local _orb_u_array=()
+	local _orb_realpaths=()
+	local _orb_realpath
+
+	local _orb_path; for _orb_path in "${_orb_i_array[@]}"; do
+		_orb_realpath=$(realpath $_orb_path)
+
+	  if ! [[ " ${_orb_realpaths[@]} " =~ " $_orb_realpath " ]]; then 
+			_orb_u_array+=($_orb_path)
+			_orb_realpaths+=("$_orb_realpath")
+		fi
+	done
+
+	declare -n _orb_uniq_assign=$2
+	_orb_uniq_assign=("${_orb_u_array[@]}")
 }
 
 # parsenv

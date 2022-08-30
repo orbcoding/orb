@@ -49,8 +49,7 @@ _orb_postvalidate_declared_args_options_requireds() {
 _orb_is_valid_arg_option() {
 	# local flag_options=( )
 	local arg=$1 
-	local options_i=$2
-	local option=${declared_arg_options[$options_i]}
+	local option=$2
 
 	_orb_is_available_option $option || return 1
 

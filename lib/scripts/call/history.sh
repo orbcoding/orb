@@ -1,3 +1,4 @@
+return 
 [[ -z $_orb_function_name ]] && return
 # Instead of caller v2
 _orb_call_count=0
@@ -16,7 +17,7 @@ fi
 
 
 for trace in $(seq 0 $trace_length); do
-  
+  :
 done
 
 

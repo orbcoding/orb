@@ -84,7 +84,7 @@ End
 Describe '_orb_collect_flag_arg'
   _orb_assign_boolean_flag() { echo_fn $@; }
   _orb_assign_flagged_arg() { echo_fn $@; }
-  # _orb_try_parse_multiple_flags() { echo_fn $@; }
+  # _orb_try_collect_multiple_flags() { echo_fn $@; }
   _orb_try_inline_arg_fallback() { echo_fn $@; }
 
   It 'collects declared boolean flag'
@@ -212,20 +212,20 @@ Describe '_orb_try_inline_arg_fallback'
   End
 End
 
-# _orb_try_parse_multiple_flags
-Describe '_orb_try_parse_multiple_flags'
+# _orb_try_collect_multiple_flags
+Describe '_orb_try_collect_multiple_flags'
   _orb_assign_boolean_flag() { spec_fns+=($(echo_fn $@)); }
   _orb_assign_flagged_arg() { spec_fns+=($(echo_fn $@)); }
   _orb_shift_args() { spec_fns+=($(echo_fn $@)); }
 
   It 'fails on verbose flags'
-    When call _orb_try_parse_multiple_flags --verbose-flag
+    When call _orb_try_collect_multiple_flags --verbose-flag
     The status should be failure
   End
 
   It 'succeeds on defined flags'
     _orb_declared_args=(-f -a)
-    When call _orb_try_parse_multiple_flags -fa
+    When call _orb_try_collect_multiple_flags -fa
     The status should be success
     The variable "spec_fns[@]" should equal "_orb_assign_boolean_flag -f 0 _orb_assign_boolean_flag -a 0 _orb_shift_args 1"
   End
@@ -233,7 +233,7 @@ Describe '_orb_try_parse_multiple_flags'
   It 'shifts args according to highest suffix'
     _orb_declared_args=(-f -a)
     declare -A _orb_declared_arg_suffixes=([-f]=3 [-a]=2)
-    When call _orb_try_parse_multiple_flags -fa
+    When call _orb_try_collect_multiple_flags -fa
     The status should be success
     The variable "spec_fns[@]" should equal "_orb_assign_flagged_arg -f 0 _orb_assign_flagged_arg -a 0 _orb_shift_args 3"
   End

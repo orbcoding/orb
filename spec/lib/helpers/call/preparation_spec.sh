@@ -50,16 +50,16 @@ Describe '_orb_get_current_namespace_from_args'
     End
 
     Context 'without $ORB_DEFAULT_NAMESPACE'
-      It 'raises error unless _orb_setting_global_help'
+      It 'raises error unless _orb_setting_help'
         orb_raise_error() { echo_fn && exit 1; }
-        _orb_setting_global_help=false
+        _orb_setting_help=false
         When run _orb_get_current_namespace_from_args hello 1 2
         The status should equal 1
         The output should equal orb_raise_error
       End
 
-      It 'succeeds if _orb_setting_global_help'
-        _orb_setting_global_help=true
+      It 'succeeds if _orb_setting_help'
+        _orb_setting_help=true
         When run _orb_get_current_namespace_from_args hello 1 2
         The status should be success
       End

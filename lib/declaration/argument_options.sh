@@ -4,6 +4,9 @@ _orb_parse_declared_args_options() {
 
 		declared_arg_options=()
 		_orb_get_declared_arg_options $arg
+		
+		[[ -z "${declared_arg_options[@]}" ]] && continue
+
 		_orb_prevalidate_declared_arg_options $arg
 		_orb_parse_declared_arg_options $arg
 	done
@@ -18,23 +21,34 @@ _orb_set_declared_arg_options_defaults() {
  
 _orb_get_declared_arg_options() {
 	local arg=$1
-	local i=${declared_args_start_indexes[$arg]}
-	local len=${declared_args_lengths[$arg]}
 	local i_offset=3
 	[[ -n ${_orb_declared_arg_suffixes[$arg]} ]] && (( i_offset++ ))
+	_orb_store_declared_arg_comment $arg $i_offset && (( i_offset++ )) 
 
-	local options_i=$(( $i + $i_offset ))
-	local options_len=$(( $len - $i_offset ))
+	local options_i=$(( ${declared_args_start_indexes[$arg]} + $i_offset ))
+	local options_len=$(( ${declared_args_lengths[$arg]} - $i_offset ))
 
-	(( $len <= $i_offset )) && return # no options after
-	
+	[[ $options_len == 0 ]] && return
+
 	declared_arg_options=("${declaration[@]:$options_i:$options_len}")
+}
+
+_orb_store_declared_arg_comment() {
+	local arg=$1
+	local i_offset=$2
+	(( ${declared_args_lengths[$arg]} == $i_offset )) && return 1 # no comment available 
+
+	local comment_i=$(( ${declared_args_start_indexes[$arg]} + $i_offset ))
+
+	if ! _orb_is_valid_arg_option $arg ${declaration[$comment_i]}; then
+		_orb_declared_comments[$arg]="${declaration[$comment_i]}"
+	fi
 }
 
 _orb_prevalidate_declared_arg_options() {
 	local arg=$1
 	
-	if ! _orb_is_valid_arg_option $arg 0; then
+	if ! _orb_is_valid_arg_option $arg ${declared_arg_options[0]}; then
 		_orb_raise_invalid_declaration "$arg: Invalid option: ${declared_arg_options[0]}. Available options: ${_orb_available_arg_options[@]}"
 	fi
 }
@@ -62,7 +76,7 @@ _orb_is_declared_arg_options_start_index() {
 	local arg=$1 
   local options_i=$2
 
-	if _orb_is_valid_arg_option $arg $options_i; then
+	if _orb_is_valid_arg_option $arg ${declared_arg_options[$options_i]}; then
 		# String is valid option
 		local current_option="${declared_arg_options[$options_i]}"
 
@@ -115,9 +129,6 @@ _orb_store_declared_arg_options() {
     local value=( "${declared_arg_options[@]:$value_start_i:$value_len}" )
     
     case $option in
-      ':')
-        _orb_declared_comments[$arg]="$value"
-        ;;
       'Required:')
         _orb_declared_requireds[$arg]="$value"
         ;;

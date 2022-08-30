@@ -1,23 +1,35 @@
 Include lib/helpers/source/extensions.sh
+Include lib/utils/file.sh
+
 
 Describe '_orb_collect_orb_extensions'
   _orb_extensions=()
-  orb_upfind_to_arr() { :; }
 
-  It 'calls upfind_to_arr with correct params'
+  It 'calls nested functions with correct params'
+    orb_upfind_to_arr() { :; }
+    orb_trim_uniq_realpaths() { :; }
     # so no home .orb is found
     HOME=
-    orb_upfind_to_arr() { echo "$@"; }
+    orb_upfind_to_arr() { spec_args+=($(echo_fn "$@")); }
+    orb_trim_uniq_realpaths() { spec_args+=($(echo_fn "$@")); }
     When call _orb_collect_orb_extensions start last
-    The output should equal "_orb_extensions _orb&.orb start last"
+    The variable "spec_args[@]" should equal "orb_upfind_to_arr _orb_extensions _orb&.orb start last orb_trim_uniq_realpaths _orb_extensions _orb_extensions"
     The variable "_orb_extensions[0]" should be undefined
   End
 
   It 'includes .orb from home dir if present'
-    HOME=spec/templates
+    HOME=$(pwd)/spec/templates
+    cd /
     When call _orb_collect_orb_extensions
-    The variable "_orb_extensions[0]" should eq spec/templates/.orb
+    The variable "_orb_extensions[0]" should eq "$HOME/.orb"
     The variable "_orb_extensions[1]" should be undefined
+  End
+
+  It 'finds _orb and .orb folders'
+    cd spec/templates
+    When call _orb_collect_orb_extensions
+    The variable "_orb_extensions[0]" should eq $(pwd)/_orb
+    The variable "_orb_extensions[1]" should eq $(pwd)/.orb
   End
 End
 

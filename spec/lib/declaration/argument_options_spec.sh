@@ -9,38 +9,59 @@ _orb_declared_args=(1 -a)
 # As set in _orb_parse_declaration
 declaration=(
   1 = first
-    : "This is first comment"
+    "This is first comment"
     Required: false
     Default: value
     In: first value or other
+
   -a 1 = flagged_arg
-    : "This is flagged comment"
+    "This is flagged comment"
     Required: true
     Default: value
     In: second value or other
 )
 
-declare -A declared_args_start_indexes=([1]="0" [-a]="14")
-declare -A declared_args_lengths=([1]="14" [-a]="15")
+declare -A declared_args_start_indexes=([1]="0" [-a]="13")
+declare -A declared_args_lengths=([1]="13" [-a]="14")
 declare -A _orb_declared_arg_suffixes=([-a]="1")
 
 
 # _orb_parse_declared_args_options
 Describe '_orb_parse_declared_args_options'
-  It 'calls nested functions with parameters'
-    _orb_declared_args=(spec args)
-    _orb_set_declared_arg_options_defaults() { spec_args+=("$@"); }
-    _orb_get_declared_arg_options() { spec_args2+=("$@"); }
-    _orb_prevalidate_declared_arg_options() { spec_args3+=("$@");}
-    _orb_parse_declared_arg_options() { spec_args4+=("$@"); }
-    _orb_postvalidate_declared_args_options() { echo_fn; }
-    
-    When call _orb_parse_declared_args_options
-    The variable "spec_args[@]" should equal "spec args"
-    The variable "spec_args2[@]" should equal "spec args"
-    The variable "spec_args3[@]" should equal "spec args"
-    The variable "spec_args4[@]" should equal "spec args"
-    The output should include "_orb_postvalidate_declared_args_options"
+
+  Context 'calls nested functions with parameters'
+    _orb_set_declared_arg_options_defaults() { spec_args+=($(echo_fn "$@")); }
+    _orb_parse_declared_arg_options() { spec_args+=($(echo_fn "$@")); }
+    _orb_prevalidate_declared_arg_options() { spec_args+=($(echo_fn "$@")); }
+    _orb_postvalidate_declared_args_options() { spec_args+=($(echo_fn "$@")); }
+
+    It 'prevalidates and parses if options found'
+      _orb_get_declared_arg_options() { spec_args+=($(echo_fn "$@")); declared_arg_options=(opt); }
+      When call _orb_parse_declared_args_options
+      The variable "spec_args[@]" should equal "\
+_orb_set_declared_arg_options_defaults 1 \
+_orb_get_declared_arg_options 1 \
+_orb_prevalidate_declared_arg_options 1 \
+_orb_parse_declared_arg_options 1 \
+\
+_orb_set_declared_arg_options_defaults -a \
+_orb_get_declared_arg_options -a \
+_orb_prevalidate_declared_arg_options -a \
+_orb_parse_declared_arg_options -a \
+_orb_postvalidate_declared_args_options"
+    End
+
+    It "doesnt prevalidate or parse if no options found"
+      _orb_get_declared_arg_options() { spec_args+=($(echo_fn "$@"));}
+      When call _orb_parse_declared_args_options
+      The variable "spec_args[@]" should equal "\
+_orb_set_declared_arg_options_defaults 1 \
+_orb_get_declared_arg_options 1 \
+\
+_orb_set_declared_arg_options_defaults -a \
+_orb_get_declared_arg_options -a \
+_orb_postvalidate_declared_args_options"
+    End 
   End
 
   Context 'holistic testing'
@@ -83,14 +104,55 @@ End
 
 # _orb_get_declared_arg_options
 Describe '_orb_get_declared_arg_options'
-  It 'gets options declaration'
+  It "calls _orb_store_declared_arg_comment"
+    _orb_store_declared_arg_comment() { echo_fn "$@"; }
     When call _orb_get_declared_arg_options 1
-    The variable "declared_arg_options[@]" should equal ": This is first comment Required: false Default: value In: first value or other"
+    The output should equal "_orb_store_declared_arg_comment 1 3"
   End
 
-  It 'gets options declaration without suffix'
+  It 'gets options declaration and comment'
+    When call _orb_get_declared_arg_options 1
+    The variable "declared_arg_options[@]" should equal "Required: false Default: value In: first value or other"
+    The variable "_orb_declared_comments[1]" should equal "This is first comment"
+  End
+
+  It 'gets options declaration with suffixed'
     When call _orb_get_declared_arg_options -a
-    The variable "declared_arg_options[@]" should equal ": This is flagged comment Required: true Default: value In: second value or other"
+    The variable "declared_arg_options[@]" should equal "Required: true Default: value In: second value or other"
+    The variable "_orb_declared_comments[-a]" should equal "This is flagged comment"
+  End
+
+  It 'does not offset comment if extraction falsy'
+    _orb_store_declared_arg_comment() { return 1; }
+    When call _orb_get_declared_arg_options -a
+    The variable "declared_arg_options[@]" should equal "This is flagged comment Required: true Default: value In: second value or other"
+  End
+
+  It 'does not set declared_arg_options if there are none'
+    declaration=(1 = first)
+    When call _orb_get_declared_arg_options 1
+    The variable "declared_arg_options[@]" should be undefined
+  End
+
+  It 'does not set declared_arg_options if there is only a comment'
+    declaration=(1 = first "comment of first")
+    When call _orb_get_declared_arg_options 1
+    The variable "declared_arg_options[@]" should be undefined
+    The variable "_orb_declared_comments[1]" should equal "comment of first"
+  End
+End
+
+# _orb_extract_arg_comment
+Describe '_orb_extract_arg_comment'
+  It 'stores comment if available'
+    When call _orb_store_declared_arg_comment 1 3
+    The variable "_orb_declared_comments[1]" should equal "This is first comment"
+  End
+
+  It 'fails if no comment available'
+    declare -A declared_args_lengths=([1]="3")
+    When call _orb_store_declared_arg_comment 1 3 
+    The status should be failure
   End
 End
 
@@ -104,7 +166,7 @@ Describe '_orb_prevalidate_declared_arg_options'
 
     When call _orb_prevalidate_declared_arg_options -f
     The status should be failure
-    The output should equal "-f: Invalid option: invalid. Available options: : Required: Default: In: Catch:"
+    The output should equal "-f: Invalid option: invalid. Available options: Required: Default: In: Catch:"
   End
 
   It 'should not raise anything if first is valid option'
@@ -252,18 +314,16 @@ Describe '_orb_store_declared_arg_options'
     Default: some value
     In: value or other
     Required: true
-    : "This is my comment"
     Catch: flag block
   )
 
-  declared_arg_options_start_indexes=(0 3 7 9 11)
-  declared_arg_options_lengths=(3 4 2 2 3)
+  declared_arg_options_start_indexes=(0 3 7 9)
+  declared_arg_options_lengths=(3 4 2 3)
   _orb_set_declared_arg_options_defaults ...
 
   It 'stores options to variables'
     When call _orb_store_declared_arg_options ...
     The variable "_orb_declared_requireds[...]" should equal true
-    The variable "_orb_declared_comments[...]" should equal "This is my comment"
     The variable "_orb_declared_defaults[@]" should equal "some value"
     The variable "_orb_declared_defaults_start_indexes[...]" should equal "0"
     The variable "_orb_declared_defaults_lengths[...]" should equal "2"

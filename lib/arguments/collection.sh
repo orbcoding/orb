@@ -3,7 +3,7 @@
 # Function arguments collector
 #
 # Arguments are checked against the functions orb declaration
-# _orb_parse_declaration should have been called before
+# _orb_parse_function_declaration should have been called before
 #
 # OBS
 # All local variables in this file have to be _orb prefixed to not block assignment to declared value variables
@@ -59,7 +59,7 @@ _orb_collect_flag_arg() { # $1 input_arg
 		_orb_assign_flagged_arg "$_orb_arg"
 	else
 		local _orb_invalid_flags=()
-		_orb_try_parse_multiple_flags "$_orb_arg"
+		_orb_try_collect_multiple_flags "$_orb_arg"
 
 		if [[ $? == 1 ]]; then 
 			_orb_try_inline_arg_fallback "$_orb_arg" "${_orb_invalid_flags[*]}"
@@ -105,7 +105,7 @@ _orb_try_inline_arg_fallback() {
 	fi
 }
 
-_orb_try_parse_multiple_flags() { # $1 arg
+_orb_try_collect_multiple_flags() { # $1 arg
 	if orb_is_verbose_flag "$1"; then
 		_orb_invalid_flags+=( "$1" )
 		return 1 # only single boolean flags can be multi-flags

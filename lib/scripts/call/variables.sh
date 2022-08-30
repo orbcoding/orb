@@ -6,7 +6,7 @@
 
 if [[ $1 != only_args_collection ]]; then
   # Orb settings
-  declare _orb_setting_global_help=false
+  declare _orb_setting_help=false
   declare _orb_setting_namespace_help=false
   declare _orb_setting_direct_call=false
   declare _orb_setting_reload_functions=false

@@ -5,7 +5,7 @@ Include lib/scripts/call/variables.sh
 Describe '_orb_extract_orb_settings_arguments'
   It 'extracts settings arguments'
     extract() { 
-      _orb_parse_declaration _orb_settings_declaration
+      _orb_parse_function_declaration _orb_settings_declaration
       _orb_extract_orb_settings_arguments settings_args -e ext --help -d -r -e ext2 namespace function
     }
     When call extract 
@@ -16,7 +16,7 @@ Describe '_orb_extract_orb_settings_arguments'
   It 'raises error un undefined settings arg'
     _orb_raise_invalid_orb_settings_arg() { echo_fn "$@"; }
     extract() { 
-      _orb_parse_declaration _orb_settings_declaration
+      _orb_parse_function_declaration _orb_settings_declaration
       _orb_extract_orb_settings_arguments settings_args -k -e ext --help -d -r -e ext2 namespace function
     }
     When call extract 
@@ -46,10 +46,10 @@ Describe '_orb_raise_invalid_orb_settings_arg'
 
 Available options:
 
-  --help   show help
-  -e       additional orb extension folders
-  -d       direct function call
-  -r       restore function declarations after call"
+  --help   Show help
+  -e       Additional orb extension folders
+  -d       Direct function call
+  -r       Restore function declarations after call"
 
     The status should be failure
   End

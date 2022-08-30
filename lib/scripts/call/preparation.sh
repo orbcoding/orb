@@ -20,7 +20,7 @@ _orb_function_descriptor=$(_orb_get_current_function_descriptor $_orb_function_n
 #   ['--help']='show help'
 # )
 
-if orb_is_flag "$_orb_function_name"; then
+if orb_is_any_flag "$_orb_function_name"; then
   if [[ $_orb_function_name == '--help' ]]; then
     _orb_setting_namespace_help=true
   else
@@ -29,7 +29,7 @@ if orb_is_flag "$_orb_function_name"; then
 fi
 
 # No more arguments required if requesting help
-$_orb_setting_global_help || ${_orb_setting_namespace_help} && return
+$_orb_setting_help || ${_orb_setting_namespace_help} && return
 
 if [[ -z $_orb_function_name ]]; then
   orb_raise_error +t "is a namespace, no command or function provided\n\n Add --help for list of functions"

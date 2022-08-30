@@ -1,6 +1,6 @@
 # Internal help functions
 _orb_handle_help_requested() {
-	if $_orb_setting_global_help; then
+	if $_orb_setting_help; then
 		_orb_print_global_namespace_help_intro
 	elif $_orb_setting_namespace_help; then
 		_orb_print_namespace_help
@@ -10,48 +10,45 @@ _orb_handle_help_requested() {
 }
 
 _orb_print_global_namespace_help_intro() {
-	local _def_namespace_msg
+	local def_namespace_msg
 
 	if [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
-		_def_namespace_msg="Default namespace: $(orb_bold)$ORB_DEFAULT_NAMESPACE$(orb_normal)"
+		def_namespace_msg="Default namespace: $(orb_bold)$ORB_DEFAULT_NAMESPACE$(orb_normal)"
 	else
-		_def_namespace_msg="Default namespace \$ORB_DEFAULT_NAMESPACE not set"
+		def_namespace_msg="Default namespace \$ORB_DEFAULT_NAMESPACE not set"
 	fi
 
-	local _intromsg="$_def_namespace_msg.\n\n"
+	local help_msg="$def_namespace_msg.\n\n"
 
 	if orb_is_empty_arr _orb_namespaces; then
-		_intromsg+="No namespaces found"
+		help_msg+="No namespaces found"
 	else
-		_intromsg+="Available namespaces listed below:\n\n"
-		_intromsg+="  $(orb_join_by ', ' "${_orb_namespaces[@]}").\n\n"
-		_intromsg+="To list commands in a namespace, use \`orb \"namespace\" --help\`"
+		help_msg+="Available namespaces listed below:\n\n"
+		help_msg+="  $(orb_join_by ', ' "${_orb_namespaces[@]}").\n\n"
+		help_msg+="To list commands in a namespace, use \`orb \"namespace\" --help\`"
 	fi
 
-	echo -e "$_intromsg"
+	echo -e "$help_msg"
 }
 
 _orb_print_namespace_help() {
-	if $_orb_setting_global_help; then
-		_orb_print_global_namespace_help_intro
-	fi
+	local i=0 file current_dir
 
-	local _i=0 _file _current_dir
-	for _file in ${_orb_namespace_files[@]}; do
-		if [[ "${_orb_namespace_files_dir_tracker[$_i]}" != "$_current_dir" ]]; then
-			_current_dir="${_orb_namespace_files_dir_tracker[$_i]}"
-			_output+="-----------------# $(orb_italic)${_current_dir}\n$(orb_normal)"
+	for file in ${_orb_namespace_files[@]}; do
+		if [[ "${_orb_namespace_files_dir_tracker[$i]}" != "$current_dir" ]]; then
+			current_dir="${_orb_namespace_files_dir_tracker[$i]}"
+			output+="-----------------# $(orb_italic)${current_dir}\n$(orb_normal)"
 		fi
 
-		_output+="$(orb_bold)$(orb_upcase $(basename $_file))$(orb_normal)\n"
-		_output+=$(grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()[ ]*{" $_file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
-		_output+="\n\n"
+		output+="$(orb_bold)$(orb_upcase $(basename $file))$(orb_normal)\n"
+		output+=$(grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()[ ]*{" $file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
+		output+="\n\n"
 
-		((_i++1))
+		((i++))
 	done
 
 	# remove last 4 chars \n\n
-	echo -e "${_output::-4}" | column -tes '#'
+	echo -e "${output::-4}" | column -tes '#'
 }
 
 _orb_print_function_help() {

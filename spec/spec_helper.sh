@@ -36,3 +36,6 @@ echo_fn() {
   (( "$#" >= 0 )) && output+=("$@")
   echo "${output[@]}"
 }
+
+
+# orb_raise_error() { echo_fn "$@"; 

@@ -15,64 +15,17 @@ _orb_function_declaration=(
     Required: false
 )
 
-# _orb_parse_declaration
-Describe '_orb_parse_declaration'
-  Include lib/declaration/argument_options.sh
 
-  It 'calls its nested functions'
-    _orb_prevalidate_declaration() { spec_fns+=( $(echo_fn) ); }
-    _orb_parse_declared_args() { spec_fns+=( $(echo_fn) ); }
-    _orb_parse_declared_args_options() { spec_fns+=( $(echo_fn) ); }
-    When call _orb_parse_declaration
-    The variable "spec_fns[@]" should equal "_orb_prevalidate_declaration _orb_parse_declared_args _orb_parse_declared_args_options"
-  End
-
-  It 'stores arguments and options to variables'
-    _orb_function_declaration=(
-      1 = first 
-        : "This is first comment"
-        Required: false
-        Default: value
-        In: first value or other
-      -a 1 = flagged_arg
-        : "This is flagged comment"
-        Required: true
-        Default: value
-        In: second value or other
-    )
-
-    orb_raise_error() { echo "$@" ; }
-
-    When call _orb_parse_declaration
-    The variable "_orb_declared_args[@]" should equal "1 -a"
-
-    The variable "_orb_declared_requireds[1]" should equal "false"
-    The variable "_orb_declared_comments[1]" should equal "This is first comment"
-    The variable "_orb_declared_defaults_start_indexes[1]" should equal "0"
-    The variable "_orb_declared_defaults_lengths[1]" should equal "1"
-    The variable "_orb_declared_ins_start_indexes[1]" should equal "0"
-    The variable "_orb_declared_ins_lengths[1]" should equal "4"
-    
-    The variable "_orb_declared_requireds[-a]" should equal "true"
-    The variable "_orb_declared_comments[-a]" should equal "This is flagged comment"
-    The variable "_orb_declared_defaults_start_indexes[-a]" should equal "1"
-    The variable "_orb_declared_defaults_lengths[-a]" should equal "1"
-    The variable "_orb_declared_ins_start_indexes[-a]" should equal "4"
-    The variable "_orb_declared_ins_lengths[-a]" should equal "4"
-    
-    The variable "_orb_declared_ins[@]" should equal "first value or other second value or other"
-    The variable "_orb_declared_defaults[@]" should equal "value value"
-  End
-End
 
 # _orb_parse_declared_args
 Describe '_orb_parse_declared_args'
   It 'calls its functions'
     _orb_get_declarad_args_and_start_indexes() { spec_fns+=( $(echo_fn) ); }
     _orb_get_declared_args_lengths() { spec_fns+=( $(echo_fn) ); }
+    _orb_parse_declared_args_options() { spec_fns+=( $(echo_fn) ); }
     When call _orb_parse_declared_args
     The status should be success
-    The variable 'spec_fns[@]' should equal "_orb_get_declarad_args_and_start_indexes _orb_get_declared_args_lengths"
+    The variable 'spec_fns[@]' should equal "_orb_get_declarad_args_and_start_indexes _orb_get_declared_args_lengths _orb_parse_declared_args_options"
   End
 End
 

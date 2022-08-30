@@ -240,7 +240,7 @@ Describe 'orb_is_valid_variable_name'
   # Use eg internally for _orb_settings_declaration
   It 'succeeds if starts with underscore'
     When call orb_is_valid_variable_name "_var"
-    The status should be failure
+    The status should be success
   End
   
   It 'succeeds if contains underscore not first'

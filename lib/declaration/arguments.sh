@@ -1,20 +1,7 @@
-_orb_parse_declaration() {
-	declare -n declaration=${1-"_orb_function_declaration"}
-	_orb_prevalidate_declaration
-
-	# local internal variables
-	declare -A declared_args_start_indexes
-	declare -A declared_args_lengths
-
-	_orb_parse_declared_args
-	_orb_parse_declared_args_options
-	# TODO check other global options before/after args
-}
-
 _orb_parse_declared_args() {
 	_orb_get_declarad_args_and_start_indexes
 	_orb_get_declared_args_lengths
-	# _orb_store_declared_args
+	_orb_parse_declared_args_options
 }
 
 _orb_get_declarad_args_and_start_indexes() {

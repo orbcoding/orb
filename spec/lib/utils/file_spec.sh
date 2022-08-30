@@ -39,6 +39,34 @@ Describe 'orb_upfind_to_arr'
     When call orb_upfind_closest _orb_nested_test_file_non_existent spec/templates/nest_level_1/nest_level_2
     The status should be failure
   End
+
+  It 'finds both if two files specified with &'
+    arr=()
+    cd spec/templates
+    When call orb_upfind_to_arr arr "_orb&.orb" $(pwd) $(pwd)
+    The variable "arr[0]" should eq $(pwd)/_orb
+    The variable "arr[1]" should eq $(pwd)/.orb
+  End
+
+  It 'finds first if two files specified with |'
+    arr=()
+    cd spec/templates
+    When call orb_upfind_to_arr arr "_orb|.orb" $(pwd) $(pwd)
+    The variable "arr[0]" should eq $(pwd)/_orb
+    The variable "arr[1]" should be undefined
+  End
+End
+
+Describe 'orb_trim_uniq_realpaths'
+  It 'trims away non unique realpaths'
+    # first is symlink to second
+    paths=(
+      $(pwd)/spec/templates/nest_level_1/nest_level_2/nest_level_3/_orb_nested_test_file
+      $(pwd)/spec/templates/nest_level_1/nest_level_2/_orb_nested_test_file
+    )
+    When call orb_trim_uniq_realpaths paths paths
+    The variable "paths[@]" should eq $(pwd)/spec/templates/nest_level_1/nest_level_2/nest_level_3/_orb_nested_test_file
+  End
 End
 
 Describe 'orb_parse_env'

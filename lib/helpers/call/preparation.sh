@@ -16,7 +16,7 @@ _orb_get_current_namespace_from_args() {
 	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
 		echo "$ORB_DEFAULT_NAMESPACE"
 		return 2
-	elif ! $_orb_setting_global_help; then
+	elif ! $_orb_setting_help; then
 		orb_raise_error +t -d "$(orb_bold)${1-\"\"}$(orb_normal)" "not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n  Available namespaces: ${_orb_namespaces[*]}"
 	fi
 }

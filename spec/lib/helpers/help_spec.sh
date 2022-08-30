@@ -6,10 +6,10 @@ Describe '_orb_handle_help_requested'
   _orb_print_global_namespace_help_intro() { echo_fn; }
   _orb_print_namespace_help() { echo_fn; }
   _orb_setting_namespace_help=false
-  _orb_setting_global_help=false
+  _orb_setting_help=false
 
   It 'prints global help if global help requested'
-    _orb_setting_global_help=true
+    _orb_setting_help=true
     When call _orb_handle_help_requested
     The output should equal _orb_print_global_namespace_help_intro
   End

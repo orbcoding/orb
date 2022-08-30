@@ -41,7 +41,7 @@ if [ ! $_orb_initialized ]; then
 
     source "$_orb_dir/lib/scripts/source/function.sh"
 
-    _orb_parse_declaration "${_orb_function_name}_orb"
+    _orb_parse_function_declaration "${_orb_function_name}_orb"
     _orb_parse_function_args "$@"
 
     # Call function

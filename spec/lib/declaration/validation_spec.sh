@@ -73,33 +73,27 @@ End
 # _orb_is_valid_arg_option
 Describe '_orb_is_valid_arg_option'
   _orb_raise_invalid_declaration() { echo "$@"; return 1; }
-
   _orb_declared_args=(-f 1 ...)
-  declared_arg_options=(
-    Default: value
-    In: value
-    Required: true 
-  )
 
   It 'suceeds for Default:'
-    When call _orb_is_valid_arg_option -f 0
+    When call _orb_is_valid_arg_option -f Default:
     The status should be success
   End
 
   It 'fails for boolean with invalid boolean option'
-    When call _orb_is_valid_arg_option -f 2
+    When call _orb_is_valid_arg_option -f In:
     The status should be failure
-    The output should equal "-f: Invalid option: In:. Available options for boolean flags: : Required: Default:"
+    The output should equal "-f: Invalid option: In:. Available options for boolean flags: Required: Default:"
   End
 
   It 'succeeds for nr with In:'
-    When call _orb_is_valid_arg_option 1 2
+    When call _orb_is_valid_arg_option 1 In:
     The status should be success
   End
 
   It 'fails for ... with invalid array option'
-    When call _orb_is_valid_arg_option ... 2
+    When call _orb_is_valid_arg_option ... In:
     The status should be failure
-    The output should equal "...: Invalid option: In:. Available options for array type arguments: : Required: Default: Catch:"
+    The output should equal "...: Invalid option: In:. Available options for array type arguments: Required: Default: Catch:"
   End
 End

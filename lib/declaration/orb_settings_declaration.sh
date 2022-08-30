@@ -1,11 +1,11 @@
 _orb_settings_declaration=(
   --help = _orb_setting_help
-    : 'show help'
+    "Show help"
   -e 1 = _orb_setting_extensions
-    : 'additional orb extension folders'
+    "Additional orb extension folders"
     Catch: multiple
   -d = _orb_setting_direct_call
-    : 'direct function call'
+    "Direct function call"
   -r = _orb_setting_reload_functions
-    : 'restore function declarations after call'
+    "Restore function declarations after call"
 )
