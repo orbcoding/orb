@@ -5,14 +5,14 @@
   "version": "0.2.0",
   "configurations": [
     {
-      // orb -e ./spec/templates/.orb spec test_orb_print_args -f -a flag --verbose-flag --verbose-flagged arg -b- block args -b- rest args -- dash rest args
+      // orb -e ./spec/fixtures/.orb spec test_orb_print_args -f -a flag --verbose-flag --verbose-flagged arg -b- block args -b- rest args -- dash rest args
       "type": "bashdb",
       "request": "launch",
       "name": "orb test",
       "program": "./bin/orb",
       "args": [
         "-e", 
-        "./spec/templates/.orb",
+        "./spec/fixtures/.orb",
         "spec",
         "test_orb_print_args",
         "-f",

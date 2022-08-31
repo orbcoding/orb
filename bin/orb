@@ -22,24 +22,24 @@ _orb_dir="${BASH_SOURCE[0]}"
 _orb_dir="${_orb_dir%/*/*}"
 
 if [ ! $_orb_initialized ]; then
-  source "$_orb_dir/lib/scripts/initialize.sh"
+  source "$_orb_dir/scripts/initialize.sh"
 
   # Prefer declaring orb function here for minimal stack trace
   orb() {
-    source "$_orb_dir/lib/scripts/call/history.sh"
-    source "$_orb_dir/lib/scripts/call/variables.sh"
-    source "$_orb_dir/lib/scripts/call/orb_settings.sh" "$@" && shift $?
-    source "$_orb_dir/lib/scripts/source/extensions.sh"
-    source "$_orb_dir/lib/scripts/call/preparation.sh"
+    source "$_orb_dir/scripts/call/history.sh"
+    source "$_orb_dir/scripts/call/variables.sh"
+    source "$_orb_dir/scripts/call/orb_settings.sh" "$@" && shift $?
+    source "$_orb_dir/scripts/source/extensions.sh"
+    source "$_orb_dir/scripts/call/preparation.sh"
 
     $_orb_setting_reload_functions && local _orb_function_dump="$(declare -f)"
 
-    source "$_orb_dir/lib/scripts/source/presource.sh"
+    source "$_orb_dir/scripts/source/presource.sh"
 
     _orb_collect_namespace_files
     _orb_handle_help_requested && exit 0
 
-    source "$_orb_dir/lib/scripts/source/function.sh"
+    source "$_orb_dir/scripts/source/function.sh"
 
     _orb_parse_function_declaration "${_orb_function_name}_orb"
     _orb_parse_function_args "$@"
@@ -56,4 +56,4 @@ if [ ! $_orb_initialized ]; then
   _orb_initialized=1
 fi
 
-source "$_orb_dir/lib/scripts/handle_orb_sourced.sh" || orb "$@"
+source "$_orb_dir/scripts/handle_orb_sourced.sh" || orb "$@"
