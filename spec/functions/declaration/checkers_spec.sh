@@ -1,5 +1,6 @@
 Include functions/utils/argument.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 
 
 # _orb_is_available_option
@@ -31,42 +32,106 @@ Describe '_orb_is_available_boolean_flag_option'
   End
 End
 
-# _orb_is_available_array_option
-Describe '_orb_is_available_array_option'
-  It 'suceeds for In:'
-    When call _orb_is_available_array_option Default:
+# _orb_is_available_flag_arg_option
+Describe '_orb_is_available_flag_arg_option'
+  It 'suceeds for Required:'
+    When call _orb_is_available_flag_arg_option Required:
     The status should be success
   End
 
-  It 'fails for other'
-    When call _orb_is_available_array_option In:
+  It 'fails for Catch:'
+    When call _orb_is_available_flag_arg_option Catch:
     The status should be failure
   End
 End
 
-
-# _orb_is_available_catch_value
-Describe '_orb_is_available_catch_value'
-  It 'suceeds for In:'
-    When call _orb_is_available_catch_value flag
+# _orb_is_available_array_flag_arg_option
+Describe '_orb_is_available_array_flag_arg_option'
+  It 'suceeds for Required:'
+    When call _orb_is_available_array_flag_arg_option Required:
     The status should be success
   End
 
-  It 'fails for other'
-    When call _orb_is_available_catch_value unknown
+  It 'fails for Ins:'
+    When call _orb_is_available_array_flag_arg_option In:
     The status should be failure
   End
 End
 
-# _orb_is_available_required_value
-Describe '_orb_is_available_required_value'
-  It 'suceeds for In:'
-    When call _orb_is_available_required_value true
+# _orb_is_available_block_option
+Describe '_orb_is_available_block_option'
+  It 'suceeds for Required:'
+    When call _orb_is_available_block_option Required:
+    The status should be success
+  End
+
+  It 'fails for In:'
+    When call _orb_is_available_block_option In:
+    The status should be failure
+  End
+End
+
+# _orb_is_available_dash_option
+Describe '_orb_is_available_dash_option'
+  It 'suceeds for Required:'
+    When call _orb_is_available_dash_option Required:
+    The status should be success
+  End
+
+  It 'fails for In:'
+    When call _orb_is_available_dash_option In:
+    The status should be failure
+  End
+End
+
+# _orb_is_available_rest_option
+Describe '_orb_is_available_rest_option'
+  It 'suceeds for Required:'
+    When call _orb_is_available_rest_option Required:
+    The status should be success
+  End
+
+  It 'fails for In:'
+    When call _orb_is_available_rest_option In:
+    The status should be failure
+  End
+End
+
+# _orb_is_available_catch_option_value
+Describe '_orb_is_available_catch_option_value'
+  It 'suceeds for flag'
+    When call _orb_is_available_catch_option_value flag
     The status should be success
   End
 
   It 'fails for other'
-    When call _orb_is_available_required_value unknown
+    When call _orb_is_available_catch_option_value unknown
+    The status should be failure
+  End
+End
+
+# _orb_is_available_required_option_value
+Describe '_orb_is_available_required_option_value'
+  It 'suceeds for true'
+    When call _orb_is_available_required_option_value true
+    The status should be success
+  End
+
+  It 'fails for other'
+    When call _orb_is_available_required_option_value unknown
+    The status should be failure
+  End
+End
+
+# _orb_is_available_multiple_option_value
+Describe '_orb_is_available_multiple_option_value'
+  It 'suceeds for true'
+    When call _orb_is_available_multiple_option_value true
+    The status should be success
+  End
+
+  It 'fails for other'
+    When call _orb_is_available_multiple_option_value unknown
     The status should be failure
   End
 End
@@ -83,6 +148,11 @@ Describe '_orb_has_declared_arg'
   It 'fails when arg undeclared'
     When call _orb_has_declared_arg "-a"
     The status should be failure
+  End
+
+  It 'succeeds for flags with +'
+    When call _orb_has_declared_arg "+f"
+    The status should be success
   End
 End
 
@@ -145,51 +215,103 @@ Describe '_orb_has_declared_flagged_arg'
   End
 End
 
+# _orb_has_declared_array_flag_arg
+Describe '_orb_has_declared_array_flag_arg'
+  _orb_declared_args=(-a -f -n)
+  declare -A _orb_declared_arg_suffixes=([-a]=2 [-f]=1)
 
-# _orb_has_declared_array
-Describe '_orb_has_declared_array'
-  _orb_declared_args=(-f -m -a ... -b- --)
-  declare -A _orb_declared_arg_suffixes=([-f]="2" [-m]="1")
-
-  It 'suceeds for flagged arg with suffix > 1'
-    When call _orb_has_declared_array -f
+  It 'succeeds when suffix > 1'
+    When call _orb_has_declared_array_flag_arg "-a"
     The status should be success
   End
 
-  It 'suceeds for flagged arg with catches multiple'
-    declare -a _orb_declared_catchs=(multiple)
-    declare -A _orb_declared_catchs_start_indexes=([-m]=0)
-    declare -A _orb_declared_catchs_lengths=([-m]=1)
-    When call _orb_has_declared_array -m
-    The status should be success
-  End
-
-  It 'fails for flagged arg with suffix <= 1'
-    When call _orb_has_declared_array -a
+  It 'fails when suffix < 2'
+    When call _orb_has_declared_array_flag_arg "-f"
     The status should be failure
   End
-
-  It 'suceeds for ...'
-    When call _orb_has_declared_array ...
-    The status should be success
-  End
-
-  It 'suceeds for block'
-    When call _orb_has_declared_array -b-
-    The status should be success
-  End
-
-  It 'suceeds for --'
-    When call _orb_has_declared_array --
-    The status should be success
-  End
-
-  It 'fails for boolean flag'
-    When call _orb_has_declared_array 1
+  
+  It 'fails when no suffix (boolean flags)'
+    When call _orb_has_declared_array_flag_arg -n
     The status should be failure
   End
 End
 
+# _orb_has_declared_array_arg
+Describe '_orb_has_declared_array_arg'
+  _orb_declared_args=(-b -f -m -a ... -b- --)
+  declare -A _orb_declared_multiples=([-a]=true)
+  declare -A _orb_declared_arg_suffixes=([-f]="1" [-m]="2")
+
+  It 'suceeds for flagged arg with suffix > 1'
+    When call _orb_has_declared_array_arg -m
+    The status should be success
+  End
+
+  It 'suceeds for flagged arg with catches multiple'
+    When call _orb_has_declared_array_arg -a
+    The status should be success
+  End
+
+  It 'fails for flagged arg with suffix <= 1'
+    When call _orb_has_declared_array_arg -f
+    The status should be failure
+  End
+
+  It 'suceeds for ...'
+    When call _orb_has_declared_array_arg ...
+    The status should be success
+  End
+
+  It 'suceeds for block'
+    When call _orb_has_declared_array_arg -b-
+    The status should be success
+  End
+
+  It 'suceeds for --'
+    When call _orb_has_declared_array_arg --
+    The status should be success
+  End
+
+  It 'fails for number args'
+    When call _orb_has_declared_array_arg 1
+    The status should be failure
+  End
+  
+  It 'fails for boolean flags'
+    When call _orb_has_declared_array_arg -b
+    The status should be failure
+  End
+End
+
+# _orb_has_declared_arg_default
+Describe '_orb_has_declared_arg_default'
+  declare -A _orb_declared_defaults_start_indexes=([-f]=1)
+  
+  It 'succeeds if has default start index'
+    When call _orb_has_declared_arg_default -f
+    The status should be success
+  End 
+
+  It 'fails if not'
+    When call _orb_has_declared_arg_default 1
+    The status should be failure
+  End 
+End
+
+# _orb_has_declared_arg_default_eval
+Describe '_orb_has_declared_arg_default_eval'
+  declare -A _orb_declared_default_evals=([-f]=val)
+  
+  It 'succeeds if has default start index'
+    When call _orb_has_declared_arg_default_eval -f
+    The status should be success
+  End 
+
+  It 'fails if not'
+    When call _orb_has_declared_arg_default_eval 1
+    The status should be failure
+  End 
+End
 
 # _orb_arg_is_required
 Describe '_orb_arg_is_required'
@@ -211,98 +333,20 @@ Describe '_orb_arg_is_required'
   End 
 End
 
+# _orb_arg_is_multiple
+Describe '_orb_arg_is_multiple'
+  declare -A _orb_declared_multiples=([-f]=true)
+  
+  It 'succeeds if multiple is true'
+    When call _orb_arg_is_multiple -f
+    The status should be success
+  End 
 
-# _orb_get_arg_comment
-Describe '_orb_get_arg_comment'
-  declare -A _orb_declared_comments=([1]="first comment" [2]="" [-f]="third comment")
-  
-  It 'succeeds and outputs comment if has comment'
-    When call _orb_get_arg_comment 1
-    The output should equal "first comment"
-  End 
-  
-  It 'fails if no comment'
-    When call _orb_get_arg_comment 2
-    The status should be failure
-  End 
-  
-  It 'fails if missing'
-    When call _orb_get_arg_comment -a
+  It 'fails if not'
+    When call _orb_arg_is_multiple -a
     The status should be failure
   End 
 End
-
-# _orb_get_arg_default_arr
-Describe '_orb_get_arg_default_arr'
-  declare -A _orb_declared_defaults_start_indexes=([1]=0 [-a]=5)
-  declare -A _orb_declared_defaults_lengths=([1]=5 [-a]=2)
-  _orb_declared_defaults=(1 2 3 4 5 6 7)
-  arg_default=()
-  
-  It 'adds default values to arg_default'
-    When call _orb_get_arg_default_arr 1 arg_default
-    The variable "arg_default[@]" should equal "1 2 3 4 5"
-  End 
-
-  It 'fails if no default for arg'
-    When call _orb_get_arg_default_arr 2 arg_default
-    The status should be failure
-  End 
-
-  It 'handles nested values'
-    When call _orb_get_arg_default_arr -a arg_default
-    The variable "arg_default[@]" should equal "6 7"
-  End 
-End
-
-
-# _orb_get_arg_default_arr
-Describe '_orb_get_arg_in_arr'
-  declare -A _orb_declared_ins_start_indexes=([1]=0 [-a]=5)
-  declare -A _orb_declared_ins_lengths=([1]=5 [-a]=2)
-  _orb_declared_ins=(1 2 3 4 5 6 7)
-  arg_ins=()
-  
-  It 'adds in values to arg_ins'
-    When call _orb_get_arg_in_arr 1 arg_ins
-    The variable "arg_ins[@]" should equal "1 2 3 4 5"
-  End 
-
-  It 'fails if no in for arg'
-    When call _orb_get_arg_in_arr 2 arg_ins
-    The status should be failure
-  End 
-
-  It 'handles nested values'
-    When call _orb_get_arg_in_arr -a arg_ins
-    The variable "arg_ins[@]" should equal "6 7"
-  End 
-End
-
-
-# _orb_get_arg_catch_arr
-Describe '_orb_get_arg_catch_arr'
-  declare -A _orb_declared_catchs_start_indexes=([1]=0 [-a]=5)
-  declare -A _orb_declared_catchs_lengths=([1]=5 [-a]=2)
-  _orb_declared_catchs=(1 2 3 4 5 6 7)
-  arg_catch=()
-  
-  It 'adds catch values to arg_catchs'
-    When call _orb_get_arg_catch_arr 1 arg_catch
-    The variable "arg_catch[@]" should equal "1 2 3 4 5"
-  End 
-
-  It 'fails if no catchs for arg'
-    When call _orb_get_arg_catch_arr 2 arg_catch
-    The status should be failure
-  End 
-
-  It 'handles nested values'
-    When call _orb_get_arg_catch_arr -a arg_catch
-    The variable "arg_catch[@]" should equal "6 7"
-  End 
-End
-
 
 # _orb_arg_catches
 Describe '_orb_arg_catches'

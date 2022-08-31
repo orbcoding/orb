@@ -27,23 +27,17 @@
 # 'source orb' was called, which then sourced this file, hence both index 0 and 1 == source
 if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
   # index 2 is sourcer function, which was not orb prefixed if index 3 != orb"
-  source "$_orb_dir/scripts/call/variables.sh"
-  _orb_setting_sourced=true
   
   source "$_orb_dir/scripts/call/history.sh"
+  source "$_orb_dir/scripts/call/variables.sh"
+  _orb_setting_sourced=true
   source "$_orb_dir/scripts/call/preparation.sh"
   source "$_orb_dir/scripts/source/presource.sh"
 
-  # TODO might source source/presource.sh
-  # Source namespace _presource.sh in reverse (closest last)
-  # local _i; for (( _i=${#_orb_extensions[@]}-1 ; _i>=0 ; _i-- )); do
-  #   local _ext="${_orb_extensions[$_i]}"
-  #   if [[ -f "$_ext/namespaces/$_orb_namespace/_presource.sh" ]]; then
-  #     source "$_ext/namespaces/$_orb_namespace/_presource.sh"
-  #   fi
-  # done
+  _orb_parse_function_declaration "${_orb_function_name}_orb"
+  _orb_parse_function_args "$@"
+  _orb_set_function_arg_default_values
+  _orb_set_function_positional_args
 
-  _orb_parse_args "${_orb_function_name}_orb" "$@"
-
-  set "${_orb_positional[@]}"
+  set "${_orb_args_positional[@]}"
 fi

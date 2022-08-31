@@ -2,6 +2,7 @@ Include functions/arguments/assignment.sh
 Include functions/arguments/validation.sh
 Include scripts/call/variables.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 Include functions/arguments/checkers.sh
 Include functions/utils/argument.sh
 
@@ -29,10 +30,8 @@ Describe '_orb_assign_arg_value'
     The variable flag should equal "some values after"
   End
 
-  It 'should handle catch multiple'
-    declare -a _orb_declared_catchs=('multiple')
-    declare -A _orb_declared_catchs_start_indexes=([-f]=0)
-    declare -A _orb_declared_catchs_lengths=([-f]=1)
+  It 'should handle Multiple'
+    declare -a _orb_declared_multiples=([-f]=true)
     _orb_assign_arg_value -f "first value"
     When call _orb_assign_arg_value -f "second value"
     The variable "_orb_args_values_start_indexes[-f]" should equal "0 1"
@@ -130,14 +129,6 @@ Describe '_orb_assign_inline_arg'
     _orb_shift_args() { spec_args+=($(echo_fn $@)); }
     When call _orb_assign_inline_arg val
     The variable "spec_args[@]" should equal "_orb_assign_arg_value 1 val _orb_shift_args"
-    The variable "_orb_args_positional" should equal "val"
-  End
-
-  It 'assigns to _orb_arg_positional, declared value variable and increments count'
-    When call _orb_assign_inline_arg val
-    The variable "_orb_args_positional" should equal "val"
-    The variable "one" should equal "val"
-    The variable "_orb_args_count" should equal 2
   End
 End
 

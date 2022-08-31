@@ -1,5 +1,6 @@
 Include functions/arguments/validation.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 
 # _orb_is_valid_arg
 Describe '_orb_is_valid_arg'

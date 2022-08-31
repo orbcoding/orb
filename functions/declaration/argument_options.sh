@@ -4,7 +4,7 @@ _orb_parse_declared_args_options() {
 
 		declared_arg_options=()
 		_orb_get_declared_arg_options $arg
-		
+
 		[[ -z "${declared_arg_options[@]}" ]] && continue
 
 		_orb_prevalidate_declared_arg_options $arg
@@ -17,6 +17,7 @@ _orb_parse_declared_args_options() {
 _orb_set_declared_arg_options_defaults() {
 	local arg=$1
 	_orb_declared_requireds[$arg]=$(orb_is_any_flag $arg && echo false || echo true)
+	_orb_declared_multiples[$arg]=false
 }
  
 _orb_get_declared_arg_options() {
@@ -42,6 +43,8 @@ _orb_store_declared_arg_comment() {
 
 	if ! _orb_is_valid_arg_option $arg ${declaration[$comment_i]}; then
 		_orb_declared_comments[$arg]="${declaration[$comment_i]}"
+	else
+		return 1
 	fi
 }
 
@@ -146,6 +149,12 @@ _orb_store_declared_arg_options() {
         _orb_declared_catchs_start_indexes[$arg]=${#_orb_declared_catchs[@]} # will start after last in array
         _orb_declared_catchs_lengths[$arg]=$value_len
         _orb_declared_catchs+=( "${value[@]}" )
+        ;;
+      'Multiple:')
+        _orb_declared_multiples[$arg]="$value"
+        ;;
+      "DefaultEval:")
+        _orb_declared_default_evals+=( "${value[@]}" )
         ;;
     esac
 

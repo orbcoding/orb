@@ -43,6 +43,8 @@ if [ ! $_orb_initialized ]; then
 
     _orb_parse_function_declaration "${_orb_function_name}_orb"
     _orb_parse_function_args "$@"
+    _orb_set_function_arg_default_values
+    _orb_set_function_positional_args
 
     # Call function
     $_orb_function_name "${_orb_positional[@]}"

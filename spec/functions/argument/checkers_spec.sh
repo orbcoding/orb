@@ -1,12 +1,14 @@
 Include functions/arguments/checkers.sh
 Include functions/declaration/checkers.sh
 Include functions/utils/argument.sh
+Include scripts/call/variables.sh
 
 # _orb_get_arg_value
 Describe '_orb_get_arg_value'
-  declare -A _orb_args_values_start_indexes=([1]=0 [...]=5)
-  declare -A _orb_args_values_lengths=([1]=5 [...]=2)
-  _orb_args_values=(1 2 3 4 5 1 2)
+  declare -A _orb_args_values_start_indexes=([1]=0 [...]=5 [-m]=7 [-f]=9 )
+  declare -A _orb_args_values_lengths=([1]=5 [...]=2 [-m]=2 [-f]=2)
+  declare -A _orb_declared_multiples=([-m]=true)
+  _orb_args_values=(1 2 3 4 5 1 2 6 7 9 0)
   values=()
   
   It 'adds arg values to ref'
@@ -17,6 +19,18 @@ Describe '_orb_get_arg_value'
   It 'stores as array for array args'
     When call _orb_get_arg_value ... values
     The variable "values[0]" should equal "1"
+  End 
+
+  It 'stores as array for multiple args'
+    When call _orb_get_arg_value -m values
+    The variable "values[0]" should equal "6"
+    The variable "values[1]" should equal "7"
+  End
+
+  It 'stores as string for non multiple'
+    When call _orb_get_arg_value -f values
+    The variable "values[0]" should equal "9 0"
+    The variable "values[1]" should be undefined
   End 
 
   It 'stores as string for non array args'

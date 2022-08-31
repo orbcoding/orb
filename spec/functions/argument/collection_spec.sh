@@ -4,6 +4,7 @@ Include functions/arguments/validation.sh
 Include functions/utils/argument.sh
 Include scripts/call/variables.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 
 # _orb_parse_function_args
 Describe '_orb_parse_function_args'
@@ -13,12 +14,6 @@ Describe '_orb_parse_function_args'
 	It 'prints function help if 1 == --help'
     When run _orb_parse_function_args --help
     The output should equal _orb_print_function_help
-  End
-
-	It 'sets directly to positional args if _orb_setting_direct_call'
-    _orb_setting_direct_call=true
-    When call _orb_parse_function_args 1 2 3
-    The variable "_orb_args_positional[@]" should equal "1 2 3"
   End
 
 	It 'parses args by default'

@@ -11,17 +11,20 @@ source "$_orb_dir/functions/call/orb_settings.sh"
 source "$_orb_dir/functions/call/preparation.sh"
 source "$_orb_dir/functions/help.sh"
 
-source "$_orb_dir/functions/declaration/function.sh"
 source "$_orb_dir/functions/declaration/arguments.sh"
 source "$_orb_dir/functions/declaration/argument_options.sh"
 source "$_orb_dir/functions/declaration/checkers.sh"
-source "$_orb_dir/functions/declaration/validation.sh"
+source "$_orb_dir/functions/declaration/getters.sh"
+source "$_orb_dir/functions/declaration/function.sh"
 source "$_orb_dir/functions/declaration/orb_settings_declaration.sh"
+source "$_orb_dir/functions/declaration/validation.sh"
 
 source "$_orb_dir/functions/arguments/assignment.sh"
-source "$_orb_dir/functions/arguments/collection.sh"
-source "$_orb_dir/functions/arguments/validation.sh"
 source "$_orb_dir/functions/arguments/checkers.sh"
+source "$_orb_dir/functions/arguments/collection.sh"
+source "$_orb_dir/functions/arguments/defaults.sh"
+source "$_orb_dir/functions/arguments/positional.sh"
+source "$_orb_dir/functions/arguments/validation.sh"
 
 
 declare -n _orb_function_trace=$(_orb_get_function_trace)

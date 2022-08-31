@@ -12,8 +12,6 @@
 _orb_parse_function_args() {
   if [[ $1 == "--help" ]]; then
     _orb_print_function_help && exit 0
-  elif $_orb_setting_direct_call; then
-    _orb_args_positional=("$@")
   else
     _orb_parse_args "$@"
   fi

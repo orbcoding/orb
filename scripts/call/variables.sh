@@ -52,6 +52,8 @@ declare -A _orb_declared_arg_suffixes
 declare -A _orb_declared_vars
 declare -A _orb_declared_requireds
 declare -A _orb_declared_comments
+declare -A _orb_declared_multiples
+declare -A _orb_declared_default_evals
 
 # Separate normal array stores to maintain word separation
 # Tracked by index and length

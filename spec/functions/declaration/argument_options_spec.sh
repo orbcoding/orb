@@ -2,6 +2,7 @@ Include functions/utils/argument.sh
 Include functions/declaration/argument_options.sh
 Include functions/declaration/validation.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 Include scripts/call/variables.sh
 
 _orb_declared_args=(1 -a)
@@ -91,6 +92,11 @@ End
 Describe '_orb_set_declared_arg_options_defaults'
   _orb_declared_args=(-f 1 --verbose-flag)
 
+  It 'sets multiple = false'
+    When call _orb_set_declared_arg_options_defaults -f
+    The variable "_orb_declared_multiples[-f]" should equal false
+  End
+
   It 'sets required = false for flags'
     When call _orb_set_declared_arg_options_defaults -f
     The variable "_orb_declared_requireds[-f]" should equal false
@@ -154,6 +160,13 @@ Describe '_orb_extract_arg_comment'
     When call _orb_store_declared_arg_comment 1 3 
     The status should be failure
   End
+
+  It 'fails if first string is valid option'
+    declaration=(1 = first Default: true)
+    declare -A declared_args_lengths=([1]="5")
+    When call _orb_store_declared_arg_comment 1 3 
+    The status should be failure
+  End
 End
 
 # _orb_prevalidate_declared_arg_options
@@ -166,7 +179,7 @@ Describe '_orb_prevalidate_declared_arg_options'
 
     When call _orb_prevalidate_declared_arg_options -f
     The status should be failure
-    The output should equal "-f: Invalid option: invalid. Available options: Required: Default: In: Catch:"
+    The output should equal "-f: Invalid option: invalid. Available options: Required: Default: In: Catch: Multiple: DefaultEval:"
   End
 
   It 'should not raise anything if first is valid option'
@@ -315,10 +328,11 @@ Describe '_orb_store_declared_arg_options'
     In: value or other
     Required: true
     Catch: flag block
+    Multiple: true
   )
 
-  declared_arg_options_start_indexes=(0 3 7 9)
-  declared_arg_options_lengths=(3 4 2 3)
+  declared_arg_options_start_indexes=(0 3 7 9 12)
+  declared_arg_options_lengths=(3 4 2 3 2)
   _orb_set_declared_arg_options_defaults ...
 
   It 'stores options to variables'
@@ -333,5 +347,6 @@ Describe '_orb_store_declared_arg_options'
     The variable "_orb_declared_catchs[@]" should equal "flag block"
     The variable "_orb_declared_catchs_start_indexes[...]" should equal "0"
     The variable "_orb_declared_catchs_lengths[...]" should equal "2"
+    The variable "_orb_declared_multiples[...]" should equal "true"
   End
 End

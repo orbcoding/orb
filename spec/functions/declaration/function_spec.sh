@@ -2,6 +2,7 @@ Include functions/declaration/function.sh
 Include functions/declaration/arguments.sh
 Include functions/declaration/validation.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 Include functions/utils/argument.sh
 Include scripts/call/variables.sh
 
