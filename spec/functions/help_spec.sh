@@ -1,5 +1,7 @@
+_orb_dir=$(pwd)
 Include functions/help.sh
 Include functions/utils/utils.sh
+Include scripts/initialize.sh
 
 # _orb_handle_help_requested
 Describe '_orb_handle_help_requested'
@@ -61,7 +63,28 @@ End
 
 # _orb_print_namespace_help
 Describe '_orb_print_namespace_help'
-
+  dir="$(pwd)/spec/fixtures/.orb/namespaces/spec"
+  It 'prints functions with comments'
+    _orb_namespace_files=( "$dir/test_print_help_functions.sh" "$dir/public_and_private_functions.sh" "$dir/test_print_help_functions2.sh" )
+    _orb_namespace_files_orb_dir_tracker=( "$spec_orb" "$spec_orb" "$spec_orb/random_dir" )
+    When call _orb_print_namespace_help
+    The line 1 of output should include "-----------------  "
+    The line 1 of output should include "spec/fixtures/.orb"
+    The line 2 of output should include "TEST_PRINT_HELP_FUNCTIONS.SH"
+    # The third line of output should include "test_orb_print_args                        test_orb_print_args comment"
+    The line 4 of output should eq "                                           "
+    The line 5 of output should include "PUBLIC_AND_PRIVATE_FUNCTIONS.SH"
+    The line 12 of output should eq "                                           "
+    The line 13 of output should include "-----------------  "
+    The line 13 of output should include "spec/fixtures/.orb/random_dir"
+    The output should include "\
+public_function                            public_function comment
+public_function_with_preceeding_array_end  public_function_with_preceeding_array_end comment
+public_function_with_curly_on_next_line    public_function_with_curly_on_next_line comment
+public_function_with_space_before_braces   public_function_with_space_before_braces comment
+public_function_with_comment_after         public_function_with_comment_after comment
+public_function_oneliner                   "
+  End
 End
 
 # _orb_print_function_help
@@ -70,6 +93,37 @@ End
 
 # _orb_print_args_explanation
 Describe '_orb_print_args_explanation'
+  _orb_function_declaration=(
+    1 = first
+      "This is first comment"
+      Required: false
+      Default: value
+      In: first value or other
+
+    -a 1 = flagged_arg
+      "This is flagged comment"
+      Required: true
+      Default: value
+      In: second value or other
+  )
+
+  It "fails if no declared args"
+    When call _orb_print_args_explanation
+    The status should be failure
+  End
+
+  It 'prints args explanation'
+    parse() {
+      _orb_parse_function_declaration
+      _orb_parse_declared_args
+      _orb_print_args_explanation
+    }
+    When call parse
+    The first line of output should include "\
+  Required:            Default:  In:                    Catch:                 Multiple:             DefaultHelp:"
+    The output should include "1   false                value     first value or other   first value or other   false value or other   value or other  This is first comment
+  -a  true value or other  value     second value or other  second value or other  false value or other   value or other  This is flagged comment"
+    End
 End
 
 # _orb_print_function_comment

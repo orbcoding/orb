@@ -78,24 +78,34 @@ Describe 'orb_parse_env'
 End
 
 Describe 'orb_has_public_function'
+  file="$spec_orb/namespaces/spec/public_and_private_functions.sh"
+
   It 'succeeds if public function exists in file'
     # When call orb_has_public_function "$spec_orb/namespaces/spec/test_functions.sh"
-    When call orb_has_public_function "test_orb_print_args" "$spec_orb/namespaces/spec/test_functions.sh"
+    When call orb_has_public_function public_function "$file"
     The status should be success
   End
 
-  It 'fails if function is private (no function prefix)'
-    When call orb_has_public_function private_function "$spec_orb/namespaces/spec/test_functions.sh"
-    The status should be failure
-  End
-
-  It 'fails if function is private (not followed by curly bracket)'
-    When call orb_has_public_function private_function2 "$spec_orb/namespaces/spec/test_functions.sh"
+  It 'fails if function is private'
+    When call orb_has_public_function private_function "$file"
     The status should be failure
   End
 
   It 'fails if function does not exist in file'
-    When call orb_has_public_function non_existent_function "$spec_orb/namespaces/spec/test_functions.sh"
+    When call orb_has_public_function non_existent_function "$file"
     The status should be failure
+  End
+End
+
+Describe "orb_get_public_functions"
+  It 'gest public functions from file'
+    When call orb_get_public_functions "$spec_orb/namespaces/spec/public_and_private_functions.sh" fns
+    The variable "fns[0]" should eq "public_function"
+    The variable "fns[@]" should eq "public_function \
+public_function_with_preceeding_array_end \
+public_function_with_curly_on_next_line \
+public_function_with_space_before_braces \
+public_function_with_comment_after \
+public_function_oneliner"
   End
 End

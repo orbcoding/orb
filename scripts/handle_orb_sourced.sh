@@ -34,7 +34,8 @@ if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
   source "$_orb_dir/scripts/call/preparation.sh"
   source "$_orb_dir/scripts/source/presource.sh"
 
-  _orb_parse_function_declaration "${_orb_function_name}_orb"
+  _orb_parse_function_declaration
+  _orb_parse_declared_args
   _orb_parse_function_args "$@"
   _orb_set_function_arg_default_values
   _orb_set_function_positional_args

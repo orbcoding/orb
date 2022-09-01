@@ -12,15 +12,15 @@ Describe '_orb_parse_function_declaration'
 
   It 'calls its nested functions'
     _orb_prevalidate_declaration() { spec_fns+=( $(echo_fn) ); }
-    _orb_parse_declared_args() { spec_fns+=( $(echo_fn) ); }
     _orb_parse_function_options() { spec_fns+=( $(echo_fn) );}
     When call _orb_parse_function_declaration
-    The variable "spec_fns[@]" should equal "_orb_prevalidate_declaration _orb_parse_declared_args _orb_parse_function_options"
+    The variable "spec_fns[@]" should equal "_orb_prevalidate_declaration _orb_parse_declared_args"
   End
 
   It 'stores arguments and options to variables'
     _orb_function_declaration=(
       "Function comment"
+      DirectCall: true
 
       1 = first 
         "This is first comment"
@@ -35,6 +35,8 @@ Describe '_orb_parse_function_declaration'
     )
 
     When call _orb_parse_function_declaration
+    The variable "_orb_declared_comments[function]" should equal "Function comment"
+    The variable "_orb_declared_direct_call" should equal true
     The variable "_orb_declared_args[@]" should equal "1 -a"
 
     The variable "_orb_declared_requireds[1]" should equal "false"
@@ -74,12 +76,83 @@ Describe "_orb_parse_function_options"
   End
 End
 
+# _orb_get_function_options
+Describe '_orb_get_function_options'
+  It 'extracts options array and stores comment from declaration'
+    declaration=(
+      "Function comment"
+      DirectCall: true
+
+      1 = "My first variable"
+    )
+
+    When call _orb_get_function_options
+    The variable "declared_function_options[@]" should eq "DirectCall: true"
+    The variable "_orb_declared_comments[function]" should eq "Function comment"
+  End
+End
+
+
 # _orb_extract_function_comment
 Describe "_orb_extract_function_comment"
-  options=(comment)
+  declared_function_options=(comment)
 
   It 'sets first fn option to comments'
     When call _orb_extract_function_comment
     The variable "_orb_declared_comments[function]" should equal "comment"
+  End
+
+  It 'fails if first is function option'
+    declared_function_options=(DirectCall:)
+    When call _orb_extract_function_comment
+    The status should be failure
+    The variable "_orb_declared_comments[function]" should be undefined
+  End
+End
+
+# _orb_get_function_options_start_indexes
+Describe "_orb_get_function_options_start_indexes"
+  declared_function_options=(DirectCall: value DirectCall: value)
+
+  It 'stores correct start_indexes'
+    When call _orb_get_function_options_start_indexes
+    The variable "declared_function_options_start_indexes[@]" should equal "0 2"
+  End
+
+  It 'raises on option as option value'
+    declared_function_options=(DirectCall: DirectCall: value)
+    _orb_raise_invalid_declaration() { echo_fn "$@"; }
+    When call _orb_get_function_options_start_indexes
+    The output should equal "_orb_raise_invalid_declaration DirectCall: invalid value: DirectCall:"
+  End
+
+  It 'raises on option without value'
+    declared_function_options=(DirectCall: true DirectCall:)
+    _orb_raise_invalid_declaration() { echo_fn "$@"; }
+    When call _orb_get_function_options_start_indexes
+    The output should equal "_orb_raise_invalid_declaration DirectCall: missing value"
+  End
+End
+
+# _orb_get_function_options_lengths
+Describe "_orb_get_function_options_start_indexes"
+  declared_function_options=(DirectCall: value DirectCall: value)
+  declared_function_options_start_indexes=(0 2)
+
+  It 'stores correct lengths'
+    When call _orb_get_function_options_lengths
+    The variable "declared_function_options_lengths[@]" should equal "2 2"
+  End
+End
+
+# _orb_store_function_options
+Describe '_orb_store_function_options'
+  declared_function_options=(DirectCall: true)
+  declared_function_options_start_indexes=(0)
+  declared_function_options_lengths=(2)
+
+  It 'stores DirectCall:'
+    When call _orb_store_function_options
+    The variable "_orb_declared_direct_call" should eq true
   End
 End

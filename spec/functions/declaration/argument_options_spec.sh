@@ -148,8 +148,8 @@ Describe '_orb_get_declared_arg_options'
   End
 End
 
-# _orb_extract_arg_comment
-Describe '_orb_extract_arg_comment'
+# _orb_store_declared_arg_comment
+Describe '_orb_store_declared_arg_comment'
   It 'stores comment if available'
     When call _orb_store_declared_arg_comment 1 3
     The variable "_orb_declared_comments[1]" should equal "This is first comment"
@@ -179,7 +179,7 @@ Describe '_orb_prevalidate_declared_arg_options'
 
     When call _orb_prevalidate_declared_arg_options -f
     The status should be failure
-    The output should equal "-f: Invalid option: invalid. Available options: Required: Default: In: Catch: Multiple: DefaultEval:"
+    The output should equal "-f: Invalid option: invalid. Available options: Required: Default: In: Catch: Multiple: DefaultHelp:"
   End
 
   It 'should not raise anything if first is valid option'

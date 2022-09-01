@@ -1,8 +1,13 @@
 # orb_upfind_closest
-declare -A orb_upfind_closest_args=(
-	['1']='filename to orb_upfind_closest'
-	['2']='starting path; DEFAULT: $PWD'
-); function orb_upfind_closest() { # Find closest filename upwards in filsystem
+orb_upfind_closest_orb=(
+	"Find closest filename upwards in filsystem"
+	DirectCall: true
+
+	1 = 'filename to orb_upfind_closest'
+	2 = 'starting path'
+		DefaultHelp: "$PWD"
+)
+function orb_upfind_closest() {
 	local _p="${2-$PWD}" _sep _options
 
 	[[ ${_p[1]} != '/' ]] && _p="$(pwd)/$_p"
@@ -19,13 +24,16 @@ declare -A orb_upfind_closest_args=(
 }
 
 # orb_upfind_to_arr
-declare -A orb_upfind_to_arr_args=(
-	['1']='array_name realpath_array_name (latter optional space separated)'
-	['2']='filename(s) multiple files sep with & (and) or | (or)'
-	['3']='start path; DEFAULT: $PWD'
-	['4']='last check path; DEFAULT: /'
-); function orb_upfind_to_arr() { # finds all files with filename(s) upwards in file system
-	# local _orb_arr_names=($1)
+orb_upfind_to_arr_orb=(
+	"Finds all files with filename(s) upwards in file system"
+	DirectCall: true
+
+	1 = 'array_name realpath_array_name (latter optional space separated)'
+	2 = 'filename(s) multiple files sep with & (and) or | (or)'
+	3 = 'start path; DEFAULT: $PWD'
+	4 = 'last check path; DEFAULT: /'
+)
+function orb_upfind_to_arr() {
 	declare -n _orb_arr=$1
 	local _orb_sep='&'; [[ $2 == *"|"* ]] && _orb_sep='|'
 	local _orb_p="${3-$PWD}"
@@ -53,9 +61,13 @@ declare -A orb_upfind_to_arr_args=(
 
 # orb_trim_uniq_realpaths
 orb_trim_uniq_realpaths_orb=(
+	"Remove any non unique realpaths (symlinked duplicates) from array of paths"
+	DirectCall: true
+
 	1 = _orb_input_array "Input path array name"
 	2 = _orb_uniq_array "Array name to store trimmed realpath array version"
-); function orb_trim_uniq_realpaths() {
+)
+function orb_trim_uniq_realpaths() {
 	declare -n _orb_i_array=$1
 	local _orb_u_array=()
 	local _orb_realpaths=()
@@ -64,7 +76,7 @@ orb_trim_uniq_realpaths_orb=(
 	local _orb_path; for _orb_path in "${_orb_i_array[@]}"; do
 		_orb_realpath=$(realpath $_orb_path)
 
-	  if ! [[ " ${_orb_realpaths[@]} " =~ " $_orb_realpath " ]]; then 
+	  if ! [[ " ${_orb_realpaths[@]} " =~ " $_orb_realpath " ]]; then
 			_orb_u_array+=($_orb_path)
 			_orb_realpaths+=("$_orb_realpath")
 		fi
@@ -74,17 +86,49 @@ orb_trim_uniq_realpaths_orb=(
 	_orb_uniq_assign=("${_orb_u_array[@]}")
 }
 
-# parsenv
-declare -A orb_parse_env_args=(
-	['1']='path to .env'
-); function orb_parse_env() { # export variables in .env to shell
+# orb_parse_env
+orb_parse_env_orb=(
+	"Export variables in .env to shell"
+	DirectCall: true
+
+	1 = 'path to .env'
+)
+function orb_parse_env() {
 	set -o allexport; source "$1"; set +o allexport
 }
 
-# has_public_function $1 function, $2 file
-declare -A orb_has_public_function_args=(
-	['1']='function_name'
-	['2']='file'
-); function orb_has_public_function() { # check if file has function
-	grep -q "^[); ]*function[ ]*$1[ ]*()[ ]*{" "$2"
+# orb_has_public_function
+orb_has_public_function_orb=(
+	"Check if file has function"
+	DirectCall: true
+
+	1 = "Function name"
+	2 = "File"
+)
+function orb_has_public_function() {
+	grep -q "^[); ]*function[ ]$1[ ]*()" "$2"
+}
+
+# orb_get_public_functions
+orb_get_public_functions_orb=(
+	"Get list public functions in file"
+	DirectCall: true
+
+	1 = "File"
+	2 = "Assign to arr name"
+)
+function orb_get_public_functions() {
+	local file=$1
+	declare -n assign_arr=$2
+
+	# Find function line
+	# Remove preceeding "); " up to and including function statement
+	# Get first word = function_name ignoring whitespace
+	# Remove any () from function_name
+	assign_arr=($(\
+		grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()" $file | \
+			sed 's/\(); \)*function//' | \
+			awk '{print $1;}' | \
+			sed 's/()//'\
+		 ))
 }

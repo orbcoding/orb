@@ -41,13 +41,19 @@ if [ ! $_orb_initialized ]; then
 
     source "$_orb_dir/scripts/source/function.sh"
 
-    _orb_parse_function_declaration "${_orb_function_name}_orb"
-    _orb_parse_function_args "$@"
+    _orb_parse_function_declaration
+    _orb_parse_declared_args
+
+    if ! $_orb_setting_direct_call && ! $_orb_declared_direct_call; then 
+      _orb_parse_function_args "$@"
+    fi
     _orb_set_function_arg_default_values
-    _orb_set_function_positional_args
+    _orb_set_function_positional_args "$@"
+    [[ ${#_orb_args_positional[@]} != 0 ]] && set "${_orb_args_positional[@]}"
+
 
     # Call function
-    $_orb_function_name "${_orb_positional[@]}"
+    $_orb_function_name "${_orb_args_positional[@]}"
     local _orb_function_exit_code=$?
 
     $_orb_setting_reload_functions && eval "$_orb_function_dump" && unset _orb_function_dump

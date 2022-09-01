@@ -32,73 +32,67 @@ _orb_print_global_namespace_help_intro() {
 }
 
 _orb_print_namespace_help() {
-	local i=0 file current_dir
+	local i=0 file current_dir output
 
-	for file in ${_orb_namespace_files[@]}; do
-		if [[ "${_orb_namespace_files_dir_tracker[$i]}" != "$current_dir" ]]; then
-			current_dir="${_orb_namespace_files_dir_tracker[$i]}"
-			output+="-----------------# $(orb_italic)${current_dir}\n$(orb_normal)"
+	local file; for file in ${_orb_namespace_files[@]}; do
+		local dir="${_orb_namespace_files_orb_dir_tracker[$i]}"
+
+		if [[ "$dir" != "$current_dir" ]]; then
+			current_dir="$dir"
+			output+="-----------------§$(orb_italic)${current_dir}$(orb_normal)\n"
 		fi
 
 		output+="$(orb_bold)$(orb_upcase $(basename $file))$(orb_normal)\n"
-		output+=$(grep "^[); ]*function[ ]*[a-zA-Z_-]*[ ]*()[ ]*{" $file | sed 's/\(); \)*function //' | sed 's/().* {[ ]*//' | sed 's/^/  /')
-		output+="\n\n"
+		source "$file"
+		local fns; orb_get_public_functions "$file" fns
+
+		local fn; for fn in "${fns[@]}"; do
+			declare -A _orb_declared_comments=()
+			_orb_parse_function_declaration "${fn}_orb"
+			output+="$fn§"
+			output+="${_orb_declared_comments[function]}\n"
+		done
+
+		output+="\n§\n"
+
 
 		((i++))
 	done
 
-	# remove last 4 chars \n\n
-	echo -e "${output::-4}" | column -tes '#'
+	# remove last 5 chars \n§\n
+	echo -e "${output::-5}" | column -tes '§'
 }
 
 _orb_print_function_help() {
 	_orb_print_orb_function_and_comment
-	local _def=$(_orb_print_args_explanation)
-	[[ -n "$_def" ]] && echo -e "\n$_def"
+	local msg=$(_orb_print_args_explanation)
+	[[ -n "$msg" ]] && echo -e "\n$msg"
 	return 0
 }
 
 
-_orb_print_args_explanation() { # $1 optional args_declaration
-	local _declaration_ref=${1-"_orb_function_declaration"}
-	declare -n _declaration="$_declaration_ref"
-
-	[[ -z "${!_declaration[@]}" ]] && exit 1
-	local _props=('ARG' 'DESCRIPTION' 'DEFAULT' 'IN' 'REQUIRED' 'OTHER')
-	IFS=';'; local _msg="$(orb_bold)${_props[*]}$(orb_normal)\n"
-
-	_msg+=$(for _key in "${!_declaration[@]}"; do
-		_sub="$_key"
-		for _prop in ${_props[@]:1}; do
-			_val=
-			if [[ "$_prop" == 'REQUIRED' ]]; then
-				_orb_is_required "$_key" "$_declaration_ref" && _val='true'
-			elif [[ "$_prop" == 'OTHER' ]]; then
-				_val=()
-				_orb_catches_any "$_key" "$_declaration_ref" && _val+=( CATCH_ANY )
-				_orb_catches_empty "$_key" "$_declaration_ref" && _val+=( CATCH_EMPTY )
-				_val=$(orb_join_by ', ' ${_val[*]})
-			else
-				_val="$(_orb_get_arg_prop "$_key" "$_prop" "$_declaration_ref")"
-			fi
-
-			_sub+=";$([[ -n "$_val" ]] && echo "$_val" || echo '-')"
-		done
-		echo "$_sub"
-	done | sort)
-
-	echo -e "$_msg" | sed 's/^/  /' | column -t -s ';'
-}
-
-_orb_print_function_comment() {
-	local _comment_line=$(grep -r "function $_orb_function_name" "$_file_with_function")
-	if [[ "$_comment_line" != "${_comment_line/\#/}" ]]; then
-	 echo "$_comment_line" | cut -d '#' -f2- | xargs
-	fi
-}
-
 _orb_print_orb_function_and_comment() {
-	local comment=$(_orb_print_function_comment)
+	local comment="${_orb_declared_comments[function]}"
 	echo "$(orb_bold)$_orb_function_name$(orb_normal) $([[ -n "$comment" ]] && echo "- $comment")"
 }
 
+_orb_print_args_explanation() {
+	[[ ${#_orb_declared_args[@]} == 0 ]] && return 1
+
+	OLD_IFS=$IFS
+	IFS='§'; local msg="$(orb_bold)§${_orb_available_arg_options[*]}§Help:$(orb_normal)\n"
+	IFS=$OLD_IFS
+
+	local arg; for arg in "${_orb_declared_args[@]}"; do
+		local msg+="$arg"
+
+		local opt; for opt in "${_orb_available_arg_options[@]}"; do
+			local value=; _orb_get_arg_option_value $arg $opt value
+			msg+="§$([[ -n "${value[@]}" ]] && echo "${value[@]}" || echo '-')"
+		done
+
+		msg+="§$(_orb_get_arg_comment $arg)\n"
+	done
+
+	echo -e "$msg" | sed 's/^/  /' | column -t -s '§'
+}

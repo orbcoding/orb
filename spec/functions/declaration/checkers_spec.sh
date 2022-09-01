@@ -3,17 +3,17 @@ Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 
 
-# _orb_is_available_option
-Describe '_orb_is_available_option'
+# _orb_is_available_arg_option
+Describe '_orb_is_available_arg_option'
   _orb_raise_invalid_declaration() { echo "$@"; exit 1; }
 
   It 'succeeds for Default:'
-    When call _orb_is_available_option Default:
+    When call _orb_is_available_arg_option Default:
     The status should be success
   End
 
   It 'fails for other'
-    When call _orb_is_available_option Unknown:
+    When call _orb_is_available_arg_option Unknown:
     The status should be failure
   End
 End
@@ -298,17 +298,17 @@ Describe '_orb_has_declared_arg_default'
   End 
 End
 
-# _orb_has_declared_arg_default_eval
-Describe '_orb_has_declared_arg_default_eval'
-  declare -A _orb_declared_default_evals=([-f]=val)
+# _orb_has_declared_arg_default_help
+Describe '_orb_has_declared_arg_default_help'
+  declare -A _orb_declared_default_helps=([-f]=val)
   
   It 'succeeds if has default start index'
-    When call _orb_has_declared_arg_default_eval -f
+    When call _orb_has_declared_arg_default_help -f
     The status should be success
   End 
 
   It 'fails if not'
-    When call _orb_has_declared_arg_default_eval 1
+    When call _orb_has_declared_arg_default_help 1
     The status should be failure
   End 
 End

@@ -35,6 +35,8 @@ if [[ -z $_orb_function_name ]]; then
   orb_raise_error +t "is a namespace, no command or function provided\n\n Add --help for list of functions"
 fi
 
+unset _orb_function_declaration
+declare -n _orb_function_declaration="${_orb_function_name}_orb"
 # # declare args declaration and raise if fails
 # if ! declare -n _orb_function_declaration=${_orb_function_name}_orb 2> /dev/null; then
 #   orb_raise_error "not a valid option or function name"

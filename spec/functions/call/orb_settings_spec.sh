@@ -6,6 +6,7 @@ Describe '_orb_extract_orb_settings_arguments'
   It 'extracts settings arguments'
     extract() { 
       _orb_parse_function_declaration _orb_settings_declaration
+      _orb_parse_declared_args _orb_settings_declaration
       _orb_extract_orb_settings_arguments settings_args -e ext --help -d -r -e ext2 namespace function
     }
     When call extract 
@@ -17,6 +18,7 @@ Describe '_orb_extract_orb_settings_arguments'
     _orb_raise_invalid_orb_settings_arg() { echo_fn "$@"; }
     extract() { 
       _orb_parse_function_declaration _orb_settings_declaration
+      _orb_parse_declared_args _orb_settings_declaration
       _orb_extract_orb_settings_arguments settings_args -k -e ext --help -d -r -e ext2 namespace function
     }
     When call extract 

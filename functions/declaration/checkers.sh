@@ -1,20 +1,10 @@
-declare -a _orb_available_arg_options=( Required: Default: In: Catch: Multiple: DefaultEval: )
 
-declare -a _orb_available_arg_options_number_arg=( Required: Default: DefaultEval: In: )
-declare -a _orb_available_arg_options_boolean_flag=( Required: Default: DefaultEval: )
-declare -a _orb_available_arg_options_flag_arg=( Required: Default: DefaultEval: Multiple: In: )
-# flag args with suffix > 1 
-declare -a _orb_available_arg_options_array_flag_arg=( Required: Default: DefaultEval: Multiple: )
-declare -a _orb_available_arg_options_block=( Required: Default: DefaultEval: Multiple: )
-declare -a _orb_available_arg_options_dash=( Required: Default: DefaultEval: )
-declare -a _orb_available_arg_options_rest=( Required: Default: DefaultEval: Catch: )
-
-declare -a _orb_available_arg_option_catch_values=( any flag block dash )
-declare -a _orb_available_arg_option_required_values=( true false )
-declare -a _orb_available_arg_option_multiple_values=( true false )
-
-_orb_is_available_option() {
+_orb_is_available_arg_option() {
 	[[ " ${_orb_available_arg_options[@]} " =~ " $1 " ]]
+}
+
+_orb_is_available_function_option() {
+	[[ " ${_orb_available_function_options[@]} " =~ " $1 " ]]
 }
 
 _orb_is_available_number_arg_option() {
@@ -105,9 +95,9 @@ _orb_has_declared_arg_default() {
   [[ -n ${_orb_declared_defaults_start_indexes[$_orb_arg]} ]]
 }
 
-_orb_has_declared_arg_default_eval() {
+_orb_has_declared_arg_default_help() {
 	local _orb_arg=$1
-  [[ -n ${_orb_declared_default_evals[$_orb_arg]} ]]
+  [[ -n ${_orb_declared_default_helps[$_orb_arg]} ]]
 }
 
 _orb_arg_is_required() {

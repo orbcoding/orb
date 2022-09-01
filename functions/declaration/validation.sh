@@ -59,8 +59,8 @@ _orb_postvalidate_declared_args_options_multiples() {
 
 _orb_postvalidate_declared_args_incompatible_options() {
 	local arg; for arg in ${_orb_declared_args[@]}; do
-		if _orb_has_declared_arg_default $arg && _orb_has_declared_arg_default_eval $arg; then
-			_orb_raise_invalid_declaration "$arg: Incompatible options: Default:, DefaultEval:"
+		if _orb_has_declared_arg_default $arg && _orb_has_declared_arg_default_help $arg; then
+			_orb_raise_invalid_declaration "$arg: Incompatible options: Default:, DefaultHelp:"
 		fi
 	done
 }
@@ -70,7 +70,7 @@ _orb_is_valid_arg_option() {
 	local arg=$1 
 	local option=$2
 
-	_orb_is_available_option $option || return 1
+	_orb_is_available_arg_option $option || return 1
 
 	if orb_is_nr $arg && ! _orb_is_available_number_arg_option $option; then
 			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for number args: ${_orb_available_arg_options_number_arg[*]}"

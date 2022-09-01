@@ -1,15 +1,19 @@
-declare -A orb_function_declared_args=(
-	['1']='function_name'
-); function orb_function_declared() { # check if function has been declared
+# orb_function_declared
+orb_function_declared_orb=(
+	"Check if a function name has been declared"
+	DirectCall: true
+
+	1 = function_name "Function name"
+); function orb_function_declared() {
 	declare -f -F $1 > /dev/null
 	return $?
 }
 
 # orb_grep_between
-declare -A orb_grep_between_args=(
-	['1']='string to grep'
-	['2']='grep between from'
-	['3']='grep between to'
+orb_grep_between=(
+	1 = 'string to grep'
+	2 = 'grep between from'
+	3 = 'grep between to'
 ); function orb_grep_between() { # grep between two strings, can use (either|or)
 	grep -oP "(?<=$2).*?(?=$3)" <<< $1
 }

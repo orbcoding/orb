@@ -124,10 +124,10 @@ Describe '_orb_postvalidate_declared_args_incompatible_options'
 
   It 'fails on invalid multiple values'
     _orb_raise_invalid_declaration() { echo_fn $@; exit 1; }
-    declare -A _orb_declared_default_evals=([-f]=val)
+    declare -A _orb_declared_default_helps=([-f]=val)
     When run _orb_postvalidate_declared_args_incompatible_options
     The status should be failure
-    The output should equal "_orb_raise_invalid_declaration -f: Incompatible options: Default:, DefaultEval:"
+    The output should equal "_orb_raise_invalid_declaration -f: Incompatible options: Default:, DefaultHelp:"
   End
 End
 
@@ -145,7 +145,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for Multiple:'
       When call _orb_is_valid_arg_option 1 Multiple:
       The status should be failure
-      The output should equal "1: Invalid option: Multiple:. Available options for number args: Required: Default: DefaultEval: In:"
+      The output should equal "1: Invalid option: Multiple:. Available options for number args: Required: Default: DefaultHelp: In:"
     End
   End
 
@@ -160,7 +160,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for Multiple:'
       When call _orb_is_valid_arg_option -f Multiple:
       The status should be failure
-      The output should equal "-f: Invalid option: Multiple:. Available options for boolean flags: Required: Default: DefaultEval:"
+      The output should equal "-f: Invalid option: Multiple:. Available options for boolean flags: Required: Default: DefaultHelp:"
     End
   End
 
@@ -176,7 +176,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for Catch:'
       When call _orb_is_valid_arg_option -f Catch:
       The status should be failure
-      The output should equal "-f: Invalid option: Catch:. Available options for flag args: Required: Default: DefaultEval: Multiple: In:"
+      The output should equal "-f: Invalid option: Catch:. Available options for flag args: Required: Default: DefaultHelp: Multiple: In:"
     End
   End
 
@@ -191,7 +191,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for In:'
       When call _orb_is_valid_arg_option -f In:
       The status should be failure
-      The output should equal "-f: Invalid option: In:. Available options for flag array args: Required: Default: DefaultEval: Multiple:"
+      The output should equal "-f: Invalid option: In:. Available options for flag array args: Required: Default: DefaultHelp: Multiple:"
     End
   End
 
@@ -204,7 +204,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for In:'
       When call _orb_is_valid_arg_option -f- In:
       The status should be failure
-      The output should equal "-f-: Invalid option: In:. Available options for blocks: Required: Default: DefaultEval: Multiple:"
+      The output should equal "-f-: Invalid option: In:. Available options for blocks: Required: Default: DefaultHelp: Multiple:"
     End
   End
 
@@ -217,7 +217,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for In:'
       When call _orb_is_valid_arg_option -- In:
       The status should be failure
-      The output should equal "--: Invalid option: In:. Available options for --: Required: Default: DefaultEval:"
+      The output should equal "--: Invalid option: In:. Available options for --: Required: Default: DefaultHelp:"
     End
   End
 
@@ -230,7 +230,7 @@ Describe '_orb_is_valid_arg_option'
     It 'fails for In:'
       When call _orb_is_valid_arg_option ... In:
       The status should be failure
-      The output should equal "...: Invalid option: In:. Available options for ...: Required: Default: DefaultEval: Catch:"
+      The output should equal "...: Invalid option: In:. Available options for ...: Required: Default: DefaultHelp: Catch:"
     End
   End
 End

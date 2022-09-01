@@ -49,13 +49,13 @@ _orb_collect_namespace_files() {
 			local to=$(( ${#_orb_namespace_files[@]} + ${#files[@]} - 1 ))
 
 			local i; for i in $(seq $from $to ); do
-				_orb_namespace_files_dir_tracker[$i]="$ext"
+				_orb_namespace_files_orb_dir_tracker[$i]="$ext"
 			done
 
 			_orb_namespace_files+=( "${files[@]}" )
 
 		elif [[ -f "${dir}.sh" ]]; then
-			_orb_namespace_files_dir_tracker[${#_orb_namespace_files[@]}]="$ext"
+			_orb_namespace_files_orb_dir_tracker[${#_orb_namespace_files[@]}]="$ext"
 			_orb_namespace_files+=( "${dir}.sh" )
 		fi
 	done

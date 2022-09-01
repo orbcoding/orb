@@ -20,7 +20,7 @@ if [[ $1 != only_args_collection ]]; then
   declare _orb_function_exit_code
 
   declare _orb_namespace_files=() # namespace files collector
-  declare _orb_namespace_files_dir_tracker # index with directory
+  declare _orb_namespace_files_orb_dir_tracker # index with directory
 
   # Extensions
   declare _orb_extensions=()
@@ -45,15 +45,15 @@ declare -A _orb_args_values_lengths
 
 
 # Declaration
+declare _orb_declared_direct_call=false
 declare -a _orb_declared_args # ordered
-# Argument as key: eg: -f
-# TODO might verbose _orb_declared_arg_vars etc
 declare -A _orb_declared_arg_suffixes
 declare -A _orb_declared_vars
 declare -A _orb_declared_requireds
 declare -A _orb_declared_comments
 declare -A _orb_declared_multiples
-declare -A _orb_declared_default_evals
+declare -A _orb_declared_default_helps
+
 
 # Separate normal array stores to maintain word separation
 # Tracked by index and length

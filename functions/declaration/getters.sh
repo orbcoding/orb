@@ -18,6 +18,45 @@ _orb_get_arg_comment() {
   fi
 }
 
+_orb_get_function_option_value() {
+  local arg=$1
+  local opt=$2
+  declare -n value=$3
+
+    case $opt in
+      'DirectCall:')
+        value="$_orb_declared_direct_call"
+        ;;
+    esac
+}
+
+_orb_get_arg_option_value() {
+  local arg=$1
+  local opt=$2
+  declare -n _orb_option_value=$3
+
+    case $opt in
+      'Required:')
+        _orb_option_value="${_orb_declared_requireds[$arg]}"
+        ;;
+      "Default:")
+        _orb_get_arg_default_arr $arg _orb_option_value
+        ;;
+      "In:")
+        _orb_get_arg_in_arr $arg _orb_option_value
+        ;;
+      "Catch:")
+        _orb_get_arg_catch_arr $arg _orb_option_value
+        ;;
+      'Multiple:')
+        _orb_option_value="${_orb_declared_multiples[$arg]}"
+        ;;
+      "DefaultHelp:")
+        _orb_option_value="${_orb_declared_default_helps[$arg]}"
+        ;;
+    esac
+}
+
 # sets value to arg_default variable that should be declared local in calling fn
 _orb_get_arg_default_arr() {
   local arg=$1

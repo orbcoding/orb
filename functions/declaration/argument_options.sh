@@ -78,11 +78,9 @@ _orb_get_declared_arg_options_start_indexes() {
 _orb_is_declared_arg_options_start_index() {
 	local arg=$1 
   local options_i=$2
+	local current_option="${declared_arg_options[$options_i]}"
 
-	if _orb_is_valid_arg_option $arg ${declared_arg_options[$options_i]}; then
-		# String is valid option
-		local current_option="${declared_arg_options[$options_i]}"
-
+	if _orb_is_valid_arg_option $arg $current_option; then
 		if [[ -n ${declared_arg_options_start_indexes[0]} ]]; then
 			local prev_start_i="${declared_arg_options_start_indexes[-1]}"
 			local prev_option="${declared_arg_options[$prev_start_i]}"
@@ -153,12 +151,14 @@ _orb_store_declared_arg_options() {
       'Multiple:')
         _orb_declared_multiples[$arg]="$value"
         ;;
-      "DefaultEval:")
-        _orb_declared_default_evals+=( "${value[@]}" )
+      "DefaultHelp:")
+        _orb_declared_default_helps[$arg]="$value"
         ;;
     esac
 
     ((options_i++))
   done
+
+	return 0
 }
 

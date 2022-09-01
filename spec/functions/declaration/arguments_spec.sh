@@ -47,6 +47,28 @@ Describe '_orb_get_declarad_args_and_start_indexes'
     start_index_declaration="$(declare -p declared_args_start_indexes)"
     The variable "start_index_declaration[@]" should equal 'declare -A declared_args_start_indexes=([...]="22" [-b-]="16" [--]="19" [-f]="0" [-a]="3" [--verbose-flag]="9" [--verbose-flagged]="12" )'
   End
+
+  Context 'declared direct call'
+    It 'stores var if valid var'
+      _orb_declared_direct_call=true
+      declaration=(
+        -f = "flag"
+      )
+      When call _orb_get_declarad_args_and_start_indexes
+      The variable "_orb_declared_vars[-f]" should equal "flag"
+      The variable "_orb_declared_comments[-f]" should be undefined
+    End
+
+    It 'stores var to comment if invalid var'
+      _orb_declared_direct_call=true
+      declaration=(
+        -f = "flag comment"
+      )
+      When call _orb_get_declarad_args_and_start_indexes
+      The variable "_orb_declared_vars[-f]" should be undefined
+      The variable "_orb_declared_comments[-f]" should equal "flag comment"
+    End
+  End
 End
 
 # _orb_get_declared_args_lengths

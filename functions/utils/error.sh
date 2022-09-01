@@ -2,17 +2,19 @@
 orb_raise_error_orb=(
   1 = error_message "Error message"
   2 = descriptor 
-    Default: '$_orb_caller_function_descriptor|$_orb_function_descriptor'
+    DefaultHelp: '$_orb_caller_function_descriptor || $_orb_function_descriptor'
   # -k = kill_script "Kill script instead of exit, even if subshell"
   #   Default: true
   # -t = trace "show stack trace"
   #   Default: true
 ) 
 function orb_raise_error() { # raise pretty error msg and kills execution
+  orb_eval_variable_or_string 
   # source orb
   # echo "$@"
   # echo $trace
   orb_print_error "$1" "$2"
+  exit
   # orb_pass -a _cmd orb_print_error -- -d 1 # not using -x as would change caller_info
   # "${_cmd[@]}"
   # $trace && orb_print_stack_trace >&2
@@ -21,13 +23,15 @@ function orb_raise_error() { # raise pretty error msg and kills execution
 
 
 # orb_print_error
-orb_print_error_args=(
+orb_print_error_orb=(
+  "Print pretty error"
+
   1 = message "Error message"
     Catch: flag block dash
   2 = descriptor "Error descriptor"
 )
     # Default: '$_orb_caller_function_descriptor|$_orb_function_descriptor'
-function orb_print_error() { # print pretty error
+function orb_print_error() { # 
   # source orb
 
 	msg=(

@@ -1,3 +1,4 @@
+source "$_orb_dir/scripts/initialize_variables.sh"
 source "$_orb_dir/functions/utils/pass.sh"
 source "$_orb_dir/functions/utils/argument.sh"
 source "$_orb_dir/functions/utils/debug.sh"
