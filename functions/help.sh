@@ -80,18 +80,21 @@ _orb_print_args_explanation() {
 	[[ ${#_orb_declared_args[@]} == 0 ]] && return 1
 
 	OLD_IFS=$IFS
-	IFS='§'; local msg="$(orb_bold)§${_orb_available_arg_options[*]}§Help:$(orb_normal)\n"
+	IFS='§'; local msg="$(orb_bold)§${_orb_available_arg_options_help[*]}§$(orb_normal)\n"
 	IFS=$OLD_IFS
 
 	local arg; for arg in "${_orb_declared_args[@]}"; do
 		local msg+="$arg"
 
-		local opt; for opt in "${_orb_available_arg_options[@]}"; do
+		local opt; for opt in "${_orb_available_arg_options_help[@]}"; do
 			local value=; _orb_get_arg_option_value $arg $opt value
+			[[ -z ${value[@]} ]] && [[ $opt == "DefaultHelp:" ]] && _orb_get_arg_option_value $arg "Default:" value
 			msg+="§$([[ -n "${value[@]}" ]] && echo "${value[@]}" || echo '-')"
 		done
 
-		msg+="§$(_orb_get_arg_comment $arg)\n"
+		local comment; comment=$(_orb_get_arg_comment $arg) || comment=${_orb_declared_vars[$arg]}
+
+		msg+="§$comment\n"
 	done
 
 	echo -e "$msg" | sed 's/^/  /' | column -t -s '§'

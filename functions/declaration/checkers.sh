@@ -1,4 +1,3 @@
-
 _orb_is_available_arg_option() {
 	[[ " ${_orb_available_arg_options[@]} " =~ " $1 " ]]
 }

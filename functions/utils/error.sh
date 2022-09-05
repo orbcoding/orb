@@ -9,16 +9,16 @@ orb_raise_error_orb=(
   #   Default: true
 ) 
 function orb_raise_error() { # raise pretty error msg and kills execution
-  orb_eval_variable_or_string 
+  local descriptor=$(orb_eval_variable_or_string_options '$_orb_caller_function_descriptor|$_orb_function_descriptor') 
   # source orb
   # echo "$@"
   # echo $trace
-  orb_print_error "$1" "$2"
-  exit
+  orb_print_error "$1" "$descriptor"
   # orb_pass -a _cmd orb_print_error -- -d 1 # not using -x as would change caller_info
   # "${_cmd[@]}"
-  # $trace && orb_print_stack_trace >&2
-  # $kill_script && orb_kill_script || exit 1
+  #$trace && 
+  orb_print_stack_trace >&2
+  orb_kill_script || exit 1
 }
 
 
@@ -57,6 +57,8 @@ function orb_print_stack_trace() {
   local _file_name
   echo
   while caller $_i; do ((_i++)); done | while read _line_no _orb_function _file_name; do
-    echo -e "$_file_name:$_line_no\t$_orb_function_name"
+    echo -e "$_file_name:$_line_no\t$_orb_function"
   done
+
+  # echo -e "$output"# | column -t -s '§'
 }

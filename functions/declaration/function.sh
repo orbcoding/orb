@@ -9,15 +9,24 @@ _orb_parse_function_options() {
 	declare -a declared_function_options_lengths
 	declare -a declared_function_options
 	_orb_get_function_options
+	_orb_prevalidate_declared_function_options
 	_orb_get_function_options_start_indexes
 	_orb_get_function_options_lengths
 	_orb_store_function_options
+	_orb_postvalidate_declared_function_options
 }
 
 _orb_get_function_options() {
 	local start_i=0;
 	local end_i; for end_i in $(seq 0 $((${#declaration[@]} - 1))); do
-		if orb_is_input_arg ${declaration[$end_i]} && [[ ${declaration[$end_i+1]} == "=" ]]; then 
+		# We need to know if declared direct call ahead of time to know if argument assignment needs a valid_var or just comment
+		if [[ ${declaration[$end_i]} == "DirectCall:" ]] && [[ ${declaration[$end_i+1]} == true ]]; then
+			_orb_declared_direct_call=true
+		fi
+
+		if [[ ${declaration[$end_i+1]} == "=" ]] && orb_is_input_arg ${declaration[$end_i]} && (\
+			$_orb_declared_direct_call || orb_is_valid_variable_name ${declaration[$end_i+2]} \
+		); then 
 			((end_i--))
 			break
 		fi
@@ -25,6 +34,10 @@ _orb_get_function_options() {
 
 	declared_function_options=( "${declaration[@]:$start_i:$end_i+1}" )
 	_orb_extract_function_comment && declared_function_options=( "${declared_function_options[@]:1}" )
+}
+
+_orb_prevalidate_declared_function_options() {
+	_orb_is_valid_function_option ${declared_function_options[0]} true
 }
 
 _orb_extract_function_comment() {
@@ -99,7 +112,7 @@ _orb_store_function_options() {
 
     case $option in
       'DirectCall:')
-        _orb_declared_direct_call=$value
+        _orb_declared_direct_call="${value[@]}"
         ;;
     esac
 

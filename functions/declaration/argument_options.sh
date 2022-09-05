@@ -17,7 +17,6 @@ _orb_parse_declared_args_options() {
 _orb_set_declared_arg_options_defaults() {
 	local arg=$1
 	_orb_declared_requireds[$arg]=$(orb_is_any_flag $arg && echo false || echo true)
-	_orb_declared_multiples[$arg]=false
 }
  
 _orb_get_declared_arg_options() {
@@ -41,7 +40,7 @@ _orb_store_declared_arg_comment() {
 
 	local comment_i=$(( ${declared_args_start_indexes[$arg]} + $i_offset ))
 
-	if ! _orb_is_valid_arg_option $arg ${declaration[$comment_i]}; then
+	if ! _orb_is_valid_arg_option $arg "${declaration[$comment_i]}"; then
 		_orb_declared_comments[$arg]="${declaration[$comment_i]}"
 	else
 		return 1
@@ -51,9 +50,7 @@ _orb_store_declared_arg_comment() {
 _orb_prevalidate_declared_arg_options() {
 	local arg=$1
 	
-	if ! _orb_is_valid_arg_option $arg ${declared_arg_options[0]}; then
-		_orb_raise_invalid_declaration "$arg: Invalid option: ${declared_arg_options[0]}. Available options: ${_orb_available_arg_options[@]}"
-	fi
+	_orb_is_valid_arg_option $arg "${declared_arg_options[0]}" true
 }
 
 _orb_parse_declared_arg_options() {
@@ -80,7 +77,7 @@ _orb_is_declared_arg_options_start_index() {
   local options_i=$2
 	local current_option="${declared_arg_options[$options_i]}"
 
-	if _orb_is_valid_arg_option $arg $current_option; then
+	if _orb_is_valid_arg_option $arg "$current_option"; then
 		if [[ -n ${declared_arg_options_start_indexes[0]} ]]; then
 			local prev_start_i="${declared_arg_options_start_indexes[-1]}"
 			local prev_option="${declared_arg_options[$prev_start_i]}"

@@ -49,7 +49,8 @@ if [ ! $_orb_initialized ]; then
     fi
     _orb_set_function_arg_default_values
     _orb_set_function_positional_args "$@"
-    [[ ${#_orb_args_positional[@]} != 0 ]] && set "${_orb_args_positional[@]}"
+
+    set -- "${_orb_args_positional[@]}"
 
 
     # Call function

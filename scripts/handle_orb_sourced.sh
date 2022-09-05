@@ -40,5 +40,5 @@ if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
   _orb_set_function_arg_default_values
   _orb_set_function_positional_args
 
-  set "${_orb_args_positional[@]}"
+  set -- "${_orb_args_positional[@]}"
 fi

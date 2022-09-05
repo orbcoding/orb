@@ -33,7 +33,7 @@ _orb_postvalidate_declared_args_options_catchs() {
 
 		local value; for value in "${arg_catch[@]}"; do
 			if ! _orb_is_available_catch_option_value $value; then
-				_orb_raise_invalid_declaration "$arg: Invalid Catch: value: $value. Available values: ${_orb_available_arg_option_catch_values[@]}"
+				_orb_raise_invalid_declaration "$arg: Invalid Catch: value: $value. Available values: ${_orb_available_arg_option_catch_values[*]}"
 			fi
 		done
 	done
@@ -43,7 +43,7 @@ _orb_postvalidate_declared_args_options_requireds() {
 	local arg; for arg in ${_orb_declared_args[@]}; do
 	 	local value=${_orb_declared_requireds[$arg]}
 		if ! _orb_is_available_required_option_value $value; then
-			_orb_raise_invalid_declaration "$arg: Invalid Required: value: $value. Available values: ${_orb_available_arg_option_required_values[@]}"
+			_orb_raise_invalid_declaration "$arg: Invalid Required: value: $value. Available values: ${_orb_available_arg_option_required_values[*]}"
 		fi
 	done
 }
@@ -51,8 +51,8 @@ _orb_postvalidate_declared_args_options_requireds() {
 _orb_postvalidate_declared_args_options_multiples() {
 	local arg; for arg in ${_orb_declared_args[@]}; do
 	 	local value=${_orb_declared_multiples[$arg]}
-		if ! _orb_is_available_multiple_option_value $value; then
-			_orb_raise_invalid_declaration "$arg: Invalid Multiple: value: $value. Available values: ${_orb_available_arg_option_multiple_values[@]}"
+		if [[ -n $value ]] && ! _orb_is_available_multiple_option_value $value; then
+			_orb_raise_invalid_declaration "$arg: Invalid Multiple: value: $value. Available values: ${_orb_available_arg_option_multiple_values[*]}"
 		fi
 	done
 }
@@ -66,25 +66,52 @@ _orb_postvalidate_declared_args_incompatible_options() {
 }
 
 _orb_is_valid_arg_option() {
-	# local flag_options=( )
 	local arg=$1 
 	local option=$2
-
-	_orb_is_available_arg_option $option || return 1
+	local raise=${3-false}
+	local error
 
 	if orb_is_nr $arg && ! _orb_is_available_number_arg_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for number args: ${_orb_available_arg_options_number_arg[*]}"
+		error="$arg: Invalid option: $option. Available options for number args: ${_orb_available_arg_options_number_arg[*]}"
 	elif _orb_has_declared_boolean_flag $arg && ! _orb_is_available_boolean_flag_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for boolean flags: ${_orb_available_arg_options_boolean_flag[*]}"
+		error="$arg: Invalid option: $option. Available options for boolean flags: ${_orb_available_arg_options_boolean_flag[*]}"
 	elif _orb_has_declared_flagged_arg $arg && ! _orb_is_available_flag_arg_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for flag args: ${_orb_available_arg_options_flag_arg[*]}"
+		error="$arg: Invalid option: $option. Available options for flag args: ${_orb_available_arg_options_flag_arg[*]}"
 	elif _orb_has_declared_array_flag_arg $arg && ! _orb_is_available_array_flag_arg_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for flag array args: ${_orb_available_arg_options_array_flag_arg[*]}"
+		error="$arg: Invalid option: $option. Available options for flag array args: ${_orb_available_arg_options_array_flag_arg[*]}"
 	elif orb_is_block $arg && ! _orb_is_available_block_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for blocks: ${_orb_available_arg_options_block[*]}"
+		error="$arg: Invalid option: $option. Available options for blocks: ${_orb_available_arg_options_block[*]}"
 	elif orb_is_dash $arg && ! _orb_is_available_dash_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for --: ${_orb_available_arg_options_dash[*]}"
+		error="$arg: Invalid option: $option. Available options for --: ${_orb_available_arg_options_dash[*]}"
 	elif orb_is_rest $arg && ! _orb_is_available_rest_option $option; then
-			_orb_raise_invalid_declaration "$arg: Invalid option: $option. Available options for ...: ${_orb_available_arg_options_rest[*]}"
+		error="$arg: Invalid option: $option. Available options for ...: ${_orb_available_arg_options_rest[*]}"
+	fi
+
+	if [[ -n $error ]]; then
+	 	[[ $raise == true ]] && _orb_raise_invalid_declaration "$error"
+		return 1
 	fi
 }
+
+
+_orb_postvalidate_declared_function_options() {
+  _orb_postvalidate_declared_function_options_direct_call
+	# _orb_postvalidate_declared_args_incompatible_options
+}
+
+_orb_postvalidate_declared_function_options_direct_call() {
+	local value="${_orb_declared_direct_call[@]}"
+	if ! [[ " ${_orb_available_function_option_direct_call_values[@]} " =~ " $value " ]]; then
+		_orb_raise_invalid_declaration "Function: DirectCall: $value. Available values: ${_orb_available_function_option_direct_call_values[*]}"
+	fi
+}
+
+_orb_is_valid_function_option() {
+	local option=$1
+	local raise=${2-false}
+
+	if ! _orb_is_available_function_option $1; then
+		[[ $raise == true ]] && _orb_raise_invalid_declaration "Function: Invalid option: $option. Available function options ${_orb_available_function_options[*]}"
+	fi
+}
+
