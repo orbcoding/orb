@@ -5,16 +5,26 @@ Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 Include functions/utils/argument.sh
 Include scripts/call/variables.sh
+Include scripts/initialize_variables.sh
 
 # _orb_parse_declaration
 Describe '_orb_parse_function_declaration'
   Include functions/declaration/argument_options.sh
 
-  It 'calls its nested functions'
+  Context 'nested functions'
     _orb_prevalidate_declaration() { spec_fns+=( $(echo_fn) ); }
     _orb_parse_function_options() { spec_fns+=( $(echo_fn) );}
-    When call _orb_parse_function_declaration
-    The variable "spec_fns[@]" should equal "_orb_prevalidate_declaration _orb_parse_declared_args"
+    _orb_parse_declared_args() { spec_fns+=( $(echo_fn) );}
+
+    It 'calls correctly'
+      When call _orb_parse_function_declaration
+      The variable "spec_fns[@]" should equal "_orb_prevalidate_declaration _orb_parse_function_options _orb_parse_declared_args"
+    End
+
+    It 'does not parse args if $2 = false'
+      When call _orb_parse_function_declaration _orb_function_declaration false
+      The variable "spec_fns[@]" should equal "_orb_prevalidate_declaration _orb_parse_function_options"
+    End
   End
 
   It 'stores arguments and options to variables'

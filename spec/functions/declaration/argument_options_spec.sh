@@ -4,6 +4,7 @@ Include functions/declaration/validation.sh
 Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 Include scripts/call/variables.sh
+Include scripts/initialize_variables.sh
 
 _orb_declared_args=(1 -a)
 
@@ -92,11 +93,6 @@ End
 Describe '_orb_set_declared_arg_options_defaults'
   _orb_declared_args=(-f 1 --verbose-flag)
 
-  It 'sets multiple = false'
-    When call _orb_set_declared_arg_options_defaults -f
-    The variable "_orb_declared_multiples[-f]" should equal false
-  End
-
   It 'sets required = false for flags'
     When call _orb_set_declared_arg_options_defaults -f
     The variable "_orb_declared_requireds[-f]" should equal false
@@ -179,7 +175,7 @@ Describe '_orb_prevalidate_declared_arg_options'
 
     When call _orb_prevalidate_declared_arg_options -f
     The status should be failure
-    The output should equal "-f: Invalid option: invalid. Available options: Required: Default: In: Catch: Multiple: DefaultHelp:"
+    The output should equal "-f: Invalid option: invalid. Available options for boolean flags: Required: Default: DefaultHelp:"
   End
 
   It 'should not raise anything if first is valid option'

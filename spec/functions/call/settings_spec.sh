@@ -1,12 +1,13 @@
-_orb_dir=$(pwd)
+_orb_root=$(pwd)
 Include scripts/initialize.sh
 Include scripts/call/variables.sh
 
 Describe '_orb_extract_orb_settings_arguments'
+  _orb_raise_invalid_orb_settings_arg() { echo_fn "$@"; }
+
   It 'extracts settings arguments'
     extract() { 
       _orb_parse_function_declaration _orb_settings_declaration
-      _orb_parse_declared_args _orb_settings_declaration
       _orb_extract_orb_settings_arguments settings_args -e ext --help -d -r -e ext2 namespace function
     }
     When call extract 
@@ -15,10 +16,8 @@ Describe '_orb_extract_orb_settings_arguments'
   End
 
   It 'raises error un undefined settings arg'
-    _orb_raise_invalid_orb_settings_arg() { echo_fn "$@"; }
     extract() { 
       _orb_parse_function_declaration _orb_settings_declaration
-      _orb_parse_declared_args _orb_settings_declaration
       _orb_extract_orb_settings_arguments settings_args -k -e ext --help -d -r -e ext2 namespace function
     }
     When call extract 
@@ -43,7 +42,7 @@ Describe '_orb_raise_invalid_orb_settings_arg'
   It 'raises on invalid flag'
     orb_raise_error() { echo -e "$@" && exit 1; }
 
-    When run source scripts/call/orb_settings.sh --unknown-flag
+    When run source scripts/call/settings.sh --unknown-flag
     The output should equal "-d $(orb_bold)orb$(orb_normal) invalid option --unknown-flag
 
 Available options:

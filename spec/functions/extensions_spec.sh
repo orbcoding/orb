@@ -1,4 +1,4 @@
-Include functions/source/extensions.sh
+Include functions/call/extensions.sh
 Include functions/utils/file.sh
 
 
@@ -34,30 +34,27 @@ Describe '_orb_collect_orb_extensions'
 End
 
 
-Describe '_orb_collect_namespace_extensions'
+Describe '_orb_collect_namespaces'
   It 'finds namespaces in orb folders'
-    _orb_extensions=( spec/fixtures/.orb )
-    When call _orb_collect_namespace_extensions
-    The variable "_orb_namespaces[0]" should equal spec
-    The variable "_orb_namespaces[1]" should equal spec2
-    The variable "_orb_namespaces[2]" should be undefined
+    _orb_extensions=( spec/fixtures/_orb_extension  )
+    When call _orb_collect_namespaces
+    The variable "_orb_namespaces[0]" should equal spec_extensions
+    The variable "_orb_namespaces[1]" should be undefined
   End
 
   It 'adds each once'
-    _orb_extensions=( spec/fixtures/.orb spec/fixtures/.orb )
-    When call _orb_collect_namespace_extensions
-    The variable "_orb_namespaces[0]" should equal spec
-    The variable "_orb_namespaces[1]" should equal spec2
+    _orb_extensions=( spec/fixtures/_orb_extension spec/fixtures/_orb_extension )
+    When call _orb_collect_namespaces
+    The variable "_orb_namespaces[0]" should equal spec_extensions
     The variable "_orb_namespaces[2]" should be undefined
   End
 
   It 'adds from multiple folders'
-    _orb_extensions=( spec/fixtures/.orb spec/fixtures/_orb )
-    When call _orb_collect_namespace_extensions
-    The variable "_orb_namespaces[0]" should equal spec
-    The variable "_orb_namespaces[1]" should equal spec2
-    The variable "_orb_namespaces[2]" should equal spec3
-    The variable "_orb_namespaces[3]" should be undefined
+    _orb_extensions=( spec/fixtures/_orb_extension spec/fixtures/_orb_extension2 )
+    When call _orb_collect_namespaces
+    The variable "_orb_namespaces[0]" should equal spec_extensions
+    The variable "_orb_namespaces[1]" should equal spec_extensions2
+    The variable "_orb_namespaces[2]" should be undefined
   End
 End
 
@@ -74,12 +71,13 @@ End
 
 Describe '_orb_collect_namespace_files'
   It 'collects namespaces files'
-    _orb_namespace="spec"
-    _orb_extensions=( spec/fixtures/.orb spec/fixtures/_orb )
+    _orb_namespace=spec_extensions
+    _orb_extensions=( spec/fixtures/_orb_extension spec/fixtures/_orb_extension2 )
 
     When call _orb_collect_namespace_files
-    The variable "_orb_namespace_files[0]" should equal spec/fixtures/.orb/namespaces/spec/test_functions.sh
-    The variable "_orb_namespace_files[1]" should equal spec/fixtures/_orb/namespaces/spec.sh
-    The variable "_orb_namespace_files[2]" should be undefined
+    The variable "_orb_namespace_files[0]" should equal spec/fixtures/_orb_extension/namespaces/spec_extensions.sh
+    The variable "_orb_namespace_files[1]" should equal spec/fixtures/_orb_extension2/namespaces/spec_extensions/spec_extensions2.sh
+    The variable "_orb_namespace_files[2]" should equal spec/fixtures/_orb_extension2/namespaces/spec_extensions/spec_extensions.sh
+    The variable "_orb_namespace_files[3]" should be undefined
   End
 End

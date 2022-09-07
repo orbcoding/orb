@@ -16,9 +16,9 @@ function orb_raise_error() { # raise pretty error msg and kills execution
   orb_print_error "$1" "$descriptor"
   # orb_pass -a _cmd orb_print_error -- -d 1 # not using -x as would change caller_info
   # "${_cmd[@]}"
-  #$trace && 
+  #$trace &&
   orb_print_stack_trace >&2
-  orb_kill_script || exit 1
+  orb_kill_script
 }
 
 
@@ -46,6 +46,8 @@ function orb_print_error() { #
 # orb_kill_script
 # https://stackoverflow.com/a/14152313
 function orb_kill_script() { # kill script
+  local just_exit=${1-false}
+  ($_orb_in_running_test || $just_exit) && exit 1
   kill -PIPE 0
 }
 

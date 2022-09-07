@@ -26,9 +26,9 @@ spec_helper_configure() {
   : import 'support/custom_matcher'
 }
 
-# _orb_dir=''
+# _orb_root=''
 spec_orb='spec/fixtures/.orb'
-_orb_dir=$spec_orb/orb
+_orb_root=$spec_orb/orb
 spec_proxy='spec/fixtures/proxy.sh'
 
 echo_fn() {
@@ -36,3 +36,5 @@ echo_fn() {
   (( "$#" >= 0 )) && output+=("$@")
   echo "${output[@]}"
 }
+
+_orb_in_running_test=true

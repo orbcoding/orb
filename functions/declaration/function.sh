@@ -1,7 +1,9 @@
 _orb_parse_function_declaration() {
 	declare -n declaration=${1-"_orb_function_declaration"}
+	local parse_args=${2-true}
 	_orb_prevalidate_declaration
 	_orb_parse_function_options
+	$parse_args && _orb_parse_declared_args "$@" || return 0
 }
  
 _orb_parse_function_options() {

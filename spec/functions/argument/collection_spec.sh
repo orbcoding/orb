@@ -6,37 +6,22 @@ Include scripts/call/variables.sh
 Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 
-# _orb_parse_function_args
-Describe '_orb_parse_function_args'
-  _orb_print_function_help() { echo_fn; }
-  _orb_parse_args() { echo_fn "$@"; }
 
-	It 'prints function help if 1 == --help'
-    When run _orb_parse_function_args --help
-    The output should equal _orb_print_function_help
-  End
-
-	It 'parses args by default'
-    When call _orb_parse_function_args 1 2 3
-    The output should equal "_orb_parse_args 1 2 3"
-  End
-End
-
-# _orb_parse_args
-Describe '_orb_parse_args'
+# _orb_collect_function_args
+Describe '_orb_collect_function_args'
   orb_raise_error() { echo "$@"; exit 1; }
   _orb_collect_args() { spec_fns+=($(echo_fn)); }
   _orb_args_post_validation() { spec_fns+=($(echo_fn)); }
   
   Context 'no args declared'
     It 'raises error if receive input args'
-      When run _orb_parse_args 1 2 3
+      When run _orb_collect_function_args 1 2 3
       The status should be failure 
       The output should equal "does not accept arguments" 
     End
 
     It 'returns without parsing if no args received'
-      When call _orb_parse_args
+      When call _orb_collect_function_args
       The status should be success
       The variable "spec_fns[@]" should be blank 
     End
@@ -48,13 +33,13 @@ Describe '_orb_parse_args'
     )
 
     It 'parses args'
-      When call _orb_parse_args 1 2 3
+      When call _orb_collect_function_args 1 2 3
       The status should be success
       The variable "spec_fns[@]" should equal "_orb_collect_args _orb_args_post_validation"
     End
 
     It 'continues even if no args received'
-      When call _orb_parse_args
+      When call _orb_collect_function_args
       The status should be success
       The variable "spec_fns[@]" should equal "_orb_collect_args _orb_args_post_validation"
     End

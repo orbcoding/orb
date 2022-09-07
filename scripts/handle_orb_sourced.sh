@@ -23,22 +23,16 @@
 # This would've also pollute stack trace when functions are called directly
 # my_function => orb => my_function
 #
-[[ "${_orb_function_trace[1]}" != "source" ]] && return 1
-# 'source orb' was called, which then sourced this file, hence both index 0 and 1 == source
-if [[ "${_orb_function_trace[3]}" != "orb" ]]; then
-  # index 2 is sourcer function, which was not orb prefixed if index 3 != orb"
+! _orb_is_sourced_and_by_unhandled_fn && return 1
   
-  source "$_orb_dir/scripts/call/history.sh"
-  source "$_orb_dir/scripts/call/variables.sh"
-  _orb_setting_sourced=true
-  source "$_orb_dir/scripts/call/preparation.sh"
-  source "$_orb_dir/scripts/source/presource.sh"
+  source "$_orb_root/scripts/call/history.sh"
+  source "$_orb_root/scripts/call/variables.sh"
+  _orb_sourced=true
+  source "$_orb_root/scripts/call/namespace_and_function.sh"
+  source "$_orb_root/scripts/call/source_presource.sh"
 
   _orb_parse_function_declaration
-  _orb_parse_declared_args
-  _orb_parse_function_args "$@"
-  _orb_set_function_arg_default_values
-  _orb_set_function_positional_args
 
+  source "$_orb_root/scripts/call/function_args.sh"
   set -- "${_orb_args_positional[@]}"
 fi

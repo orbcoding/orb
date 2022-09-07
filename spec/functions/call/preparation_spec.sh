@@ -1,12 +1,12 @@
-Include functions/call/preparation.sh
+Include functions/call/namespace_and_function.sh
 Include functions/utils/text.sh
 
 Describe '_orb_get_current_namespace'
   _orb_get_current_namespace_from_args() { echo_fn && return 3; }
   _orb_get_current_namespace_from_file_structure() { echo_fn; }
 
-  Context 'without _orb_setting_sourced'
-    _orb_setting_sourced=false
+  Context 'without _orb_sourced'
+    _orb_sourced=false
 
     It 'echoes output and returns status of _orb_get_current_namespace_from_args'
       When run _orb_get_current_namespace
@@ -15,8 +15,8 @@ Describe '_orb_get_current_namespace'
     End
   End
 
-  Context 'with _orb_setting_sourced'
-    _orb_setting_sourced=true
+  Context 'with _orb_sourced'
+    _orb_sourced=true
 
     It 'echoes output of _orb_get_current_namespace_from_file_structure and returns 1'
       When run _orb_get_current_namespace
@@ -92,8 +92,8 @@ End
 
 
 Describe _orb_get_current_function
-  Context 'with _orb_setting_sourced'
-    _orb_setting_sourced=true
+  Context 'with _orb_sourced'
+    _orb_sourced=true
     _orb_get_current_function_from_source_chain() { echo_fn; }
 
     It 'calls _orb_get_current_function_from_source_chain and returns 2'
@@ -103,8 +103,8 @@ Describe _orb_get_current_function
     End
   End
 
-  Context 'without _orb_setting_sourced'
-    _orb_setting_sourced=false
+  Context 'without _orb_sourced'
+    _orb_sourced=false
 
     It 'returns 0 and outputs $1'
       When call _orb_get_current_function my_function

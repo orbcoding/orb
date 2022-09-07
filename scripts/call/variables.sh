@@ -7,26 +7,24 @@
 if [[ $1 != only_args_collection ]]; then
   # Orb settings
   declare _orb_setting_help=false
-  declare _orb_setting_namespace_help=false
   declare _orb_setting_direct_call=false
   declare _orb_setting_reload_functions=false
-  declare _orb_setting_sourced=false
   declare _orb_setting_extensions=()
+  
+  # Internal configs
+  declare _orb_function_dump
 
-  # Namespace info
+  # Namespace and function info
   declare _orb_namespace
   declare _orb_function
   declare _orb_function_descriptor
   declare _orb_function_exit_code
 
   declare _orb_namespace_files=() # namespace files collector
-  declare _orb_namespace_files_orb_dir_tracker # index with directory
+  declare _orb_namespace_files_orb_dir_tracker # same indexes with directory
 
   # Extensions
   declare _orb_extensions=()
-  # local _orb_namespace_files=()
-  # local _orb_namespace_files_dirs=()
-
   # Will be a nameref to ${_orb_function_name}_orb declaration
   declare -a _orb_function_declaration
 

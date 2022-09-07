@@ -1,68 +1,51 @@
 #!/bin/bash
-# This script is bash >= 4.3 only
-#
-# Because use eg:
-# - arrays. Not supported in sh and in zsh indexes start at 1 instead of 0.
-# - local function variables. Not supported in classic sh shells.
-# - FUNCNAME and BASH_SOURCE lookup. Would have to be adapted for each shell if supported at all.
-# - double bracket regex conditions.
-# - associative arrays (used sparsely). requires bash_version >= 4
-# - declare and namerefs. requires bash_version >= 4.3, released 2014
-#   https://wiki.bash-hackers.org/commands/builtin/declare#nameref
-#
-
-if [ -z "$BASH" ]; then
-  echo "Please use orb with bash" && return 1
-elif ! (( ${BASH_VERSINFO[0]}${BASH_VERSINFO[1]} >= 43 )); then
-  echo "Please use a bash version >= 4.3" && return 1
-fi
 
 # Set project root
-_orb_dir="${BASH_SOURCE[0]}"
-_orb_dir="${_orb_dir%/*/*}"
+_orb_root="${BASH_SOURCE[0]}"
+_orb_root="${_orb_root%/*/*}"
+
+source "$_orb_root/scripts/version_check.sh"
 
 if [ ! $_orb_initialized ]; then
-  source "$_orb_dir/scripts/initialize.sh"
+  source "$_orb_root/scripts/initialize.sh"
 
   # Prefer declaring orb function here for minimal stack trace
   orb() {
-    source "$_orb_dir/scripts/call/history.sh"
-    source "$_orb_dir/scripts/call/variables.sh"
-    source "$_orb_dir/scripts/call/orb_settings.sh" "$@" && shift $?
-    source "$_orb_dir/scripts/source/extensions.sh"
-    source "$_orb_dir/scripts/call/preparation.sh"
+    source "$_orb_root/scripts/call/history.sh"
+    source "$_orb_root/scripts/call/variables.sh"
+    source "$_orb_root/scripts/call/extensions.sh"
+    source "$_orb_root/scripts/call/settings.sh" "$@" && shift $?
+    source "$_orb_root/scripts/call/namespace_and_function.sh"
 
-    $_orb_setting_reload_functions && local _orb_function_dump="$(declare -f)"
-
-    source "$_orb_dir/scripts/source/presource.sh"
-
-    _orb_collect_namespace_files
-    _orb_handle_help_requested && exit 0
-
-    source "$_orb_dir/scripts/source/function.sh"
-
-    _orb_parse_function_declaration
-    _orb_parse_declared_args
-
-    if ! $_orb_setting_direct_call && ! $_orb_declared_direct_call; then 
-      _orb_parse_function_args "$@"
+    # Get function declaration
+    if [[ -n $_orb_function_name ]]; then
+      source "$_orb_root/scripts/call/source_function_file.sh"
+      _orb_parse_function_declaration
     fi
-    _orb_set_function_arg_default_values
-    _orb_set_function_positional_args "$@"
 
-    set -- "${_orb_args_positional[@]}"
+    # Handle help
+    if _orb_handle_help; then
+      source "$_orb_root/scripts/call/cleanup.sh" 
+      return 0
+    fi
 
+    # Get function args and source presource files
+    source "$_orb_root/scripts/call/function_args.sh"
+    source "$_orb_root/scripts/call/source_presource.sh"
 
     # Call function
     $_orb_function_name "${_orb_args_positional[@]}"
-    local _orb_function_exit_code=$?
-
-    $_orb_setting_reload_functions && eval "$_orb_function_dump" && unset _orb_function_dump
-
-    return $_orb_function_exit_code
+    _orb_function_exit_code=$?
+    source "$_orb_root/scripts/call/cleanup.sh" 
+    return $?
   }
 
   _orb_initialized=1
 fi
 
-source "$_orb_dir/scripts/handle_orb_sourced.sh" || orb "$@"
+# Source or call orb
+if _orb_sourced; then
+  source "$_orb_root/scripts/handle_orb_sourced.sh" 
+else 
+  orb "$@"
+fi

@@ -1,0 +1,2 @@
+_orb_get_function_trace _orb_function_trace
+_orb_get_source_trace _orb_source_trace

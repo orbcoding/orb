@@ -1,15 +1,17 @@
 # Internal help functions
-_orb_handle_help_requested() {
-	if $_orb_setting_help; then
-		_orb_print_global_namespace_help_intro
-	elif $_orb_setting_namespace_help; then
+_orb_handle_help() {
+	! $_orb_setting_help && return 1
+
+	if [[ -n "$_orb_function_name" ]]; then
+		_orb_print_function_help
+	elif [[ -n $_orb_namespace ]]; then
 		_orb_print_namespace_help
 	else
-		return 1
+		_orb_print_orb_help
 	fi
 }
 
-_orb_print_global_namespace_help_intro() {
+_orb_print_orb_help() {
 	local def_namespace_msg
 
 	if [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
@@ -48,7 +50,7 @@ _orb_print_namespace_help() {
 
 		local fn; for fn in "${fns[@]}"; do
 			declare -A _orb_declared_comments=()
-			_orb_parse_function_declaration "${fn}_orb"
+			_orb_parse_function_declaration "${fn}_orb" false
 			output+="$fn§"
 			output+="${_orb_declared_comments[function]}\n"
 		done

@@ -1,5 +1,5 @@
 Include functions/utils/error.sh
-PATH=PATH:$_orb_dir/bin
+PATH=PATH:$_orb_root/bin
 
 Describe 'orb_raise_error'
   kill() {

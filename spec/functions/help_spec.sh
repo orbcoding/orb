@@ -1,40 +1,40 @@
-_orb_dir=$(pwd)
-Include functions/help.sh
+_orb_root=$(pwd)
+Include functions/call/help.sh
 Include functions/utils/utils.sh
 Include scripts/initialize.sh
 
-# _orb_handle_help_requested
-Describe '_orb_handle_help_requested'
-  _orb_print_global_namespace_help_intro() { echo_fn; }
+# _orb_handle_help
+Describe '_orb_handle_help'
+  _orb_print_orb_help() { echo_fn; }
   _orb_print_namespace_help() { echo_fn; }
   _orb_setting_namespace_help=false
   _orb_setting_help=false
 
   It 'prints global help if global help requested'
     _orb_setting_help=true
-    When call _orb_handle_help_requested
-    The output should equal _orb_print_global_namespace_help_intro
+    When call _orb_handle_help
+    The output should equal _orb_print_orb_help
   End
 
   It 'prints namespace help if namespace help requested'
     _orb_setting_namespace_help=true
-    When call _orb_handle_help_requested
+    When call _orb_handle_help
     The output should equal _orb_print_namespace_help
   End
 
   It 'fails when no help requested'
-    When call _orb_handle_help_requested
+    When call _orb_handle_help
     The status should be failure
   End
 End
 
 
-# _orb_print_global_namespace_help_intro
-Describe '_orb_print_global_namespace_help_intro'
+# _orb_print_orb_help
+Describe '_orb_print_orb_help'
   Include functions/utils/text.sh
   
   It 'prints help with no namespaces or default'
-    When call _orb_print_global_namespace_help_intro
+    When call _orb_print_orb_help
     The output should equal 'Default namespace $ORB_DEFAULT_NAMESPACE not set.
 
 No namespaces found'
@@ -42,7 +42,7 @@ No namespaces found'
 
   It 'prints default namespace if found'
     ORB_DEFAULT_NAMESPACE=spec
-    When call _orb_print_global_namespace_help_intro
+    When call _orb_print_orb_help
     The output should equal "Default namespace: $(orb_bold)$ORB_DEFAULT_NAMESPACE$(orb_normal).
 
 No namespaces found"
@@ -50,7 +50,7 @@ No namespaces found"
 
   It 'prints namespaces when found'
     _orb_namespaces=( spec spec2 )
-    When call _orb_print_global_namespace_help_intro
+    When call _orb_print_orb_help
     The output should equal 'Default namespace $ORB_DEFAULT_NAMESPACE not set.
 
 Available namespaces listed below:
@@ -115,7 +115,6 @@ Describe '_orb_print_args_explanation'
   It 'prints args explanation'
     parse() {
       _orb_parse_function_declaration
-      _orb_parse_declared_args
       _orb_print_args_explanation
     }
     When call parse

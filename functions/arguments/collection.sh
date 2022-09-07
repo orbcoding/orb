@@ -9,15 +9,7 @@
 # All local variables in this file have to be _orb prefixed to not block assignment to declared value variables
 #
 # Main function
-_orb_parse_function_args() {
-  if [[ $1 == "--help" ]]; then
-    _orb_print_function_help && exit 0
-  else
-    _orb_parse_args "$@"
-  fi
-}
-
-_orb_parse_args() {
+_orb_collect_function_args() {
 	local _orb_args_count=1
 	local _orb_args_remaining=( "$@" ) # array of input args each quoted
 	

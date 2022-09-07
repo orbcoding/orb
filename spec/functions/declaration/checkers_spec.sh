@@ -1,6 +1,7 @@
 Include functions/utils/argument.sh
 Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
+Include scripts/initialize_variables.sh
 
 
 # _orb_is_available_arg_option

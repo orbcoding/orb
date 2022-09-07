@@ -1,4 +1,4 @@
-Describe 'orb_settings.sh'
+Describe 'settings.sh'
   It 'Sets default local orb settings'
     # TODO test local variables?
     # cmd=( echo dude1 && source scripts/call/variables.sh '&&' echo dude )
@@ -8,6 +8,6 @@ Describe 'orb_settings.sh'
     # The variable _orb_setting_namespace_help should equal false
     # The variable _orb_setting_direct_call should equal false
     # The variable _orb_setting_reload_functions should equal false
-    # The variable _orb_setting_sourced should equal false
+    # The variable _orb_sourced should equal false
   End
 End
