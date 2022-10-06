@@ -100,7 +100,7 @@ _orb_postvalidate_declared_function_options() {
 }
 
 _orb_postvalidate_declared_function_options_direct_call() {
-	local value="${_orb_declared_direct_call[@]}"
+	local value=$_orb_declared_direct_call
 	if ! [[ " ${_orb_available_function_option_direct_call_values[@]} " =~ " $value " ]]; then
 		_orb_raise_invalid_declaration "Function: DirectCall: $value. Available values: ${_orb_available_function_option_direct_call_values[*]}"
 	fi

@@ -2,18 +2,18 @@ Include functions/utils/file.sh
 
 Describe 'orb_upfind_closest'
   It 'finds the closest matching file'
-    When call orb_upfind_closest specfile spec/fixtures/nest_1/nest_2
-    The output should include "spec/fixtures/nest_1/nest_2/specfile"
+    When call orb_upfind_closest specfile spec/fixtures/functions/utils/file.sh/nest1/nest2
+    The output should include "spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile"
     The status should be success
   End
 
   It 'finds the closest matching file in lower levels'
-    When call orb_upfind_closest specfile1 spec/fixtures/nest_1/nest_2
-    The output should include "spec/fixtures/nest_1/specfile1"
+    When call orb_upfind_closest specfile1 spec/fixtures/functions/utils/file.sh/nest1/nest2
+    The output should include "spec/fixtures/functions/utils/file.sh/nest1/specfile1"
   End
 
   It 'fails if no file found'
-    When call orb_upfind_closest file_non_existent spec/fixtures/nest_1/nest_2
+    When call orb_upfind_closest file_non_existent spec/fixtures/functions/utils/file.sh/nest1/nest2
     The status should be failure
   End
 End
@@ -23,20 +23,20 @@ Describe 'orb_upfind_to_arr'
 
   It 'adds file matches to array'
     arr=()
-    When call orb_upfind_to_arr arr specfile spec/fixtures/nest_1/nest_2
-    The variable "arr[0]" should include "spec/fixtures/nest_1/nest_2/specfile" 
-    The variable "arr[1]" should include "spec/fixtures/nest_1/specfile"
+    When call orb_upfind_to_arr arr specfile spec/fixtures/functions/utils/file.sh/nest1/nest2
+    The variable "arr[0]" should include "spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile" 
+    The variable "arr[1]" should include "spec/fixtures/functions/utils/file.sh/nest1/specfile"
   End
 
   It 'stops after parsing last directory'
     arr=()
-    When call orb_upfind_to_arr arr specfile spec/fixtures/nest_1/nest_2 spec/fixtures/nest_1/nest_2
-    The variable "arr[0]" should include "spec/fixtures/nest_1/nest_2/specfile" 
+    When call orb_upfind_to_arr arr specfile spec/fixtures/functions/utils/file.sh/nest1/nest2 spec/fixtures/functions/utils/file.sh/nest1/nest2
+    The variable "arr[0]" should include "spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile" 
     The variable "arr[1]" should be undefined
   End
 
   It 'fails if no file found'
-    When call orb_upfind_closest file_non_existent spec/fixtures/nest_1/nest_2
+    When call orb_upfind_closest file_non_existent spec/fixtures/functions/utils/file.sh/nest1/nest2
     The status should be failure
   End
 
@@ -61,11 +61,11 @@ Describe 'orb_trim_uniq_realpaths'
   It 'trims away non unique realpaths'
     # first is symlink to second
     paths=(
-      $(pwd)/spec/fixtures/nest_1/nest_2/nest_3_file_symlink_to_2/specfile
-      $(pwd)/spec/fixtures/nest_1/nest_2/specfile
+      $(pwd)/spec/fixtures/functions/utils/file.sh/nest1/nest2/nest3_file_symlink_to_2/specfile
+      $(pwd)/spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile
     )
     When call orb_trim_uniq_realpaths paths paths
-    The variable "paths[@]" should eq $(pwd)/spec/fixtures/nest_1/nest_2/nest_3_file_symlink_to_2/specfile
+    The variable "paths[@]" should eq $(pwd)/spec/fixtures/functions/utils/file.sh/nest1/nest2/nest3_file_symlink_to_2/specfile
   End
 End
 

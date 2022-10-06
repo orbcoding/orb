@@ -23,16 +23,22 @@
 # This would've also pollute stack trace when functions are called directly
 # my_function => orb => my_function
 #
-! _orb_is_sourced_and_by_unhandled_fn && return 1
-  
-  source "$_orb_root/scripts/call/history.sh"
-  source "$_orb_root/scripts/call/variables.sh"
+
+if ! _orb_is_sourced_by_unhandled_fn; then
+  _orb_sourced=false
+  return 1
+else
   _orb_sourced=true
-  source "$_orb_root/scripts/call/namespace_and_function.sh"
-  source "$_orb_root/scripts/call/source_presource.sh"
-
-  _orb_parse_function_declaration
-
-  source "$_orb_root/scripts/call/function_args.sh"
-  set -- "${_orb_args_positional[@]}"
 fi
+
+source "$_orb_root/scripts/call/history.sh"
+source "$_orb_root/scripts/call/variables.sh"
+source "$_orb_root/scripts/call/namespace_and_function.sh"
+source "$_orb_root/scripts/call/source_presource.sh"
+
+_orb_parse_function_declaration
+
+source "$_orb_root/scripts/call/function_args.sh"
+set -- "${_orb_args_positional[@]}"
+
+return 0

@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Set project root
-_orb_root="${BASH_SOURCE[0]}"
+# Store trace
+_orb_function_trace=("${FUNCNAME[@]}")
+_orb_source_trace=("${BASH_SOURCE[@]}")
+# Set root path
+_orb_root="${_orb_source_trace[0]}"
 _orb_root="${_orb_root%/*/*}"
 
 source "$_orb_root/scripts/version_check.sh"
@@ -14,38 +17,32 @@ if [ ! $_orb_initialized ]; then
     source "$_orb_root/scripts/call/history.sh"
     source "$_orb_root/scripts/call/variables.sh"
     source "$_orb_root/scripts/call/extensions.sh"
-    source "$_orb_root/scripts/call/settings.sh" "$@" && shift $?
+    source "$_orb_root/scripts/call/settings.sh" "$@" 
+    shift -- ${#_orb_settings_args[@]}
     source "$_orb_root/scripts/call/namespace_and_function.sh"
 
     # Get function declaration
     if [[ -n $_orb_function_name ]]; then
-      source "$_orb_root/scripts/call/source_function_file.sh"
+      source "$_orb_root/scripts/call/function_file.sh"
       _orb_parse_function_declaration
     fi
-
+    
     # Handle help
-    if _orb_handle_help; then
-      source "$_orb_root/scripts/call/cleanup.sh" 
-      return 0
-    fi
+    _orb_handle_help && source "$_orb_root/scripts/call/cleanup.sh" && return 0
 
-    # Get function args and source presource files
+    # Get function args
     source "$_orb_root/scripts/call/function_args.sh"
-    source "$_orb_root/scripts/call/source_presource.sh"
 
-    # Call function
+    # Source presource files and call function
+    source "$_orb_root/scripts/call/source_presource.sh"
     $_orb_function_name "${_orb_args_positional[@]}"
     _orb_function_exit_code=$?
-    source "$_orb_root/scripts/call/cleanup.sh" 
-    return $?
+    source "$_orb_root/scripts/call/cleanup.sh"
+
+    return $_orb_function_exit_code
   }
 
   _orb_initialized=1
 fi
 
-# Source or call orb
-if _orb_sourced; then
-  source "$_orb_root/scripts/handle_orb_sourced.sh" 
-else 
-  orb "$@"
-fi
+source "$_orb_root/scripts/handle_orb_sourced.sh" || orb "$@"

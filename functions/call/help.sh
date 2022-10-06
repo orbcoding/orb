@@ -1,6 +1,6 @@
 # Internal help functions
 _orb_handle_help() {
-	! $_orb_setting_help && return 1
+	$_orb_setting_help || return 1
 
 	if [[ -n "$_orb_function_name" ]]; then
 		_orb_print_function_help
@@ -89,8 +89,15 @@ _orb_print_args_explanation() {
 		local msg+="$arg"
 
 		local opt; for opt in "${_orb_available_arg_options_help[@]}"; do
-			local value=; _orb_get_arg_option_value $arg $opt value
-			[[ -z ${value[@]} ]] && [[ $opt == "DefaultHelp:" ]] && _orb_get_arg_option_value $arg "Default:" value
+			local value=()
+			
+			if [[ $opt == "Default:" ]]; then
+				_orb_get_arg_option_value $arg "DefaultHelp:" value
+				[[ -z ${value[@]} ]] &&  _orb_get_arg_option_value $arg "Default:" value
+			else 
+				_orb_get_arg_option_value $arg $opt value
+			fi
+
 			msg+="§$([[ -n "${value[@]}" ]] && echo "${value[@]}" || echo '-')"
 		done
 

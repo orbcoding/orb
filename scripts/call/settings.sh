@@ -13,6 +13,3 @@ $_orb_setting_reload_functions && local _orb_function_dump="$(declare -f)"
 
 # Reset collection variables
 source "$_orb_root/scripts/call/variables.sh" only_args_collection
-
-# Return nr of args to shift
-return ${#_orb_settings_args[@]}

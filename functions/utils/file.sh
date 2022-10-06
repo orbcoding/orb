@@ -69,6 +69,7 @@ orb_trim_uniq_realpaths_orb=(
 )
 function orb_trim_uniq_realpaths() {
 	declare -n _orb_i_array=$1
+	declare -n _orb_uniq_assign=$2
 	local _orb_u_array=()
 	local _orb_realpaths=()
 	local _orb_realpath
@@ -82,7 +83,6 @@ function orb_trim_uniq_realpaths() {
 		fi
 	done
 
-	declare -n _orb_uniq_assign=$2
 	_orb_uniq_assign=("${_orb_u_array[@]}")
 }
 

@@ -7,22 +7,28 @@ Include scripts/initialize.sh
 Describe '_orb_handle_help'
   _orb_print_orb_help() { echo_fn; }
   _orb_print_namespace_help() { echo_fn; }
-  _orb_setting_namespace_help=false
-  _orb_setting_help=false
+  _orb_print_function_help() { echo_fn; }
+  _orb_setting_help=true
 
   It 'prints global help if global help requested'
-    _orb_setting_help=true
     When call _orb_handle_help
     The output should equal _orb_print_orb_help
   End
 
-  It 'prints namespace help if namespace help requested'
-    _orb_setting_namespace_help=true
+  It 'prints function help if function provided'
+    _orb_function_name=spec
+    When call _orb_handle_help
+    The output should equal _orb_print_function_help
+  End
+
+  It 'prints namespace help if namespace provided'
+    _orb_namespace=spec
     When call _orb_handle_help
     The output should equal _orb_print_namespace_help
   End
 
   It 'fails when no help requested'
+    _orb_setting_help=false
     When call _orb_handle_help
     The status should be failure
   End
@@ -63,6 +69,9 @@ End
 
 # _orb_print_namespace_help
 Describe '_orb_print_namespace_help'
+  Include "$_orb_root/scripts/call/variables.sh"
+  _orb_setting_direct_call=false
+
   dir="$(pwd)/spec/fixtures/.orb/namespaces/spec"
   It 'prints functions with comments'
     _orb_namespace_files=( "$dir/test_print_help_functions.sh" "$dir/public_and_private_functions.sh" "$dir/test_print_help_functions2.sh" )
@@ -93,6 +102,8 @@ End
 
 # _orb_print_args_explanation
 Describe '_orb_print_args_explanation'
+  Include "$_orb_root/scripts/call/variables.sh"
+
   _orb_function_declaration=(
     1 = first
       "This is first comment"
@@ -103,7 +114,7 @@ Describe '_orb_print_args_explanation'
     -a 1 = flagged_arg
       "This is flagged comment"
       Required: true
-      Default: value
+      DefaultHelp: "value help"
       In: second value or other
   )
 
@@ -119,9 +130,10 @@ Describe '_orb_print_args_explanation'
     }
     When call parse
     The first line of output should include "\
-  Required:            Default:  In:                    Catch:                 Multiple:             DefaultHelp:"
-    The output should include "1   false                value     first value or other   first value or other   false value or other   value or other  This is first comment
-  -a  true value or other  value     second value or other  second value or other  false value or other   value or other  This is flagged comment"
+  Required:  Default:    In:                    Catch:  Multiple:"
+    The output should include "\
+  1   false      value       first value or other   -       -          This is first comment
+  -a  true       value help  second value or other  -       -          This is flagged comment"
     End
 End
 

@@ -1,3 +1,4 @@
+exit 0
 Include functions/utils/error.sh
 PATH=PATH:$_orb_root/bin
 
