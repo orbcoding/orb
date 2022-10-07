@@ -26,8 +26,7 @@ if [[ $1 != only_args_collection ]]; then
 
   # Extensions
   declare -a _orb_extensions=()
-  # Will be a nameref to ${_orb_function_name}_orb declaration
-  declare -a _orb_function_declaration=()
+  # _orb_function_declaration will be a nameref to ${_orb_function_name}_orb
 
   # Set to point orb functions to another declaration/argument/variable 
   # Eg: ${_orb_function_declaration}${_orb_variable_suffix}

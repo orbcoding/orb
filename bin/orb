@@ -9,7 +9,7 @@ _orb_root="${_orb_root%/*/*}"
 
 source "$_orb_root/scripts/version_check.sh"
 
-if [ ! $_orb_initialized ]; then
+if [[ $_orb_initialized != true ]]; then
   source "$_orb_root/scripts/initialize.sh"
 
   # Prefer declaring orb function here for minimal stack trace
@@ -42,7 +42,7 @@ if [ ! $_orb_initialized ]; then
     return $_orb_function_exit_code
   }
 
-  _orb_initialized=1
+  _orb_initialized=true
 fi
 
 source "$_orb_root/scripts/handle_orb_sourced.sh" || orb "$@"

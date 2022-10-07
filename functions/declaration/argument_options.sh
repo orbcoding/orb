@@ -1,6 +1,6 @@
 _orb_parse_declared_args_options() {
 	local arg; for arg in "${_orb_declared_args[@]}"; do
-		arg_options_declaration=()
+		local arg_options_declaration=()
 		_orb_get_arg_options_declaration $arg
 
 		_orb_prevalidate_declared_arg_options $arg

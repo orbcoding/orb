@@ -24,11 +24,17 @@
 # my_function => orb => my_function
 #
 
-if ! _orb_is_sourced_by_unhandled_fn; then
+if [[ ${_orb_function_trace[0]} == "source" ]]; then
+  if [[ ${_orb_function_trace[2]} == "orb" ]]; then
+    # Do nothing if sourced when parent function already called through orb
+    return 0
+  fi
+
+  _orb_sourced=true
+else
+  # Return false to proceed with normal call
   _orb_sourced=false
   return 1
-else
-  _orb_sourced=true
 fi
 
 source "$_orb_root/scripts/call/history.sh"

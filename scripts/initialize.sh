@@ -1,7 +1,5 @@
 source "$_orb_root/scripts/initialize_variables.sh"
 
-source "$_orb_root/functions/handle_orb_sourced.sh"
-
 source "$_orb_root/functions/utils/pass.sh"
 source "$_orb_root/functions/utils/argument.sh"
 source "$_orb_root/functions/utils/debug.sh"
