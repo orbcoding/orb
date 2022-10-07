@@ -38,3 +38,9 @@ echo_fn() {
 }
 
 _orb_in_running_test=true
+
+
+orb_raise_error() {
+  echo "$@" && exit 1
+}
+

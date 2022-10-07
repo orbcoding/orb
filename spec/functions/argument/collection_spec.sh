@@ -2,6 +2,7 @@ Include functions/arguments/collection.sh
 Include functions/arguments/assignment.sh
 Include functions/arguments/validation.sh
 Include functions/utils/argument.sh
+Include functions/utils/utils.sh
 Include scripts/call/variables.sh
 Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
@@ -157,35 +158,35 @@ Describe '_orb_try_inline_arg_fallback'
   _orb_raise_invalid_arg() { echo_fn "$@"; exit 1; }
   _orb_args_count=1
   _orb_declared_args=(1 ...)
-  declare -a _orb_declared_catchs=(flag block dash)
+  declare -a _orb_declared_option_values=(flag block dash)
 
   It 'assigns flag to nr arg if catch declared'
-    declare -A _orb_declared_catchs_start_indexes=([1]=0)
-    declare -A _orb_declared_catchs_lengths=([1]=1)
+    declare -A _orb_declared_option_start_indexes=([Catch:]="0 -")
+    declare -A _orb_declared_option_lengths=([Catch:]="1 -")
     When call _orb_try_inline_arg_fallback -f -f
     The status should be success
     The output should equal "_orb_assign_inline_arg -f"
   End
   
   It 'assigns flag to rest if catch properly declared'
-    declare -A _orb_declared_catchs_start_indexes=([...]=0)
-    declare -A _orb_declared_catchs_lengths=([...]=1)
+    declare -A _orb_declared_option_start_indexes=([Catch:]="- 0")
+    declare -A _orb_declared_option_lengths=([Catch:]="- 1")
     When call _orb_try_inline_arg_fallback -f -f
     The status should be success
     The output should equal "_orb_assign_rest"
   End
   
   It 'works for blocks'
-    declare -A _orb_declared_catchs_start_indexes=([...]=1)
-    declare -A _orb_declared_catchs_lengths=([...]=1)
+    declare -A _orb_declared_option_start_indexes=([Catch:]="- 1")
+    declare -A _orb_declared_option_lengths=([Catch:]="- 1")
     When call _orb_try_inline_arg_fallback -f- -f-
     The status should be success
     The output should equal "_orb_assign_rest"
   End
   
   It 'fails unless catch specified'
-    declare -A _orb_declared_catchs_start_indexes
-    declare -A _orb_declared_catchs_lengths
+    declare -A _orb_declared_option_start_indexes=("- -")
+    declare -A _orb_declared_option_lengths=("- -")
     When run _orb_try_inline_arg_fallback -f- -f-
     The status should be failure
     The output should equal "_orb_raise_invalid_arg -f-"

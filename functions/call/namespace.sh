@@ -5,7 +5,7 @@ _orb_collect_namespaces() {
       local namespace=$(basename $file)
 			namespace="${namespace/\.*/}"
 
-      if [[ ! " ${_orb_namespaces[@]} " =~ " $namespace " ]]; then
+      if ! orb_in_arr $namespace _orb_namespaces; then
         _orb_namespaces+=( $namespace )
       fi
     done
@@ -51,7 +51,7 @@ _orb_get_current_namespace() {
 
 _orb_get_current_namespace_from_args() {
   local ns=$1
-	if [[ " ${_orb_namespaces[@]} " =~ " $ns " ]]; then
+	if orb_in_arr $ns _orb_namespaces; then
 		echo "$ns"
 	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
 		echo "$ORB_DEFAULT_NAMESPACE"

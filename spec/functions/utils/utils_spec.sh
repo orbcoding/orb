@@ -68,3 +68,38 @@ Describe 'orb_is_empty_arr'
     The status should be failure
   End
 End
+
+
+Describe 'orb_remove_prefix'
+End
+
+# orb_index_of
+Describe 'orb_index_of'
+  It 'returns the index of item in array'
+    arr=(first second third)
+    When call orb_index_of second arr
+    The output should equal 1
+  End
+
+  It 'returns -1 and fails if not found'
+    arr=(first second third)
+    When call orb_index_of fourth arr
+    The status should be failure
+    The output should equal -1
+  End
+End
+
+# orb_in_arr
+Describe 'orb_in_arr'
+  It 'succeeds if item in array'
+    arr=(first second third)
+    When call orb_in_arr second arr
+    The status should be success
+  End
+
+  It 'fails if not found'
+    arr=(first second third)
+    When call orb_in_arr fourth arr
+    The status should be failure
+  End
+End

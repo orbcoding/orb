@@ -1,5 +1,6 @@
 Include functions/call/namespace.sh
 Include functions/utils/text.sh
+Include functions/utils/utils.sh
 
 # _orb_collect_namespaces
 Describe '_orb_collect_namespaces'

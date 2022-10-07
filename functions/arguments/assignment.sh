@@ -4,7 +4,7 @@
 _orb_assign_arg_value() {
 	local _orb_arg=$1 && shift
 
-	if _orb_has_arg_value $_orb_arg && _orb_arg_is_multiple $_orb_arg; then
+	if _orb_has_arg_value $_orb_arg && _orb_arg_option_value_is $_orb_arg Multiple: true; then
 		_orb_args_values_start_indexes[$_orb_arg]+=" ${#_orb_args_values[@]}"
 		_orb_args_values_lengths[$_orb_arg]+=" $#"
 	else

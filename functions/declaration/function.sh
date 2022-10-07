@@ -44,7 +44,7 @@ _orb_prevalidate_declared_function_options() {
 
 _orb_extract_function_comment() {
 	local comment=${declared_function_options[0]}
-	if [[ -n $comment ]] && ! _orb_is_available_function_option $comment; then
+	if [[ -n $comment ]] && ! orb_in_arr $comment _orb_available_function_options; then
 		_orb_declared_comments["function"]="$comment"
 	else
 		return 1
@@ -63,7 +63,7 @@ _orb_is_function_options_start_index() {
   local options_i=$1
 	local current_option="${declared_function_options[$options_i]}"
 
-	if _orb_is_available_function_option $current_option; then
+	if orb_in_arr $current_option _orb_available_function_options; then
 		if [[ -n ${declared_function_options_start_indexes[0]} ]]; then
 			local prev_start_i="${declared_function_options_start_indexes[-1]}"
 			local prev_option="${declared_function_options[$prev_start_i]}"

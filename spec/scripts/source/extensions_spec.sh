@@ -1,5 +1,6 @@
 Include functions/call/extensions.sh
 Include functions/utils/file.sh
+Include functions/utils/utils.sh
 
 Describe 'orb_extensions.sh'
   It 'Collects orb extensions and parses their .env files'

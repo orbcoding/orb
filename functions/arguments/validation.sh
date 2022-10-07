@@ -5,9 +5,9 @@ _orb_is_valid_arg() { # $1 arg_key, $2 arg
 _orb_is_valid_in() {
 	local arg=$1
 	local val=(${@:2})
-	local in_arr=(); _orb_get_arg_in_arr $arg in_arr || return 0
+	local in_arr=(); _orb_get_arg_option_value $arg "In:" in_arr || return 0
 
-	[[ " ${in_arr[@]} " =~ " $val " ]]
+	orb_in_arr "$val" in_arr
 }
 
 _orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required

@@ -30,59 +30,36 @@ _orb_get_function_option_value() {
     esac
 }
 
+_orb_get_arg_option_default_value() {
+	local arg=$1
+  local opt=$2
+	declare -n _orb_assign_ref=$3
+
+	case $opt in
+		'Required:')
+			_orb_assign_ref=$(orb_is_any_flag $arg && echo false || echo true);;
+		*)
+			_orb_assign_ref=
+	esac
+}
+
+
+# If called without assignment param $3 will just check if has value
 _orb_get_arg_option_value() {
   local arg=$1
   local opt=$2
+
+  local i=$(orb_index_of $arg _orb_declared_args)
+  local start_is=(${_orb_declared_option_start_indexes[$opt]})
+  local start_i="${start_is[$i]}"
+
+  # Should always be - if empty but adding -z for sanity when testing
+  [[ $start_i == '-' ]] || [[ -z $start_i ]] && return 1
+  [[ -z $3 ]] && return 0 
+
   declare -n _orb_option_value=$3
+  local lens=(${_orb_declared_option_lengths[$opt]})
+  local len=${lens[$i]}
 
-    case $opt in
-      'Required:')
-        _orb_option_value="${_orb_declared_requireds[$arg]}"
-        ;;
-      "Default:")
-        _orb_get_arg_default_arr $arg _orb_option_value
-        ;;
-      "In:")
-        _orb_get_arg_in_arr $arg _orb_option_value
-        ;;
-      "Catch:")
-        _orb_get_arg_catch_arr $arg _orb_option_value
-        ;;
-      'Multiple:')
-        _orb_option_value="${_orb_declared_multiples[$arg]}"
-        ;;
-      "DefaultHelp:")
-        _orb_option_value="${_orb_declared_default_helps[$arg]}"
-        ;;
-    esac
-}
-
-# sets value to arg_default variable that should be declared local in calling fn
-_orb_get_arg_default_arr() {
-  local arg=$1
-	declare -n assign_ref=$2
-  local i=${_orb_declared_defaults_start_indexes[$arg]}
-  [[ -z $i ]] && return 1
-  local len=${_orb_declared_defaults_lengths[$arg]}
-  assign_ref=( "${_orb_declared_defaults[@]:$i:$len}" )
-}
-
-# sets value to arg_in variable that should be declared local in calling fn
-_orb_get_arg_in_arr() {
-  local arg=$1
-	declare -n assign_ref=$2
-  local i=${_orb_declared_ins_start_indexes[$arg]}
-  [[ -z $i ]] && return 1
-  local len=${_orb_declared_ins_lengths[$arg]}
-  assign_ref=( "${_orb_declared_ins[@]:$i:$len}" )
-}
-
-# sets value to arg_catch variable that should be declared local in calling fn
-_orb_get_arg_catch_arr() {
-  local arg=$1
-	declare -n assign_ref=$2
-  local i="${_orb_declared_catchs_start_indexes[$arg]}"
-  [[ -z $i ]] && return 1
-  local len=${_orb_declared_catchs_lengths[$arg]}
-	assign_ref=( "${_orb_declared_catchs[@]:$i:$len}" )
+  _orb_option_value=("${_orb_declared_option_values[@]:$start_i:$len}")
 }

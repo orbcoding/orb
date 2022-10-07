@@ -5,6 +5,7 @@ Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 Include functions/arguments/checkers.sh
 Include functions/utils/argument.sh
+Include functions/utils/utils.sh
 
 declare flag
 declare dash
@@ -15,6 +16,7 @@ declare -A _orb_declared_vars=(
   [-b-]=block 
   [...]=rest
 )
+_orb_declared_args=(1 -f -- -b- ...)
 
 # _orb_assign_arg_value
 Describe '_orb_assign_arg_value'
@@ -31,7 +33,9 @@ Describe '_orb_assign_arg_value'
   End
 
   It 'should handle Multiple'
-    declare -a _orb_declared_multiples=([-f]=true)
+    declare -a _orb_declared_option_values=(true) 
+    declare -A _orb_declared_option_start_indexes=([Multiple:]="- 0 - - -")
+    declare -A _orb_declared_option_lengths=([Multiple:]="- 1 - - -")
     _orb_assign_arg_value -f "first value"
     When call _orb_assign_arg_value -f "second value"
     The variable "_orb_args_values_start_indexes[-f]" should equal "0 1"

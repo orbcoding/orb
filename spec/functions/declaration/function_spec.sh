@@ -4,6 +4,7 @@ Include functions/declaration/validation.sh
 Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 Include functions/utils/argument.sh
+Include functions/utils/utils.sh
 Include scripts/call/variables.sh
 Include scripts/initialize_variables.sh
 
@@ -48,23 +49,12 @@ Describe '_orb_parse_function_declaration'
     The variable "_orb_declared_comments[function]" should equal "Function comment"
     The variable "_orb_declared_direct_call" should equal true
     The variable "_orb_declared_args[@]" should equal "1 -a"
-
-    The variable "_orb_declared_requireds[1]" should equal "false"
     The variable "_orb_declared_comments[1]" should equal "This is first comment"
-    The variable "_orb_declared_defaults_start_indexes[1]" should equal "0"
-    The variable "_orb_declared_defaults_lengths[1]" should equal "1"
-    The variable "_orb_declared_ins_start_indexes[1]" should equal "0"
-    The variable "_orb_declared_ins_lengths[1]" should equal "4"
-    
-    The variable "_orb_declared_requireds[-a]" should equal "true"
     The variable "_orb_declared_comments[-a]" should equal "This is flagged comment"
-    The variable "_orb_declared_defaults_start_indexes[-a]" should equal "1"
-    The variable "_orb_declared_defaults_lengths[-a]" should equal "1"
-    The variable "_orb_declared_ins_start_indexes[-a]" should equal "4"
-    The variable "_orb_declared_ins_lengths[-a]" should equal "4"
-    
-    The variable "_orb_declared_ins[@]" should equal "first value or other second value or other"
-    The variable "_orb_declared_defaults[@]" should equal "value value"
+
+    The variable "_orb_declared_option_values[@]" should equal "false value first value or other true value second value or other"
+    The variable "_orb_declared_option_start_indexes[@]" should equal "- - 2 8 - - - - 1 7 0 6"
+    The variable "_orb_declared_option_lengths[@]" should equal "- - 4 4 - - - - 1 1 1 1"
   End
 End
 

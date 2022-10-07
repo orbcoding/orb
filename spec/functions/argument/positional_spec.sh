@@ -3,6 +3,7 @@ Include functions/declaration/getters.sh
 Include functions/declaration/checkers.sh
 Include functions/arguments/checkers.sh
 Include functions/utils/argument.sh
+Include functions/utils/utils.sh
 Include scripts/call/variables.sh
 
 

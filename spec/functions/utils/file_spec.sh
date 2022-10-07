@@ -1,4 +1,5 @@
 Include functions/utils/file.sh
+Include functions/utils/utils.sh
 
 Describe 'orb_upfind_closest'
   It 'finds the closest matching file'

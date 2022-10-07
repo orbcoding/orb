@@ -49,21 +49,12 @@ declare _orb_declared_direct_call=false
 declare -a _orb_declared_args=() # ordered
 declare -A _orb_declared_arg_suffixes=()
 declare -A _orb_declared_vars=()
-declare -A _orb_declared_requireds=()
 declare -A _orb_declared_comments=()
-declare -A _orb_declared_multiples=()
-declare -A _orb_declared_default_helps=()
 
-# Separate normal array stores to maintain word separation
-# Tracked by index and length
-declare -a _orb_declared_defaults=()
-declare -A _orb_declared_defaults_start_indexes=()
-declare -A _orb_declared_defaults_lengths=()
-
-declare -a _orb_declared_ins=()
-declare -A _orb_declared_ins_start_indexes=()
-declare -A _orb_declared_ins_lengths=()
-
-declare -a _orb_declared_catchs=()
-declare -A _orb_declared_catchs_start_indexes=()
-declare -A _orb_declared_catchs_lengths=()
+# One array holding all option values mixed
+# Start_indexes and lengths for each option provided by separate arrays 
+# Eg: _orb_declared_start_indexes[Default:] would return "0 2 6..." 
+# for each declared arg in order, leaving '-' for blanks.
+declare -a _orb_declared_option_values=() 
+declare -A _orb_declared_option_start_indexes=()
+declare -A _orb_declared_option_lengths=()

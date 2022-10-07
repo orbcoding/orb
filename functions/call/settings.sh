@@ -34,7 +34,7 @@ _orb_raise_invalid_orb_settings_arg() {
   local error_msg="invalid option $invalid_arg\n\nAvailable options:\n\n"
 
   local settings
-  local arg; for arg in ${_orb_declared_args[@]}; do
+  local arg; for arg in "${_orb_declared_args[@]}"; do
     settings+="  $arg; ${_orb_declared_comments[$arg]}\n"
   done
 

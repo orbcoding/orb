@@ -1,11 +1,7 @@
 _orb_parse_declared_args_options() {
-	local arg; for arg in ${_orb_declared_args[@]}; do
-		_orb_set_declared_arg_options_defaults $arg
-
-		declared_arg_options=()
-		_orb_get_declared_arg_options $arg
-
-		[[ -z "${declared_arg_options[@]}" ]] && continue
+	local arg; for arg in "${_orb_declared_args[@]}"; do
+		arg_options_declaration=()
+		_orb_get_arg_options_declaration $arg
 
 		_orb_prevalidate_declared_arg_options $arg
 		_orb_parse_declared_arg_options $arg
@@ -14,12 +10,8 @@ _orb_parse_declared_args_options() {
 	_orb_postvalidate_declared_args_options
 }
 
-_orb_set_declared_arg_options_defaults() {
-	local arg=$1
-	_orb_declared_requireds[$arg]=$(orb_is_any_flag $arg && echo false || echo true)
-}
- 
-_orb_get_declared_arg_options() {
+
+_orb_get_arg_options_declaration() {
 	local arg=$1
 	local i_offset=3
 	[[ -n ${_orb_declared_arg_suffixes[$arg]} ]] && (( i_offset++ ))
@@ -30,7 +22,7 @@ _orb_get_declared_arg_options() {
 
 	[[ $options_len == 0 ]] && return
 
-	declared_arg_options=("${declaration[@]:$options_i:$options_len}")
+	arg_options_declaration=("${declaration[@]:$options_i:$options_len}")
 }
 
 _orb_store_declared_arg_comment() {
@@ -49,23 +41,25 @@ _orb_store_declared_arg_comment() {
 
 _orb_prevalidate_declared_arg_options() {
 	local arg=$1
-	
-	_orb_is_valid_arg_option $arg "${declared_arg_options[0]}" true
+	[[ -z ${arg_options_declaration[@]} ]] || \
+	_orb_is_valid_arg_option $arg "${arg_options_declaration[0]}" true
 }
 
 _orb_parse_declared_arg_options() {
 	local arg=$1
 	local declared_arg_options_start_indexes=()
 	local declared_arg_options_lengths=()
+	local declared_arg_option_names=()
 	_orb_get_declared_arg_options_start_indexes $arg
 	_orb_get_declared_arg_options_lengths $arg
-	_orb_store_declared_arg_options $arg
+	_orb_get_declared_arg_option_names $arg
+	_orb_store_declared_arg_option_values $arg
 }
 
 _orb_get_declared_arg_options_start_indexes() {
 	local arg=$1
 
-	local options_i; for options_i in $(seq 0 $((${#declared_arg_options[@]} - 1))); do
+	local options_i; for options_i in $(seq 0 $((${#arg_options_declaration[@]} - 1))); do
 		if _orb_is_declared_arg_options_start_index $arg $options_i; then
 			declared_arg_options_start_indexes+=( $options_i )
 		fi
@@ -75,17 +69,17 @@ _orb_get_declared_arg_options_start_indexes() {
 _orb_is_declared_arg_options_start_index() {
 	local arg=$1 
   local options_i=$2
-	local current_option="${declared_arg_options[$options_i]}"
+	local current_option="${arg_options_declaration[$options_i]}"
 
 	if _orb_is_valid_arg_option $arg "$current_option"; then
 		if [[ -n ${declared_arg_options_start_indexes[0]} ]]; then
 			local prev_start_i="${declared_arg_options_start_indexes[-1]}"
-			local prev_option="${declared_arg_options[$prev_start_i]}"
+			local prev_option="${arg_options_declaration[$prev_start_i]}"
 		fi
 
 		if [[ -n $prev_start_i ]] && (( $prev_start_i == $options_i - 1 )); then
 			_orb_raise_invalid_declaration "$prev_option invalid value: $current_option"
-		elif [[ $options_i == $((${#declared_arg_options[@]} - 1)) ]]; then
+		elif [[ $options_i == $((${#arg_options_declaration[@]} - 1)) ]]; then
 			# option is last str
 			_orb_raise_invalid_declaration "$current_option missing value"
 		else
@@ -97,7 +91,7 @@ _orb_is_declared_arg_options_start_index() {
 }
 
 _orb_get_declared_arg_options_lengths() {
-	local options_length=${#declared_arg_options[@]}
+	local options_length=${#arg_options_declaration[@]}
 	local counter=1
 
 	local i; for i in "${declared_arg_options_start_indexes[@]}"; do
@@ -115,46 +109,37 @@ _orb_get_declared_arg_options_lengths() {
 	done
 }
 
+_orb_get_declared_arg_option_names() {
+	for i in "${declared_arg_options_start_indexes[@]}"; do
+    declared_arg_option_names+=(${arg_options_declaration[$i]})
+	done
+}
 
-_orb_store_declared_arg_options() {
+_orb_store_declared_arg_option_values() {
 	local arg=$1
-  local options_i=0
+	local prefix; [[ $arg == "${_orb_declared_args[0]}" ]] && prefix="" || prefix=" "
 
-  for i in "${declared_arg_options_start_indexes[@]}"; do
-    local option=${declared_arg_options[$i]}
-    local value_start_i=$(( $i + 1 )) # first is option itself
-    local value_len=$(( ${declared_arg_options_lengths[$options_i]} - 1 )) # hence one shorter
-    local value=( "${declared_arg_options[@]:$value_start_i:$value_len}" )
-    
-    case $option in
-      'Required:')
-        _orb_declared_requireds[$arg]="$value"
-        ;;
-      "Default:")
-        _orb_declared_defaults_start_indexes[$arg]=${#_orb_declared_defaults[@]} # will start after last in array
-        _orb_declared_defaults_lengths[$arg]=$value_len
-        _orb_declared_defaults+=( "${value[@]}" )
-        ;;
-      "In:")
-        _orb_declared_ins_start_indexes[$arg]=${#_orb_declared_ins[@]} # will start after last in array
-        _orb_declared_ins_lengths[$arg]=$value_len
-        _orb_declared_ins+=( "${value[@]}" )
-        ;;
-      "Catch:")
-        _orb_declared_catchs_start_indexes[$arg]=${#_orb_declared_catchs[@]} # will start after last in array
-        _orb_declared_catchs_lengths[$arg]=$value_len
-        _orb_declared_catchs+=( "${value[@]}" )
-        ;;
-      'Multiple:')
-        _orb_declared_multiples[$arg]="$value"
-        ;;
-      "DefaultHelp:")
-        _orb_declared_default_helps[$arg]="$value"
-        ;;
-    esac
 
-    ((options_i++))
-  done
+	local option; for option in "${_orb_available_arg_options[@]}"; do
+		local i value=() value_start_i value_len
+
+		if i=$(orb_index_of $option declared_arg_option_names); then
+			value_start_i=$(( ${declared_arg_options_start_indexes[$i]} + 1))
+			value_len=$(( ${declared_arg_options_lengths[$i]} - 1))
+			value=("${arg_options_declaration[@]:$value_start_i:$value_len}")
+		else
+			_orb_get_arg_option_default_value $arg $option value
+		fi
+
+		if [[ -n "${value[@]}" ]]; then
+			_orb_declared_option_start_indexes[$option]+="$prefix${#_orb_declared_option_values[@]}"
+			_orb_declared_option_values+=("${value[@]}")
+			_orb_declared_option_lengths[$option]+="$prefix${#value[@]}"
+		else
+			_orb_declared_option_start_indexes[$option]+="${prefix}-"
+			_orb_declared_option_lengths[$option]+="${prefix}-"
+		fi
+	done
 
 	return 0
 }

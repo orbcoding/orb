@@ -4,6 +4,7 @@ Include functions/declaration/getters.sh
 Include scripts/call/variables.sh
 Include scripts/initialize_variables.sh
 Include functions/utils/argument.sh
+Include functions/utils/utils.sh
 Include functions/call/help.sh
 
 # _orb_prevalidate_declaration
@@ -57,9 +58,9 @@ End
 # _orb_postvalidate_declared_args_options_catchs
 Describe '_orb_postvalidate_declared_args_options_catchs'
   _orb_declared_args=(-f)
-  declare -a _orb_declared_catchs=(1 flag block dash 2)
-  declare -A _orb_declared_catchs_start_indexes=([-f]=1)
-  declare -A _orb_declared_catchs_lengths=([-f]=3)
+  _orb_declared_option_values=(1 flag block dash 2)
+  declare -A _orb_declared_option_start_indexes=([Catch:]=1)
+  declare -A _orb_declared_option_lengths=([Catch:]=3)
 
   It 'succeeds on valid catch values'
     When call _orb_postvalidate_declared_args_options_catchs
@@ -68,7 +69,7 @@ Describe '_orb_postvalidate_declared_args_options_catchs'
 
   It 'fails on invalid catch values'
     _orb_raise_invalid_declaration() { echo_fn $@; exit 1; }
-    declare -A _orb_declared_catchs_start_indexes=([-f]=0)
+    declare -A _orb_declared_option_start_indexes=([Catch:]=0)
     When run _orb_postvalidate_declared_args_options_catchs
     The status should be failure
     The output should equal "_orb_raise_invalid_declaration -f: Invalid Catch: value: 1. Available values: any flag block dash"
@@ -78,7 +79,9 @@ End
 # _orb_postvalidate_declared_args_options_requireds
 Describe '_orb_postvalidate_declared_args_options_requireds'
   _orb_declared_args=(-f)
-  declare -A _orb_declared_requireds=([-f]=true)
+  _orb_declared_option_values=(true) 
+  declare -A _orb_declared_option_start_indexes=([Required:]=0)
+  declare -A _orb_declared_option_lengths=([Required:]=1)
 
   It 'succeeds on valid required values'
     When call _orb_postvalidate_declared_args_options_requireds
@@ -87,17 +90,19 @@ Describe '_orb_postvalidate_declared_args_options_requireds'
 
   It 'fails on invalid required values'
     _orb_raise_invalid_declaration() { echo_fn $@; exit 1; }
-    declare -A _orb_declared_requireds=([-f]=asd)
+    _orb_declared_option_values=(unknown)
     When run _orb_postvalidate_declared_args_options_requireds
     The status should be failure
-    The output should equal "_orb_raise_invalid_declaration -f: Invalid Required: value: asd. Available values: true false"
+    The output should equal "_orb_raise_invalid_declaration -f: Invalid Required: value: unknown. Available values: true false"
   End
 End
 
 # _orb_postvalidate_declared_args_options_multiples
 Describe '_orb_postvalidate_declared_args_options_multiples'
   _orb_declared_args=(-f)
-  declare -A _orb_declared_multiples=([-f]=true)
+  _orb_declared_option_values=(true) 
+  declare -A _orb_declared_option_start_indexes=([Multiple:]=0)
+  declare -A _orb_declared_option_lengths=([Multiple:]=1)
 
   It 'succeeds on valid multiple values'
     When call _orb_postvalidate_declared_args_options_multiples
@@ -106,17 +111,19 @@ Describe '_orb_postvalidate_declared_args_options_multiples'
 
   It 'fails on invalid multiple values'
     _orb_raise_invalid_declaration() { echo_fn $@; exit 1; }
-    declare -A _orb_declared_multiples=([-f]=asd)
+    _orb_declared_option_values=(unknown) 
     When run _orb_postvalidate_declared_args_options_multiples
     The status should be failure
-    The output should equal "_orb_raise_invalid_declaration -f: Invalid Multiple: value: asd. Available values: true false"
+    The output should equal "_orb_raise_invalid_declaration -f: Invalid Multiple: value: unknown. Available values: true false"
   End
 End
 
 # _orb_postvalidate_declared_args_incompatible_options
 Describe '_orb_postvalidate_declared_args_incompatible_options'
   _orb_declared_args=(-f)
-  declare -A _orb_declared_defaults_start_indexes=([-f]=0)
+  _orb_declared_option_values=(def defhelp)
+  declare -A _orb_declared_option_start_indexes=([Default:]=0 [DefaultHelp:]="-")
+  declare -A _orb_declared_option_lengths=([Default:]=1 [DefaultHelp:]="-")
 
   It 'succeeds on valid multiple values'
     When call _orb_postvalidate_declared_args_incompatible_options
@@ -125,7 +132,9 @@ Describe '_orb_postvalidate_declared_args_incompatible_options'
 
   It 'fails on invalid multiple values'
     _orb_raise_invalid_declaration() { echo_fn $@; exit 1; }
-    declare -A _orb_declared_default_helps=([-f]=val)
+    _orb_declared_option_start_indexes[DefaultHelp:]=1
+    _orb_declared_option_lengths[DefaultHelp:]=1
+
     When run _orb_postvalidate_declared_args_incompatible_options
     The status should be failure
     The output should equal "_orb_raise_invalid_declaration -f: Incompatible options: Default:, DefaultHelp:"

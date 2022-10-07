@@ -83,3 +83,25 @@ declare -A orb_remove_prefix_args=(
 		return 1
 	fi
 }
+
+
+function orb_index_of() {
+	local _orb_arr_value="$1"
+	declare -n _orb_arr_ref="$2"
+
+	local _orb_i; for _orb_i in "${!_orb_arr_ref[@]}"; do
+		if [[ "${_orb_arr_ref[$_orb_i]}" == "$_orb_arr_value" ]]; then
+			echo "$_orb_i" && return
+		fi
+	done
+
+	echo "-1"
+	return 1
+}
+
+function orb_in_arr() {
+	local _orb_arr_value="$1"
+	local _orb_arr_name="$2"
+
+	orb_index_of $_orb_arr_value $_orb_arr_name > /dev/null
+}

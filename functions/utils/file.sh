@@ -77,7 +77,7 @@ function orb_trim_uniq_realpaths() {
 	local _orb_path; for _orb_path in "${_orb_i_array[@]}"; do
 		_orb_realpath=$(realpath $_orb_path)
 
-	  if ! [[ " ${_orb_realpaths[@]} " =~ " $_orb_realpath " ]]; then
+	  if ! orb_in_arr $_orb_realpath _orb_realpaths; then
 			_orb_u_array+=($_orb_path)
 			_orb_realpaths+=("$_orb_realpath")
 		fi

@@ -1,14 +1,20 @@
 Include functions/arguments/checkers.sh
 Include functions/declaration/checkers.sh
+Include functions/declaration/getters.sh
 Include functions/utils/argument.sh
+Include functions/utils/utils.sh
 Include scripts/call/variables.sh
 
 # _orb_get_arg_value
 Describe '_orb_get_arg_value'
   declare -A _orb_args_values_start_indexes=([1]=0 [...]=5 [-m]=7 [-f]=9 )
   declare -A _orb_args_values_lengths=([1]=5 [...]=2 [-m]=2 [-f]=2)
-  declare -A _orb_declared_multiples=([-m]=true)
   _orb_args_values=(1 2 3 4 5 1 2 6 7 9 0)
+
+  _orb_declared_args=(1 ... -m -f)
+  _orb_declared_option_values=(true)
+  declare -A _orb_declared_option_start_indexes=([Multiple:]="- - 0 -")
+  declare -A _orb_declared_option_lengths=([Multiple:]="- - 1 -")
   values=()
   
   It 'adds arg values to ref'
