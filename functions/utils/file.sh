@@ -43,6 +43,7 @@ function orb_upfind_to_arr() {
 	[[ ${_orb_stop_p:0:1} != '/' ]] && _orb_stop_p="$(pwd)/$_orb_stop_p"
 
 	local _orb_files _orb_file; IFS="$_orb_sep" read -r -a _orb_files <<< $2 # split by sep
+	local _orb_fullpath
 
 	while true; do
 		for _orb_file in "${_orb_files[@]}"; do

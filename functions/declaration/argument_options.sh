@@ -110,7 +110,7 @@ _orb_get_declared_arg_options_lengths() {
 }
 
 _orb_get_declared_arg_option_names() {
-	for i in "${declared_arg_options_start_indexes[@]}"; do
+	local i; for i in "${declared_arg_options_start_indexes[@]}"; do
     declared_arg_option_names+=(${arg_options_declaration[$i]})
 	done
 }

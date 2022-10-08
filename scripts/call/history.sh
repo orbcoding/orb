@@ -1,45 +1,30 @@
-return 
 [[ -z $_orb_function_name ]] && return
-# Instead of caller v2
-_orb_call_count=0
-_orb_call_trace_max_length=3 # min 1 needed for orb_pass
-# 
 
-
-
-if (( $_orb_call_count < $_orb_call_trace_max_length )); then
-  trace_length=$_orb_call_count
-  move_traces=$(( $trace_length - 1 ))
+if (( $_orb_history_index < $_orb_history_max_length - 1 )); then
+  _orb_last_move_i=$_orb_history_index
 else
-  trace_length=$_orb_call_trace_max_length
-  destroy_trace_index=$(( $_orb_call_trace_max_length - 1 ))
+  _orb_last_move_i=$(( $_orb_history_max_length - 2 ))
 fi
 
+# Move variables up one index
+# Loop through history in reverse
+# skipping last entry if reached max history length
+local _orb_i; for _orb_i in $(seq $_orb_last_move_i -1 0); do
+  local _orb_history_var; for _orb_history_var in "${_orb_history_variables[@]}"; do
+    local _orb_old_name="${_orb_history_var}_history_${_orb_i}"
+    local _orb_new_name="${_orb_history_var}_history_$(( $_orb_i + 1 ))"
 
-for trace in $(seq 0 $trace_length); do
-  :
+    eval $(_orb_rename_variable $_orb_old_name $_orb_new_name)
+  done
+done; 
+
+# Set the new 0 index
+local _orb_history_var; for _orb_history_var in "${_orb_history_variables[@]}"; do
+    local _orb_new_name="${_orb_history_var}_history_0"
+    
+    eval $(_orb_rename_variable $_orb_history_var $_orb_new_name)
 done
 
+(( _orb_history_index++ ))
 
-# Namespace
-_orb_namespace
-_orb_function
-_orb_function_descriptor
-_orb_function_exit_code
-
-_orb_declared_vars
-_orb_declared_args
-_orb_declared_arg_suffixes
-
-# No need
-# _orb_declared_requireds
-# _orb_declared_ins
-# _orb_declared_defaults
-
-_orb_args_values
-_orb_args_values_indexes
-_orb_args_values_lengths
-
-
-# Becomes
-_orb_args_values_history_0
+unset _orb_i _orb_last_move_i _orb_history_var _orb_old_name _orb_new_name

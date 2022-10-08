@@ -29,7 +29,12 @@ _orb_get_function_options() {
 		if [[ ${declaration[$end_i+1]} == "=" ]] && orb_is_input_arg ${declaration[$end_i]} && (\
 			$_orb_declared_direct_call || orb_is_valid_variable_name ${declaration[$end_i+2]} \
 		); then 
-			((end_i--))
+			if orb_is_nr ${declaration[$end_i]} && orb_is_any_flag ${declaration[$end_i-1]}; then 
+				# two steps back if flagged arg
+				end_i=$(($end_i - 2))
+			else
+				((end_i--))
+			fi
 			break
 		fi
 	done

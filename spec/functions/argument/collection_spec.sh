@@ -211,11 +211,11 @@ Describe '_orb_try_collect_multiple_flags'
     The variable "spec_fns[@]" should equal "_orb_assign_boolean_flag -f 0 _orb_assign_boolean_flag -a 0 _orb_shift_args 1"
   End
 
-  It 'shifts args according to highest suffix'
+  It 'shifts args according to highest suffix + 1'
     _orb_declared_args=(-f -a)
     declare -A _orb_declared_arg_suffixes=([-f]=3 [-a]=2)
     When call _orb_try_collect_multiple_flags -fa
     The status should be success
-    The variable "spec_fns[@]" should equal "_orb_assign_flagged_arg -f 0 _orb_assign_flagged_arg -a 0 _orb_shift_args 3"
+    The variable "spec_fns[@]" should equal "_orb_assign_flagged_arg -f 0 _orb_assign_flagged_arg -a 0 _orb_shift_args 4"
   End
 End

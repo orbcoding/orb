@@ -1,106 +1,121 @@
 # orb_pass
-declare -A orb_pass_args=(
-  ['-a arg']='array name where to append args'
-  ['-s']='skip: flag before flagged arg, block marks, "--" before "-- *"'
-  ['-x']='expand/exec array/cmd after adding args to -a arg array"'
-  ['*']='array/cmd elements; OPTIONAL; CATCH_ANY'
-	['-- *']='flags to pass;'
-); function orb_pass() { # Pass commands to arr eg: cmd=( my__cmd ); orb_pass my__cmd -- -fs 1 2 *
+
+orb_pass_orb=(
+  "Pass commands to array eg: cmd=(my_cmd); orb_pass md_cmd -- -fa 1 2 --"
+
+  -a 1 = _orb_arr_name "Array name where args are appended"
+  -v = _orb_only_val "Only pass values: ignore flag before flagged arg, block marks and --"
+  -x = _orb_execute "exec array after adding args to -a arg array"
+  -h = history_index "which caller history index to pass from"
+    Default: 0
+  ... = _orb_arr_els "array/cmd elements"
+    Required: false
+    Catch: any
+  -- = _orb_pass 
+)
+function orb_pass() {
   source orb
 
-  if [[ -n "${_args['-a arg']}" ]]; then
-    declare -n __cmd="${_args['-a arg']}"
-    ${_args['*']} && __cmd+=("${_orb_rest[@]}")
-  elif ${_args['*']}; then
+  # This will redirect any argument/declaration queries to check our caller history data
+  local _orb_variable_suffix=_history_$history_index
+
+  if [[ -n $_orb_arr_name ]]; then
+    declare -n _orb_arr=$_orb_arr_name
+    [[ -n "${_orb_arr_els[@]}" ]] && _orb_arr+=("${_orb_arr_els[@]}")
+  elif [[ -n "${_orb_arr_els[@]}" ]]; then
     # rests to be executed
-    declare -n __cmd=_orb_rest
+    declare -n _orb_arr=_orb_arr_els
   else
-    orb_raise_error "-a arg or * required" 
+    orb_raise_error '-a or ... required'
   fi
 
+  [[ -z $_orb_function_name_history_0 ]] && orb_raise_error 'no parent orb function to pass args from'
+  [[ -z ${_orb_declared_args_history_0[@]} ]] && orb_raise_error "$_orb_function_descriptor_history_0 has no arguments to pass"
 
-  [[ -z $_orb_caller_function ]] && orb_raise_error 'must be used from within a caller function'
-  [[ ! -v _orb_caller_args_declaration[@] ]] && orb_raise_error "$_orb_caller_function_descriptor has no arguments to pass"
-
-  local _arg; for _arg in "${_orb_dash_rest[@]}"; do
-    if orb_is_flag "$_arg"; then
-      _orb_pass_flag "$_arg"
-    elif orb_is_block "$_arg"; then
-      _orb_pass_block "$_arg"
-    elif orb_is_nr "$_arg"; then
-      _orb_pass_nr "$_arg"
-    elif [[ "$_arg" == '*' ]]; then
+  local _orb_arg; for _orb_arg in "${_orb_pass[@]}"; do
+    if orb_is_any_flag "$_orb_arg"; then
+      _orb_pass_flag "$_orb_arg"
+    elif orb_is_block "$_orb_arg"; then
+      _orb_pass_block "$_orb_arg"
+    elif orb_is_nr "$_orb_arg"; then
+      _orb_pass_nr "$_orb_arg"
+    elif orb_is_rest $_orb_arg; then
       _orb_pass_rest
-    elif [[ "$_arg" == '-- *' ]]; then
-      _orb_pass_dash_rest
+    elif orb_is_dash $_orb_arg; then
+      _orb_pass_dash
     else
-      orb_raise_error "$_arg not a flag, block, nr or rest"
+      orb_raise_error "$_orb_arg not flag, block, nr, ... or --"
     fi
   done
 
-  if [[ -n "${_args['-a arg']}" ]]; then
+  if [[ -n "$_orb_arr_name" ]]; then
     # With -a arg -x has to be explicitly added to exec
-    [[ ${_args['-x']} == true ]] && "${__cmd[@]}"
+    $_orb_execute && "${_orb_arr[@]}"
   else
     # Without -a arg always exec
-    "${__cmd[@]}"
+    "${_orb_arr[@]}"
   fi
+
+  return 0
 }
 
 _orb_pass_flag() { # $1 = flag arg/args
-  local _flags=()
+  local _orb_flag_arg=$1
+  local _orb_flags=()
 
-  if orb_is_verbose_flag "$1"; then
-    _flags+=( "$1" )
+  if orb_is_verbose_flag "$_orb_flag_arg"; then
+    _orb_flags+=( "$_orb_flag_arg" )
   else
-    _flags+=( $(echo "${1:1}" | grep -o . | sed  s/^/-/g) )
+    # Split any combined flags eg -far into -f -a -r
+    _orb_flags+=( $(echo "${_orb_flag_arg:1}" | grep -o . | sed  s/^/-/g) )
   fi
 
-  local _flag; for _flag in ${_flags[@]}; do
-    if _orb_has_declared_boolean_flag "$_flag" _orb_caller_args_declaration; then
-      # declared boolean flag
-      ${_orb_caller_args["$_flag"]} && \
-      __cmd+=( "$_flag" )
-    elif _orb_has_declared_flagged_arg "$_flag" _orb_caller_args_declaration; then
-      # declared flag with arg
-      if [[ -n ${_orb_caller_args["$_flag arg"]+x} ]]; then
-        ! ${_args[-s]} && __cmd+=( "$_flag" )
-        __cmd+=( "${_orb_caller_args["$_flag arg"]}" )
-      fi
-    else # undeclared
-      _orb_raise_undeclared "$_flag"
+  local _orb_flag; for _orb_flag in ${_orb_flags[@]}; do
+    if _orb_has_declared_boolean_flag "$_orb_flag"; then
+      # Only pass if true
+      _orb_pass_arg $_orb_flag "" "" true
+    elif _orb_has_declared_flagged_arg "$_orb_flag"; then
+      # Add flag prefix unless only val
+      $_orb_only_val && _orb_pass_arg $_orb_flag || _orb_pass_arg $_orb_flag $_orb_flag 
     fi
   done
 }
 
+# TODO continue
 _orb_pass_block() {
-  _orb_has_declared_arg "$1" _orb_caller_args_declaration || _orb_raise_undeclared "$1"
-  ${_orb_caller_args["$1"]} || return
-  local _arr_name="$(_orb_block_to_arr_name "$1")"
-  declare -n _block_ref=$_arr_name
-  local _to_add=()
-  _to_add+=("${_block_ref[@]}")
-  ${_args[-s]} || _to_add=("$1" "${_to_add[@]}" "$1") 
-  __cmd+=( "${_to_add[@]}" )
+  $_orb_only_val && _orb_pass_arg $1 || _orb_pass_arg $1 $1 $1
 }
 
-_orb_pass_nr() { # $1 = nr arg
-  _orb_declared_inline_arg "$1" _orb_caller_args_declaration || _orb_raise_undeclared "$1"
-  [[ -n ${_orb_caller_args["$1"]+x} ]] && \
-  __cmd+=( "${_orb_caller_args["$1"]}" )
+_orb_pass_nr() {
+  _orb_pass_arg $1
 }
-
 
 _orb_pass_rest() {
-  _orb_declared_rest _orb_caller_args_declaration || _orb_raise_undeclared "*"
-  ${_orb_caller_args['*']} && \
-  __cmd+=( "${_orb_caller_rest[@]}" )
+  _orb_pass_arg ...
 }
 
-_orb_pass_dash_rest() {
-  _orb_declared_dash_rest _orb_caller_args_declaration || _orb_raise_undeclared "-- *"
-  ${_orb_caller_args['-- *']} || return
-  ${_args[-s]} || __cmd+=( '--' )
-  __cmd+=( "${_orb_caller_dash_rest[@]}" )
+_orb_pass_dash() {
+  $_orb_only_val && _orb_pass_arg -- || _orb_pass_arg -- --
 }
 
+_orb_pass_arg() {
+  local _orb_arg=$1
+  local _orb_prefix=$2
+  local _orb_suffix=$3
+  local _orb_pass_self_if_eq="$4"
+
+  _orb_has_declared_arg "$_orb_arg" || _orb_raise_undeclared "$_orb_arg"
+  _orb_has_arg_value $_orb_arg || return 1
+  local _orb_value; _orb_get_arg_value $_orb_arg _orb_value
+
+  if [[ -n "$_orb_pass_self_if_eq" ]]; then 
+    [[ "${_orb_value[@]}" != "$_orb_pass_self_if_eq" ]] && return 1 
+    _orb_value=("$_orb_arg")
+  fi
+
+  [[ -n $_orb_prefix ]] && _orb_arr+=( $_orb_prefix )
+  _orb_arr+=( ${_orb_value[@]} )
+  [[ -n $_orb_suffix ]] && _orb_arr+=( $_orb_suffix )
+  
+  return 0
+}

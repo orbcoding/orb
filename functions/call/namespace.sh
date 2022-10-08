@@ -39,7 +39,7 @@ _orb_collect_namespace_files() {
 
 # Return success => shift away namespace argument from positional args
 _orb_get_current_namespace() {
-	if $_orb_sourced; then
+	if [[ $_orb_sourced == true ]]; then
 		echo "$(_orb_get_current_namespace_from_file_structure)"
 		return 2 # no shift
 	else
@@ -50,8 +50,11 @@ _orb_get_current_namespace() {
 }
 
 _orb_get_current_namespace_from_args() {
-  local ns=$1
-	if orb_in_arr $ns _orb_namespaces; then
+  local ns="$1"
+	
+	if  [[ -z $ns ]]; then
+		return 1
+	elif orb_in_arr "$ns" _orb_namespaces; then
 		echo "$ns"
 	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
 		echo "$ORB_DEFAULT_NAMESPACE"

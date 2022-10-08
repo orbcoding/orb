@@ -52,7 +52,7 @@ declare -A orb_is_rest_args=(
 declare -A orb_is_dash_args=(
 	['1']='arg'
 ); function orb_is_dash() {
-	[[ "$1" == -- ]]
+	[[ "$1" == "--" ]]
 }
 
 function orb_is_input_arg() {

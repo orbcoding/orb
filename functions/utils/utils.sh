@@ -103,5 +103,25 @@ function orb_in_arr() {
 	local _orb_arr_value="$1"
 	local _orb_arr_name="$2"
 
-	orb_index_of $_orb_arr_value $_orb_arr_name > /dev/null
+	orb_index_of "$_orb_arr_value" "$_orb_arr_name" > /dev/null
+}
+
+
+# To be evaled
+_orb_rename_variable() {
+	local _orb_var=$1
+	local _orb_name=$2
+	local _orb_unset=${3-true}
+	local _orb_global=${4-false}
+
+	local _orb_declare_statement; _orb_declare_statement=($(declare -p "$_orb_var" 2>/dev/null)) || return 1
+	local _orb_opening=(${_orb_declare_statement[@]:0:2}) # declare -a
+	$_orb_global && _orb_opening=(${_orb_opening[0]} -g ${_orb_opening[1]})
+	local _orb_assignment=${_orb_declare_statement[@]:2} # var=....
+	_orb_assignment="${_orb_name}${_orb_assignment/$_orb_var/}" # name=...
+
+	local to_eval="${_orb_opening[@]} ${_orb_assignment[@]}" 
+	$_orb_unset && to_eval+="; unset $_orb_var"
+
+	echo "${to_eval[@]}"
 }

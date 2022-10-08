@@ -26,9 +26,8 @@ spec_helper_configure() {
   : import 'support/custom_matcher'
 }
 
-# _orb_root=''
+_orb_root="$PWD"
 spec_orb='spec/fixtures/.orb'
-_orb_root=$spec_orb/orb
 spec_proxy='spec/fixtures/proxy.sh'
 
 echo_fn() {

@@ -95,8 +95,8 @@ Describe '_orb_assign_flagged_arg'
   End
 
   It 'takes shift step override'
-    When call _orb_assign_boolean_flag -f 0
-    The variable "spec_args[@]" should equal "_orb_assign_arg_value -f true _orb_shift_args 0"
+    When call _orb_assign_flagged_arg -f 0
+    The variable "spec_args[@]" should equal "_orb_assign_arg_value -f followed by args _orb_shift_args 0"
   End
 End
 

@@ -81,18 +81,18 @@ Describe '_orb_print_namespace_help'
     The line 1 of output should include "spec/fixtures/.orb"
     The line 2 of output should include "TEST_PRINT_HELP_FUNCTIONS.SH"
     # The third line of output should include "test_orb_print_args                        test_orb_print_args comment"
-    The line 4 of output should eq "                                           "
+    The line 4 of output should eq "                                             "
     The line 5 of output should include "PUBLIC_AND_PRIVATE_FUNCTIONS.SH"
-    The line 12 of output should eq "                                           "
+    The line 12 of output should eq "                                             "
     The line 13 of output should include "-----------------  "
     The line 13 of output should include "spec/fixtures/.orb/random_dir"
     The output should include "\
-public_function                            public_function comment
-public_function_with_preceeding_array_end  public_function_with_preceeding_array_end comment
-public_function_with_curly_on_next_line    public_function_with_curly_on_next_line comment
-public_function_with_space_before_braces   public_function_with_space_before_braces comment
-public_function_with_comment_after         public_function_with_comment_after comment
-public_function_oneliner                   "
+  public_function                            public_function comment
+  public_function_with_preceeding_array_end  public_function_with_preceeding_array_end comment
+  public_function_with_curly_on_next_line    public_function_with_curly_on_next_line comment
+  public_function_with_space_before_braces   public_function_with_space_before_braces comment
+  public_function_with_comment_after         public_function_with_comment_after comment
+  public_function_oneliner                   "
   End
 End
 

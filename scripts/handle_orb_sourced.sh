@@ -24,18 +24,15 @@
 # my_function => orb => my_function
 #
 
-if [[ ${_orb_function_trace[0]} == "source" ]]; then
-  if [[ ${_orb_function_trace[2]} == "orb" ]]; then
-    # Do nothing if sourced when parent function already called through orb
-    return 0
-  fi
-
-  _orb_sourced=true
-else
+if [[ ${_orb_function_trace[0]} != "source" ]]; then
   # Return false to proceed with normal call
-  _orb_sourced=false
   return 1
+elif [[ ${_orb_function_trace[2]} == "orb" ]]; then
+  # Do nothing if sourced when parent function already called through orb
+  return 0
 fi
+
+_orb_sourced=true
 
 source "$_orb_root/scripts/call/history.sh"
 source "$_orb_root/scripts/call/variables.sh"
@@ -46,5 +43,7 @@ _orb_parse_function_declaration
 
 source "$_orb_root/scripts/call/function_args.sh"
 set -- "${_orb_args_positional[@]}"
+
+unset _orb_sourced
 
 return 0

@@ -9,6 +9,8 @@ _orb_handle_help() {
 	else
 		_orb_print_orb_help
 	fi
+
+	return 0
 }
 
 _orb_print_orb_help() {
@@ -51,7 +53,7 @@ _orb_print_namespace_help() {
 		local fn; for fn in "${fns[@]}"; do
 			declare -A _orb_declared_comments=()
 			_orb_parse_function_declaration "${fn}_orb" false
-			output+="$fn§"
+			output+="  $fn§"
 			output+="${_orb_declared_comments[function]}\n"
 		done
 
@@ -74,18 +76,21 @@ _orb_print_function_help() {
 
 
 _orb_print_orb_function_and_comment() {
-	local comment="${_orb_declared_comments[function]}"
-	echo "$(orb_bold)$_orb_function_name$(orb_normal) $([[ -n "$comment" ]] && echo "- $comment")"
+	declare -n comments=_orb_declared_comments$_orb_variable_suffix
+	declare -n function_descriptor=_orb_function_descriptor$_orb_variable_suffix
+	local comment="${comments[function]}"
+	echo "$(orb_bold)$function_descriptor$(orb_normal) $([[ -n "$comment" ]] && echo "- $comment")"
 }
 
 _orb_print_args_explanation() {
-	[[ ${#_orb_declared_args[@]} == 0 ]] && return 1
+	declare -n declared_args=_orb_declared_args$_orb_variable_suffix
+	[[ ${#declared_args[@]} == 0 ]] && return 1
 
 	OLD_IFS=$IFS
 	IFS='§'; local msg="$(orb_bold)§${_orb_available_arg_options_help[*]}§$(orb_normal)\n"
 	IFS=$OLD_IFS
 
-	local arg; for arg in "${_orb_declared_args[@]}"; do
+	local arg; for arg in "${declared_args[@]}"; do
 		local msg+="$arg"
 
 		local opt; for opt in "${_orb_available_arg_options_help[@]}"; do
@@ -101,7 +106,11 @@ _orb_print_args_explanation() {
 			msg+="§$([[ -n "${value[@]}" ]] && echo "${value[@]}" || echo '-')"
 		done
 
-		local comment; comment=$(_orb_get_arg_comment $arg) || comment=${_orb_declared_vars[$arg]}
+		local comment; comment="$(_orb_get_arg_comment $arg)"
+		if [[ $? == 1 ]]; then
+			declare -n declared_vars=_orb_declared_vars$_orb_variable_suffix
+			comment=${declared_vars[$arg]}
+		fi
 
 		msg+="§$comment\n"
 	done

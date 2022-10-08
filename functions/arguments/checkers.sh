@@ -3,14 +3,18 @@ _orb_get_arg_value() {
 	declare -n _orb_assign_ref=$2
 	local _orb_val=()
 
-	local _orb_start_is=(${_orb_args_values_start_indexes[$_orb_arg]})
-	local _orb_lengths=(${_orb_args_values_lengths[$_orb_arg]})
+	declare -n _orb_values=_orb_args_values$_orb_variable_suffix
+	declare -n _orb_values_start_indexes=_orb_args_values_start_indexes$_orb_variable_suffix
+	declare -n _orb_values_lengths=_orb_args_values_lengths$_orb_variable_suffix
+
+	local _orb_start_is=(${_orb_values_start_indexes[$_orb_arg]})
+	local _orb_lengths=(${_orb_values_lengths[$_orb_arg]})
 	local _orb_start_i _orb_length
 
 	local _orb_i; for _orb_i in $(seq 0 $(( ${#_orb_start_is[@]} - 1)) ); do
 		_orb_start_i=${_orb_start_is[$_orb_i]}
 		_orb_length=${_orb_lengths[$_orb_i]}
-		_orb_val+=(${_orb_args_values[@]:${_orb_start_i}:${_orb_length}})
+		_orb_val+=(${_orb_values[@]:${_orb_start_i}:${_orb_length}})
 	done
 
 	if _orb_has_declared_array_arg $_orb_arg; then
@@ -22,5 +26,6 @@ _orb_get_arg_value() {
 
 _orb_has_arg_value() {
 	local _orb_arg=$1
-  [[ -n ${_orb_args_values_start_indexes[$_orb_arg]} ]]
+	declare -n start_indexes=_orb_args_values_start_indexes$_orb_variable_suffix
+  [[ -n ${start_indexes[$_orb_arg]} ]]
 }

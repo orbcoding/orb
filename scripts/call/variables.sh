@@ -26,12 +26,14 @@ if [[ $1 != only_args_collection ]]; then
 
   # Extensions
   declare -a _orb_extensions=()
+  
+  [[ -z $_orb_history_index ]] && declare _orb_history_index=0
   # _orb_function_declaration will be a nameref to ${_orb_function_name}_orb
 
   # Set to point orb functions to another declaration/argument/variable 
   # Eg: ${_orb_function_declaration}${_orb_variable_suffix}
   # Useful for working with call history 
-  declare _orb_variable_suffix
+  declare _orb_variable_suffix=
 fi
 
 

@@ -21,19 +21,20 @@ _orb_assign_arg_value() {
 
 _orb_assign_boolean_flag() {
 	local _orb_arg="${1/+/-}"
+	local _orb_shift=${2-1}
 	local _orb_value=$(_orb_flag_value "$1")
 	_orb_assign_arg_value $_orb_arg $_orb_value
-	_orb_shift_args ${2:-1}
+	_orb_shift_args $_orb_shift
 }
 
 _orb_flag_value() {
 	[[ ${1:0:1} == '-' ]] && echo true || echo false
 }
 
-# if specified with arg suffix, set value to next arg and shift both
 _orb_assign_flagged_arg() {
 	local _orb_arg=$1
 	local _orb_suffix=${_orb_declared_arg_suffixes[$_orb_arg]}
+	local _orb_shift=${2-$(($_orb_suffix + 1))}
 	local _orb_value=("${_orb_args_remaining[@]:1:$_orb_suffix}")
 
 	if _orb_is_valid_arg "$_orb_arg" "${_orb_value[@]}"; then
@@ -42,7 +43,7 @@ _orb_assign_flagged_arg() {
 		_orb_raise_invalid_arg "$_orb_arg" "${_orb_value[@]}"
 	fi
 
-	_orb_shift_args $(( $_orb_suffix + 1 ))
+	_orb_shift_args $_orb_shift
 }
 
 _orb_assign_block() {

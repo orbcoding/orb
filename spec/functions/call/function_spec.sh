@@ -15,7 +15,7 @@ Describe _orb_get_current_function
   End
 
   Context 'without _orb_sourced'
-    _orb_sourced=false
+    unset _orb_sourced
 
     It 'returns 0 and outputs $1'
       When call _orb_get_current_function my_function

@@ -103,3 +103,39 @@ Describe 'orb_in_arr'
     The status should be failure
   End
 End
+
+# _orb_rename_variable
+Describe '_orb_rename_variable'
+  first_var=spec
+
+  It 'renames variable based on declaration'
+    eval $(_orb_rename_variable first_var new_var)
+    The variable first_var should be undefined
+    The variable new_var should eq spec
+  End
+
+  It 'does not unset old name if false'
+    eval $(_orb_rename_variable first_var new_var false)
+    The variable first_var should eq spec
+    The variable new_var should eq spec
+  End
+
+  rename() {
+    global=$1
+    eval $(_orb_rename_variable first_var new_var true $global)
+  }
+  It 'creates local variable if false'
+    When call rename false
+    The variable new_var should be undefined
+  End
+  
+  It 'creates a global variable if true'
+    When call rename true
+    The variable new_var should eq spec
+  End
+
+  It 'does nothing if no variable found'
+    When call _orb_rename_variable unknown_var new_var
+    The status should be failure 
+  End
+End

@@ -22,7 +22,10 @@ _orb_has_declared_flagged_arg() { # $1 arg
 
 _orb_has_declared_array_flag_arg() {
 	local arg=$1
-	local suffix=${_orb_declared_arg_suffixes[$arg]}
+	
+	declare -n suffixes="_orb_declared_arg_suffixes$_orb_variable_suffix"
+	local suffix=${suffixes[$arg]}
+	
 	if orb_is_any_flag $arg && [[ -n $suffix ]] && (( $suffix > 1 )); then 
 		return 0
 	fi

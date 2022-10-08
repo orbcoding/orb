@@ -125,7 +125,7 @@ _orb_try_collect_multiple_flags() { # $1 arg
 			_orb_assign_boolean_flag "$_orb_flag" 0
 		else
 			_orb_assign_flagged_arg "$_orb_flag" 0
-			(( $_orb_suffix > $_orb_shift_steps )) && _orb_shift_steps=$_orb_suffix
+			(( $_orb_suffix >= $_orb_shift_steps )) && _orb_shift_steps=$((_orb_suffix + 1))
 		fi
 	done
 
