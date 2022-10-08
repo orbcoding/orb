@@ -64,6 +64,18 @@ declare -A orb_eval_variable_or_string_options_args=(
 	return 1
 }
 
+orb_first_present_orb=(
+	"Returns first present input argument"
+	... = args "Arguments to check"
+)
+function orb_first_present() {
+	local arg; for arg in "$@"; do
+		[[ -n "$arg" ]] && echo "$arg" && return 0 
+	done
+
+	return 1
+}
+
 # TODO verify empty or unset?
 declare -A orb_is_empty_arr_args=(
 	['1']='arr_name'

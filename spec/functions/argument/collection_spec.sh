@@ -10,7 +10,7 @@ Include functions/declaration/getters.sh
 
 # _orb_collect_function_args
 Describe '_orb_collect_function_args'
-  orb_raise_error() { echo "$@"; exit 1; }
+  _orb_raise_error() { echo "$@"; exit 1; }
   _orb_collect_args() { spec_fns+=($(echo_fn)); }
   _orb_args_post_validation() { spec_fns+=($(echo_fn)); }
   

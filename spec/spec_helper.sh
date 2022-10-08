@@ -36,10 +36,6 @@ echo_fn() {
   echo "${output[@]}"
 }
 
-_orb_in_running_test=true
 
-
-orb_raise_error() {
-  echo "$@" && exit 1
-}
+ORB_KILL_SCRIPT_ON_ERROR=false
 

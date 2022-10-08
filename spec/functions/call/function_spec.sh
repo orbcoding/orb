@@ -20,7 +20,7 @@ Describe _orb_get_current_function
     It 'returns 0 and outputs $1'
       When call _orb_get_current_function my_function
       The status should be success
-      The output should equal my_function
+      The variable _orb_function_name should equal my_function
     End
   End
 End
@@ -29,20 +29,20 @@ Describe '_orb_get_current_function_from_trace'
   It 'gets function from source chain'
     _orb_function_trace=("source" "fn" )
     When call _orb_get_current_function_from_trace
-    The output should eq fn
+    The variable _orb_function_name should eq fn
   End
 End
 
 
 Describe '_orb_get_current_function_descriptor'
   It 'includes namespace if present'
-    When run _orb_get_current_function_descriptor test_fn test_namespace
-    The output should equal "test_namespace->$(orb_bold)test_fn$(orb_normal)"
+    When call _orb_get_current_function_descriptor test_fn test_namespace
+    The variable _orb_function_descriptor should equal "test_namespace->$(orb_bold)test_fn$(orb_normal)"
   End
 
   It 'only fn if no namespace'
-    When run _orb_get_current_function_descriptor test_fn
-    The output should equal $(orb_bold)test_fn$(orb_normal)
+    When call _orb_get_current_function_descriptor test_fn
+    The variable _orb_function_descriptor should equal $(orb_bold)test_fn$(orb_normal)
   End
 End
 

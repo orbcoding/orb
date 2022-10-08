@@ -21,7 +21,7 @@ End
 
 # _orb_raise_invalid_declaration
 Describe '_orb_raise_invalid_declaration'
-  orb_raise_error() { echo "$@"; }
+  _orb_raise_error() { echo "$@"; }
 
   It 'calls raise error with invalid declaration error'
     When call _orb_raise_invalid_declaration "error message"
@@ -31,7 +31,7 @@ End
 
 # _orb_raise_undeclared
 Describe '_orb_raise_undeclared'
-  orb_raise_error() { echo "$@"; }
+  _orb_raise_error() { echo "$@"; }
 
   It 'calls raise error with undeclared error'
     # When call _orb_raise_undeclared "1"

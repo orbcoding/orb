@@ -27,7 +27,7 @@ _orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 
 	msg+="\n\n$(_orb_print_args_explanation)"
 
-	orb_raise_error "$msg"
+	_orb_raise_error "$msg"
 }
 
 

@@ -13,11 +13,11 @@ _orb_prevalidate_declaration() {
 }
 
 _orb_raise_invalid_declaration() {
-	orb_raise_error "Invalid declaration. $@" 
+	_orb_raise_error "Invalid declaration. $@" 
 }
 
 _orb_raise_undeclared() {
-	orb_raise_error "'$1' not in $_orb_function_descriptor$_orb_variable_suffix args declaration\n\n$(_orb_print_args_explanation)"
+	_orb_raise_error "'$1' not in $_orb_function_descriptor$_orb_variable_suffix args declaration\n\n$(_orb_print_args_explanation)"
 }
 
 _orb_postvalidate_declared_args_options() {

@@ -57,13 +57,10 @@ No namespaces found"
   It 'prints namespaces when found'
     _orb_namespaces=( spec spec2 )
     When call _orb_print_orb_help
-    The output should equal 'Default namespace $ORB_DEFAULT_NAMESPACE not set.
-
-Available namespaces listed below:
-
-  spec, spec2.
-
-To list commands in a namespace, use `orb "namespace" --help`'
+    The line 1 of output should include 'Default namespace $ORB_DEFAULT_NAMESPACE not set'
+    The line 4 of output should include "spec"
+    The line 5 of output should include "spec2"
+    The line 7 of output should include 'To show information about a namespace, use `orb --help "namespace"`'
   End
 End
 
@@ -79,19 +76,20 @@ Describe '_orb_print_namespace_help'
     When call _orb_print_namespace_help
     The line 1 of output should include "-----------------  "
     The line 1 of output should include "spec/fixtures/.orb"
-    The line 2 of output should include "TEST_PRINT_HELP_FUNCTIONS.SH"
+    The line 2 of output should include "test_print_help_functions.sh"
     # The third line of output should include "test_orb_print_args                        test_orb_print_args comment"
-    The line 4 of output should eq "                                             "
-    The line 5 of output should include "PUBLIC_AND_PRIVATE_FUNCTIONS.SH"
-    The line 12 of output should eq "                                             "
+    The line 4 of output should eq "                                                    "
+    The line 5 of output should include "public_and_private_functions.sh"
+    The line 12 of output should eq "                                                    "
     The line 13 of output should include "-----------------  "
     The line 13 of output should include "spec/fixtures/.orb/random_dir"
+    The line 17 of output should include "To show information about a function, use \`orb --help \"namespace\" \"function\"\`"
     The output should include "\
-  public_function                            public_function comment
-  public_function_with_preceeding_array_end  public_function_with_preceeding_array_end comment
-  public_function_with_curly_on_next_line    public_function_with_curly_on_next_line comment
-  public_function_with_space_before_braces   public_function_with_space_before_braces comment
-  public_function_with_comment_after         public_function_with_comment_after comment
+  public_function                                   public_function comment
+  public_function_with_preceeding_array_end         public_function_with_preceeding_array_end comment
+  public_function_with_curly_on_next_line           public_function_with_curly_on_next_line comment
+  public_function_with_space_before_braces          public_function_with_space_before_braces comment
+  public_function_with_comment_after                public_function_with_comment_after comment
   public_function_oneliner                   "
   End
 End

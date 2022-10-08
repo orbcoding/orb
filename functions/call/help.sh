@@ -27,9 +27,8 @@ _orb_print_orb_help() {
 	if orb_is_empty_arr _orb_namespaces; then
 		help_msg+="No namespaces found"
 	else
-		help_msg+="Available namespaces listed below:\n\n"
-		help_msg+="  $(orb_join_by ', ' "${_orb_namespaces[@]}").\n\n"
-		help_msg+="To list commands in a namespace, use \`orb \"namespace\" --help\`"
+		help_msg+="$(_orb_print_available_namespaces)\n"
+		help_msg+="To show information about a namespace, use \`orb --help \"namespace\"\`"
 	fi
 
 	echo -e "$help_msg"
@@ -43,10 +42,10 @@ _orb_print_namespace_help() {
 
 		if [[ "$dir" != "$current_dir" ]]; then
 			current_dir="$dir"
-			output+="-----------------§$(orb_italic)${current_dir}$(orb_normal)\n"
+			output+="-----------------  $(orb_italic)${current_dir}$(orb_normal)\n"
 		fi
 
-		output+="$(orb_bold)$(orb_upcase $(basename $file))$(orb_normal)\n"
+		output+="$(orb_bold)$(basename $file)$(orb_normal)\n"
 		source "$file"
 		local fns; orb_get_public_functions "$file" fns
 
@@ -57,14 +56,15 @@ _orb_print_namespace_help() {
 			output+="${_orb_declared_comments[function]}\n"
 		done
 
-		output+="\n§\n"
-
-
 		((i++))
+
+		output+='§\n'
 	done
 
-	# remove last 5 chars \n§\n
-	echo -e "${output::-5}" | column -tes '§'
+	# remove last newline chars §\n
+	echo -e "${output::-3}" | column -tes '§'
+
+	echo -e "\nTo show information about a function, use \`orb --help \"namespace\" \"function\"\`"
 }
 
 _orb_print_function_help() {

@@ -116,11 +116,11 @@ Describe '_orb_assign_block'
   End
 
   It 'raises error if end block missing'
-    orb_raise_error() { spec_args+=($(echo_fn $@)); return 1; }
+    _orb_raise_error() { spec_args+=($(echo_fn $@)); return 1; }
     _orb_args_remaining=(-b- followed by args)
     When call _orb_assign_block -b-
     The status should be failure
-    The variable "spec_args[@]" should equal "orb_raise_error '-b-' missing block end"
+    The variable "spec_args[@]" should equal "_orb_raise_error '-b-' missing block end"
   End
 End
 

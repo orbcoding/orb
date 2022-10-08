@@ -72,7 +72,7 @@ End
 
 Describe 'orb_parse_env'
   It 'exports variables from .env'
-    When call orb_parse_env "$spec_orb/.env"
+    When call orb_parse_env "$spec_orb/.env.orb"
     The variable SPEC_TEST_VAR should equal "test"
     The variable SPEC_TEST_VAR2 should equal "test2"
   End

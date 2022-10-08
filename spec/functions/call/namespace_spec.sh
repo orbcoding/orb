@@ -89,7 +89,7 @@ Describe '_orb_get_current_namespace_from_args'
     It 'returns first argument as namespace'
       When call _orb_get_current_namespace_from_args test_namespace 1 2
       The status should be success
-      The output should equal test_namespace
+      The variable _orb_namespace should equal test_namespace
     End
   End
 
@@ -100,17 +100,17 @@ Describe '_orb_get_current_namespace_from_args'
       It 'returns $ORB_DEFAULT_NAMESPACE'
         When call _orb_get_current_namespace_from_args hello 1 2
         The status should equal 2
-        The output should equal def_space
+        The variable _orb_namespace should equal def_space
       End
     End
 
     Context 'without $ORB_DEFAULT_NAMESPACE'
       It 'raises error unless _orb_setting_help'
-        orb_raise_error() { echo_fn && exit 1; }
+        _orb_raise_error() { echo_fn && exit 1; }
         _orb_setting_help=false
         When run _orb_get_current_namespace_from_args hello 1 2
         The status should equal 1
-        The output should equal orb_raise_error
+        The output should equal _orb_raise_error
       End
 
       It 'succeeds if _orb_setting_help'
@@ -128,14 +128,14 @@ Describe '_orb_get_current_namespace_from_file_structure'
     _orb_get_current_sourcer_file_path() { echo namespaces/test_namespace.sh; }
     When call _orb_get_current_namespace_from_file_structure
     The status should be success
-    The output should equal test_namespace
+    The variable _orb_namespace should equal test_namespace
   End
 
   It 'can get namespace from nested files dirname'
     _orb_get_current_sourcer_file_path() { echo namespaces/test_namespace/nest_file.sh; }
     When call _orb_get_current_namespace_from_file_structure
     The status should be success
-    The output should equal test_namespace
+    The variable _orb_namespace should equal test_namespace
   End
 
   It 'fails if not found'

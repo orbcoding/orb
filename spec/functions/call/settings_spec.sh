@@ -40,7 +40,7 @@ End
 
 Describe '_orb_raise_invalid_orb_settings_arg'
   It 'raises on invalid flag'
-    orb_raise_error() { echo -e "$@" && exit 1; }
+    _orb_raise_error() { echo -e "$@" && exit 1; }
 
     When run source scripts/call/settings.sh --unknown-flag
     The output should equal "-d $(orb_bold)orb$(orb_normal) invalid option --unknown-flag

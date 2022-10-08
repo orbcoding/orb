@@ -26,11 +26,11 @@ function orb_pass() {
     # rests to be executed
     declare -n _orb_arr=_orb_arr_els
   else
-    orb_raise_error '-a or ... required'
+    _orb_raise_error '-a or ... required'
   fi
 
-  [[ -z $_orb_function_name_history_0 ]] && orb_raise_error 'no parent orb function to pass args from'
-  [[ -z ${_orb_declared_args_history_0[@]} ]] && orb_raise_error "$_orb_function_descriptor_history_0 has no arguments to pass"
+  [[ -z $_orb_function_name_history_0 ]] && _orb_raise_error 'no parent orb function to pass args from'
+  [[ -z ${_orb_declared_args_history_0[@]} ]] && _orb_raise_error "$_orb_function_descriptor_history_0 has no arguments to pass"
 
   local _orb_arg; for _orb_arg in "${_orb_pass[@]}"; do
     if orb_is_any_flag "$_orb_arg"; then
@@ -44,7 +44,7 @@ function orb_pass() {
     elif orb_is_dash $_orb_arg; then
       _orb_pass_dash
     else
-      orb_raise_error "$_orb_arg not flag, block, nr, ... or --"
+      _orb_raise_error "$_orb_arg not flag, block, nr, ... or --"
     fi
   done
 

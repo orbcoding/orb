@@ -15,7 +15,7 @@ _orb_collect_function_args() {
 	
 	if [[ ${#_orb_declared_args[@]} == 0 ]]; then
 		if [[ ${#_orb_args_remaining[@]} != 0 ]]; then
-			orb_raise_error "does not accept arguments"
+			_orb_raise_error "does not accept arguments"
 		else # no args to parse
 			return 0
 		fi

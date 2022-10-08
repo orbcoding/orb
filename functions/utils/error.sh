@@ -1,54 +1,73 @@
-# orb_raise_error
+# Public raise error function
 orb_raise_error_orb=(
   1 = error_message "Error message"
-  2 = descriptor 
+  -d = descriptor 
     DefaultHelp: '$_orb_caller_function_descriptor || $_orb_function_descriptor'
-  # -k = kill_script "Kill script instead of exit, even if subshell"
-  #   Default: true
-  # -t = trace "show stack trace"
-  #   Default: true
-) 
-function orb_raise_error() { # raise pretty error msg and kills execution
-  local descriptor=$(orb_eval_variable_or_string_options '$_orb_caller_function_descriptor|$_orb_function_descriptor') 
-  # source orb
-  # echo "$@"
-  # echo $trace
-  orb_print_error "$1" "$descriptor"
-  # orb_pass -a _cmd orb_print_error -- -d 1 # not using -x as would change caller_info
-  # "${_cmd[@]}"
-  #$trace &&
-  orb_print_stack_trace >&2
-  orb_kill_script
+  -k = kill_script "Kill script instead of exit, even if subshell"
+    Default: true
+  -t = trace "show stack trace"
+    Default: true
+)
+function orb_raise_error_orb=(
+  source orb
+
+
+)
+
+# Internal raise error function
+# Separated to avoid sourcing orb and getting stuck in a loop of bugs
+_orb_raise_error() {
+  local msg="$1"
+  local descriptor="$2"
+  
+  # Setting descriptor to false will leave it at default
+  # So we can go forward to next param without changing value
+  [[ descriptor == false ]] && descriptor=""
+  local descriptor=$(orb_first_present "$descriptor" "$_orb_function_descriptor_history_0" "$_orb_function_descriptor")
+
+  local print_trace=${3-true}
+  local kill_script=${4-true}
+
+  orb_print_error "$msg" "$descriptor"
+  $print_trace && orb_print_stack_trace >&2
+  orb_kill_script $kill_script
 }
 
 
 # orb_print_error
 orb_print_error_orb=(
+  DirectCall: true
+
   "Print pretty error"
 
-  1 = message "Error message"
+  1 = "Error message"
     Catch: flag block dash
-  2 = descriptor "Error descriptor"
+  2 = "Error descriptor"
+    DefaultHelp: '$_orb_function_descriptor_history_0 || $_orb_function_descriptor'
 )
-    # Default: '$_orb_caller_function_descriptor|$_orb_function_descriptor'
 function orb_print_error() { # 
-  # source orb
+  local msg="$1"
+  local descriptor=$(orb_first_present "$2" "$_orb_function_descriptor_history_0" "$_orb_function_descriptor")
 
-	msg=(
+	error=(
     "$(orb_red)$(orb_bold)Error:$(orb_normal)"
-    "$2"
-    "$1"
+    "$descriptor"
+    "$msg"
   )
 
-	echo -e "${msg[*]}" >&2
+	echo -e "${error[*]}" >&2
 };
 
 # orb_kill_script
 # https://stackoverflow.com/a/14152313
 function orb_kill_script() { # kill script
-  local just_exit=${1-false}
-  ($_orb_in_running_test || $just_exit) && exit 1
-  kill -PIPE 0
+  local kill_script=${1-false}
+
+  if [[ $kill_script == true || $ORB_KILL_SCRIPT_ON_ERROR == true ]]; then
+    kill -PIPE 0
+  else
+    exit 1
+  fi
 }
 
 # orb_print_stack_trace

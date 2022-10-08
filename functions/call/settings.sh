@@ -39,5 +39,5 @@ _orb_raise_invalid_orb_settings_arg() {
   done
 
   error_msg+=$(echo -e "$settings" | column -tes ';')
-  orb_raise_error -d "$(orb_bold)orb$(orb_normal)" "$error_msg"
+  _orb_raise_error -d "$(orb_bold)orb$(orb_normal)" "$error_msg"
 }

@@ -63,7 +63,7 @@ _orb_assign_block() {
 		fi 
 	done
 
-	orb_raise_error "'$_orb_arg' missing block end"
+	_orb_raise_error "'$_orb_arg' missing block end"
 }
 
 _orb_assign_inline_arg() {

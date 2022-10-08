@@ -17,7 +17,7 @@ if [[ $1 != only_args_collection ]]; then
 
   # Namespace and function info
   declare _orb_namespace
-  declare _orb_function
+  declare _orb_function_name
   declare _orb_function_descriptor
   declare _orb_function_exit_code
 

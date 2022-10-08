@@ -3,7 +3,7 @@ Include scripts/initialize.sh
 Include scripts/call/variables.sh
 
 Describe 'settings.sh'
-  orb_raise_error() { echo "$@"; exit 1; }
+  _orb_raise_error() { echo "$@"; exit 1; }
 
   It 'collects --help'
     When call source scripts/call/settings.sh --help

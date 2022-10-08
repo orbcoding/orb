@@ -7,4 +7,4 @@ local _file; for _file in ${_orb_namespace_files[@]}; do
   fi
 done
 
-orb_function_declared $_orb_function_name || orb_raise_error "undefined"
+orb_function_declared $_orb_function_name || _orb_raise_error "undefined"
