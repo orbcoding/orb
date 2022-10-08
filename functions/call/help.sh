@@ -24,7 +24,7 @@ _orb_print_orb_help() {
 
 	local help_msg="$def_namespace_msg.\n\n"
 
-	if orb_is_empty_arr _orb_namespaces; then
+	if [[ -z "${_orb_namespaces[@]}" ]]; then
 		help_msg+="No namespaces found"
 	else
 		help_msg+="$(_orb_print_available_namespaces)\n"
@@ -98,6 +98,7 @@ _orb_print_args_explanation() {
 			
 			if [[ $opt == "Default:" ]]; then
 				_orb_get_arg_option_value $arg "DefaultHelp:" value
+				[[ -z ${value[@]} ]] &&  _orb_get_arg_option_value $arg "DefaultPresence:" value
 				[[ -z ${value[@]} ]] &&  _orb_get_arg_option_value $arg "Default:" value
 			else 
 				_orb_get_arg_option_value $arg $opt value

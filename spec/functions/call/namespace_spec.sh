@@ -1,6 +1,7 @@
 Include functions/call/namespace.sh
 Include functions/utils/text.sh
 Include functions/utils/utils.sh
+Include functions/utils/argument.sh
 
 # _orb_collect_namespaces
 Describe '_orb_collect_namespaces'
@@ -154,3 +155,26 @@ Describe '_orb_get_current_sourcer_file_path'
   End
 End
 
+# _orb_validate_current_namespace
+Describe '_orb_validate_current_namespace'
+  _orb_raise_error() { echo_fn "$@"; exit 1; }
+
+  It 'raises if present and not variable name'
+    _orb_namespace="--asd"
+    When run _orb_validate_current_namespace
+    The status should be failure
+    The output should eq "_orb_raise_error not a valid namespace name"
+  End
+
+  It 'does not raise if not present'
+    _orb_namespace=""
+    When run _orb_validate_current_namespace
+    The status should be success
+  End
+
+  It 'does not raise if valid var name'
+    _orb_namespace="my_namespace"
+    When run _orb_validate_current_namespace
+    The status should be success
+  End
+End

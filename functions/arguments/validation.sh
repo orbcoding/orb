@@ -14,16 +14,6 @@ _orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 	local arg
 	[[ ${1:0:1} == '-' ]] && ! orb_is_block "$1" && arg='flags' || arg='args'
 	local msg="invalid $arg: $1"
-	# if [[ "$2" == 'required' ]]; then
-	# 	_msg+=" is required"
-  # elif [[ "$2" == "invalid" ]]; then
-	# 	_msg+=" invalid argument format"
-	# elif [[ -n "$2" && "$2" != '""' ]]; then # non empty string
-	# 	_msg+=" with value $2"
-	# elif [[ -n "${2+x}" ]]; then # empty string
-	# 	_msg+=" with value \"\""
-	# 	_msg+="\n\n Add CATCH_EMPTY to arg $1 declaration if empty string is accepted"
-	# fi
 
 	msg+="\n\n$(_orb_print_args_explanation)"
 

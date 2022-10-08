@@ -43,11 +43,11 @@ orb_print_error_orb=(
   1 = "Error message"
     Catch: flag block dash
   2 = "Error descriptor"
-    DefaultHelp: '$_orb_function_descriptor_history_0 || $_orb_function_descriptor'
+    DefaultPresence: '$_orb_function_descriptor_history_0 || $_orb_function_descriptor'
 )
 function orb_print_error() { # 
   local msg="$1"
-  local descriptor=$(orb_first_present "$2" "$_orb_function_descriptor_history_0" "$_orb_function_descriptor")
+  local descriptor="$(orb_first_present "$2" "$_orb_function_descriptor_history_0" "$_orb_function_descriptor")"
 
 	error=(
     "$(orb_red)$(orb_bold)Error:$(orb_normal)"

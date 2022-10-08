@@ -31,6 +31,11 @@ _orb_get_current_function_descriptor() { # $1 = $_orb_function_name $2 = $_orb_n
 	fi
 }
 
+_orb_validate_current_function() {
+	[[ -n $_orb_function_name ]] && ! orb_is_valid_variable_name $_orb_function_name && _orb_raise_error "not a valid function name"
+	return 0
+}
+
 # _orb_runtime_shell() {
 # 	# https://unix.stackexchange.com/a/72475
 # 	# Determine what (Bourne compatible) shell we are running under.

@@ -86,6 +86,7 @@ _orb_get_current_namespace_from_file_structure() {
 
   if [[ "$(basename "$ns_file_dir")" == namespaces ]]; then
     _orb_namespace="$(basename "${ns_file%.*}")"
+		orb_is_valid_variable_name $_orb_namespace || _orb_raise_error "not a valid namespace name"
 	else
 		return 1
   fi
@@ -100,4 +101,9 @@ _orb_get_current_sourcer_file_path() {
 		fi
 		(( i++ ))
 	done
+}
+
+_orb_validate_current_namespace() {
+	[[ -n $_orb_namespace ]] && ! orb_is_valid_variable_name $_orb_namespace && _orb_raise_error "not a valid namespace name"
+	return 0
 }

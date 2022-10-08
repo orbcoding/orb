@@ -1,4 +1,5 @@
 Include functions/call/function.sh
+Include functions/utils/argument.sh
 Include functions/utils/text.sh
 
 
@@ -43,6 +44,30 @@ Describe '_orb_get_current_function_descriptor'
   It 'only fn if no namespace'
     When call _orb_get_current_function_descriptor test_fn
     The variable _orb_function_descriptor should equal $(orb_bold)test_fn$(orb_normal)
+  End
+End
+
+# _orb_validate_current_function
+Describe '_orb_validate_current_function'
+  _orb_raise_error() { echo_fn "$@"; exit 1; }
+
+  It 'raises if present and not variable name'
+    _orb_function_name="--asd"
+    When run _orb_validate_current_function
+    The status should be failure
+    The output should eq "_orb_raise_error not a valid function name"
+  End
+
+  It 'does not raise if not present'
+    _orb_function_name=""
+    When run _orb_validate_current_function
+    The status should be success
+  End
+
+  It 'does not raise if valid var name'
+    _orb_function_name="my_function"
+    When run _orb_validate_current_function
+    The status should be success
   End
 End
 
