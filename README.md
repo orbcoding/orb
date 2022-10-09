@@ -6,7 +6,7 @@
 
 `orb` can also be used to empower argument collection for individual functions in existing projects. See [individual function usage](#individual_function_usage).
 
-`orb` is tested with [shellspec](https://github.com/shellspec/shellspec#command-based-mock).
+`orb` is tested with [shellspec](https://github.com/shellspec/shellspec).
 
 
 ## Installation
