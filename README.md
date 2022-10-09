@@ -1,133 +1,169 @@
-# orb-cli (alpha)
-`orb-cli` is a tool for building self-documenting command line utilities in bash. It removes the pain of parsing advanced command line options such as flags, blocks and wildcards. It also helps with argument validation and code organization through namespaces. 
+# orb
+
+*Unstable. In final development stages*
+
+`orb` is a tool for building self-documenting function libraries in bash. It removes the pain of parsing and validating advanced arguments and helps you organize your functions in namespaces based on a simple file structure.
+
+`orb` can also be used to empower argument collection for individual functions in existing projects. See [individual function usage](#individual_function_usage).
+
+`orb` is tested with [shellspec](https://github.com/shellspec/shellspec#command-based-mock).
 
 
 ## Installation
 ```BASH
-mkdir ~/.orb-cli && cd ~/.orb-cli
-git clone https://github.com/sharetransition/orb-cli.git
-# Extend path in ~/.bashrc or ~/.zshrc and resource/restart shell
-PATH=$PATH:~/.orb-cli/orb-cli
+mkdir ~/.orb && cd ~/.orb
+git clone https://github.com/orbcoding/orb.git
+
+# Extend path in ~/.bashrc or ~/.zshrc
+PATH=$PATH:~/.orb/orb/bin
 
 # Now you can use the orb command
 orb --help
 ```
 
-## How it works
+## Self documenting library setup
 
-1. Create an orb extension folder with a namespace file inside
+1. Create an orb folder with a namespace file inside
 ```BASH
-mkdir -p ~/.orb-cli/namespaces
-touch ~/.orb-cli/namespaces/my_namespace.sh
-chmod +x ~/.orb-cli/namespaces/my_namespace.sh
+mkdir -p ~/.orb/namespaces
+touch ~/.orb/namespaces/my_namespace.sh
+chmod +x ~/.orb/namespaces/my_namespace.sh
 ```
 
 2. Declare your function and arguments
 
 ```BASH
-# ~/.orb-cli/namespaces/my_namespace.sh
+# ~/.orb/namespaces/my_namespace.sh
 
 # my_function
-declare -A my_function_args=(
-  ['1']='first inline argument'
-  ['2']='second inline argument'
-  ['-b']='boolean flag'
-  ['-f arg']='flagged argument'
-  ['-b-']='matches block between -b- * -b-'
-  ['*']='rest of arguments unless find --'
-  ['-- *']='rest of arguments'
-); function my_function() { # This is my function comment
-  echo "$1"
-  echo "$2"
-  echo "${_args['-b']}"
-  echo "${_args['-f arg']}"
+my_function_orb=(
+  "This is my function comment"
 
-  # Blocks and wildcards only state true/false if received or not
-  "${_args['*']}" && echo "got wildcard"
-
-  # Their actual values are stored in separate variables 
-  # (Bash does not support nested arrays)
-  echo "${_args_block_b[@]}" # ['-b-']
-  echo "${_args_wildcard[@]}" # ['*']
-  echo "${_args_dash_wildcard[@]}" # ['-- *']
-
-  
-  # _print_args is a core function that helps you print recieved args for debugging
-  # see orb core --help for more
+  1 = first "first inline argument"
+  2 = second "second inline argument"
+  -b = boolean "boolean flag"
+  -f 1 = flag_arg 'flagged argument'
+  -b- = block 'matches block between -b- ... -b-'
+  ... = rest 'rest of arguments unless find --'
+  -- = dash 'dash rest of arguments'
+); function my_function() {
+  echo $first
+  echo $second
+  echo $boolean
+  echo $flag_arg
+  echo "${block[@]}" # Stored in arrays
+  echo "${rest[@]}"
+  echo "${dash[@]}"
 }
 ```
 
 3. Call your function
 ```
-$ orb my_namespace my_function arg_1 arg_2 -bf arg_f -b- my block args -b- first wildcard -- dash wildcard
+$ orb my_namespace my_function arg_1 arg_2 -bf arg_f -b- my block args -b- first rest -- dash rest
 
 arg_1
 arg_2
 true
 arg_f
-got wildcard
 my block args
-first wildcard
-dash wildcard
+first rest
+dash rest
 ```
+
+4. Check documentation
+```
+$ orb --help my_namespace
+
+-----------------  /home/user/.orb  
+my_namespace.sh                      
+  my_function                          
+
+To show information about a function, use `orb --help "namespace" "function"`
+```
+
+```
+$ orb --help my_namespace my_function
+
+my_namespace->my_function - This is my function comment
+
+        Required:  Default:  In:  Catch:  Multiple:  
+  1     true       -         -    -       -          first inline argument
+  2     true       -         -    -       -          second inline argument
+  -b    false      false     -    -       -          boolean flag
+  -f 1  false      -         -    -       -          flagged argument
+  -b-   false      -         -    -       -          matches block between -b- ... -b-
+  ...   true       -         -    -       -          rest of arguments unless find --
+  --    true       -         -    -       -          dash rest of arguments
+```
+---
+
+## Argument options
+Here is a more advanced argument declaration
+
+```BASH
+ my_function_orb=(
+  1 = first "first inline argument"
+    Required: false
+  2 = second "second inline argument"
+    Default: accepted_value
+    In: accepted_value another_accepted_value
+  --verbose-flag = boolean "boolean flag"
+    Required: true
+    Multiple: true
+  -f 1 = flag_arg 'flagged argument'
+    Default: 
+      FirstPresent: '$var1 || $var2 || fallback'
+      Help: 'Some helping text'
+    Catch: any
+ ); 
+ function my_function() { ... }
+```
+ Note the available argument options
+ - `Required:`
+    - number, rest and dash arguments are required unless set `Required: false` or `Default:` 
+    - Flag and block args are optional unless set `Required: true`
+ - `In:` specifies a list of accepted values.
+ - `Default:` specifies a default value. Also has nested options: 
+   - `FirstPresent:` Evaluates to first present variable or string.
+   - `Help:` Help text for documentation.
+ - `Catch:` Allows argument to assign undeclared special arguments, preventing orb from raising undeclared argument error. Available values: `any flag block dash`.
+
+Note also:
+ - If flags are single char you can pass multiple flag statements such as `-fa`.
+ - Calling `orb my_function +f` sets its value to  `false`. This is useful if in combination with `Default: true`.
+- Numbered args and rest args also passed as inline args to function call.
+ This allows expected argument access from bash positional arguments eg: `$1`, `$2`, `$@/$*`.
 
 ---
-## Print help
-```
-$ orb my_namespace --help
+## orb folders
 
------------------     /home/user/.orb-cli
-MY_NAMESPACE.SH
-  my_function         This is my function comment
-```
-
-```
-orb my_namespace my_function --help
-
-my_function - This is my function comment
-
-  ARG     DESCRIPTION                       DEFAULT  IN  REQUIRED  OTHER
-  1       first inline argument             -        -   true      -
-  2       second inline argument            -        -   true      -
-  -b      boolean flag                      -        -   -         -
-  -b-     matches block between -b- * -b-   -        -   -         -
-  -f arg  flagged argument                  -        -   -         -
-  -- *    rest of arguments                 -        -   true      -
-  *       rest of arguments unless find --  -        -   true      -
-
-```
-
----
-
-## Orb extension folders
-
-From now on i refer to them as `orb_ext_dir`:
-  - `~/.orb-cli` - is user global orb extension folder. Which can be extended by any number of the following two folders found above you in the file system. This makes it easy to add project specific functionality.
-  - `.orb-extension`
-  - `_orb_extension`
+  - `~/.orb` - is user global orb folder. Which can be extended by any number of the following two folders found below you in the file system. This makes it easy to add project specific libraries.
+  - `.orb`
+  - `_orb`
 
 ## Namespaces
-Your namespaces are defined by either a file or a folder with multiple files
-  - `orb_ext_dir/namespaces/my_namespace.sh`
-  - `orb_ext_dir/namespaces/my_namespace/file.sh`
+Your namespaces are defined inside your orb folders. Either by a single file or a folder with multiple files
+  - `.orb/namespaces/my_namespace.sh`
+  - `.orb/namespaces/my_namespace/file.sh`
 
-### Core namespace
+<!-- ### Core namespace
 - `orb core --help` lists all core functions.
 - All core functions can be called directly from within your own orb functions without orb prefix.
 
 Some useful functions
-- `_print_args` - prints received args after parsing
-- `_args_to` - pass recevied args to array if received. Useful for creating command interfaces.
-- `_raise_error` - raises formatted error and kills script
+- `orb_print_args` - prints received args after parsing
+- `orb_pass` - pass recevied args to array if received. Useful for creating command interfaces.
+- `orb_raise_error` - raises formatted error and kills script -->
 
 
   
 
 ### Presource
 If using a dedicated namespace folder you can also add
-  - `orb_ext_dir/namespaces/my_namespace/_presource.sh` - will be sourced before functions in your namespace are called
-- `orb_ext_dir/.env` - will be parsed into your scripts as exported variables.
+  - `.orb/namespaces/my_namespace/.presource.sh` - will be sourced before functions in your namespace are called
+- `.orb/.env` - will be parsed into your scripts as exported variables.
 - Core uses following `.env` vars
+  - `ORB_DEFAULT_NAMESPACE` - if set to `my_namespace`, you can call `orb my_function` directly.
   - `ORB_DEFAULT_NAMESPACE` - if set to `my_namespace`, you can call `orb my_function` directly.
 
 
@@ -135,33 +171,41 @@ If using a dedicated namespace folder you can also add
 
 Functions callable through orb and listed in help - aka. "`public functions`" - have to be declared inside your namespace files with `function` prefix and `()` suffix. If not it will be considered a "`private function`" that is used internally in the file.
 
+
 ---
 
-
-
-
-## Advanced arguments 
-Here is a more advanced argument declaration
+## <a name="individual_function_usage"></a> Individual function usage
 
 ```BASH
- declare -A my_function_args=(
-  ['1']='short description of first arg; IN: value1|value2|value3; DEFAULT: $checkedvar1|$checkedvar2|value3'
-  ['2']='second arg; OPTIONAL'
-  ['-r']='r flag description; DEFAULT: true'
-  ['--verbose-flag']='if desired'
-  ['-e arg']='flagged arg; REQUIRED'
-  ['*']='matches rest of args when args not declared or invalid; CATCH_ANY'
- ); function my_function() { ... }
-```
- Note the available argument properties
- - Numbered args are required unless prop `OPTIONAL` or supplied `DEFAULT`
- - Flag and block args are optional unless prop `REQUIRED`
- - `IN` lists multiple accepted values with `|`
- - `DEFAULT` can eval variables and falls back through `|` chain when undef.
- - Numbered args and wildcards with `CATCH_ANY` allows dash to be first character in assignment. Otherwise the argument would be interpreted as an invalid flag.
+# Create a script:
+touch my_script.sh && chmod +x my_script.sh
 
-Note:
- - If flags are single char you can pass multiple flag statements such as `-ri`.
- - Calling `orb my_function +r` sets `[-r]=false`. This is useful if `[-r]=DEFAULT: true` - Inspired by bash options https://tldp.org/LDP/abs/html/options.html
-- Numbered args and wildcard args also passed as inline args to function call.
- This allows expected argument access from bash positional arguments eg: `$1`, `$2`, `$@/$*` etc
+# my_script.sh
+my_fn_orb=(
+  1 = first
+  -b = boolean
+  -f 1 = flag_arg
+  ... = rest
+) 
+function my_fn() {
+  source orb
+  echo $first
+  echo $boolean
+  echo $flag_arg
+  echo "${rest[@]}"
+}
+
+# cmdline
+# Make sure were running bash when sourcing orb in this way
+# With the library setup orb can be called from any shell
+exec bash 
+source my_script.sh && my_fn first -b -f flag rest of args
+# =>
+first
+true
+flag
+rest of args
+```
+
+
+
