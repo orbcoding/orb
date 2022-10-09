@@ -53,6 +53,11 @@ Describe '_orb_get_default_arg_option_value'
     The variable store_ref should eq false
   End
 
+  It 'sets required false for --'
+    When call _orb_get_default_arg_option_value -- Required: store_ref
+    The variable store_ref should eq false
+  End
+
   It 'sets required true for others'
     When call _orb_get_default_arg_option_value 1 Required: store_ref
     The variable store_ref should eq true

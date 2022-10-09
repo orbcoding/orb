@@ -27,7 +27,7 @@ _orb_get_default_arg_option_value() {
 
 	case $opt in
 		'Required:')
-			_orb_assign_ref=$(orb_is_any_flag $arg || orb_is_block $arg && echo false || echo true)
+			_orb_assign_ref=$(orb_is_any_flag $arg || orb_is_block $arg || orb_is_dash $arg && echo false || echo true)
     ;;
     'Default:')
       _orb_has_declared_boolean_flag $arg && _orb_assign_ref=false

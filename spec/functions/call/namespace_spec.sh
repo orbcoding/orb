@@ -95,6 +95,8 @@ Describe '_orb_get_current_namespace_from_args'
   End
 
   Context 'when namespace undefined'
+    _orb_setting_help=false
+    
     Context 'when $ORB_DEFAULT_NAMESPACE defined'
       ORB_DEFAULT_NAMESPACE=def_space
 

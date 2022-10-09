@@ -51,17 +51,17 @@ _orb_get_current_namespace() {
 _orb_get_current_namespace_from_args() {
   local ns="$1"
 
-
 	if [[ -n "$ns" ]] && orb_in_arr "$ns" _orb_namespaces; then
 		_orb_namespace="$ns"
-	elif [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
-		_orb_namespace="$ORB_DEFAULT_NAMESPACE"
-		return 2
 	elif ! $_orb_setting_help; then
-		local error="not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n"
-		error+="$(_orb_print_available_namespaces)"
-
-		_orb_raise_error "$error" "$(orb_bold)${1-\"\"}$(orb_normal)" false
+		if [[ -n $ORB_DEFAULT_NAMESPACE ]]; then
+			_orb_namespace="$ORB_DEFAULT_NAMESPACE"
+			return 2
+		else
+			local error="not a valid namespace and \$ORB_DEFAULT_NAMESPACE not set. \n\n"
+			error+="$(_orb_print_available_namespaces)"
+			_orb_raise_error "$error" "$(orb_bold)${1-\"\"}$(orb_normal)" false
+		fi
 	fi
 }
 
