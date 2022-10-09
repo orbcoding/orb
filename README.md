@@ -2,7 +2,7 @@
 
 *Unstable. In final development stages*
 
-`orb` is a tool for building self-documenting function libraries in bash. It removes the pain of parsing and validating advanced arguments and helps you organize your functions in namespaces based on a simple file structure.
+`orb` is a CLI framework that helps you build self-documenting function libraries in bash. It removes the pain of parsing and validating advanced arguments and helps you organize your functions in namespaces based on a simple file structure.
 
 `orb` can also be used to empower argument collection for individual functions in existing projects. See [individual function usage](#individual_function_usage).
 
