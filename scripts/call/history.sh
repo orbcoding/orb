@@ -14,7 +14,7 @@ local _orb_i; for _orb_i in $(seq $_orb_last_move_i -1 0); do
     local _orb_old_name="${_orb_history_var}_history_${_orb_i}"
     local _orb_new_name="${_orb_history_var}_history_$(( $_orb_i + 1 ))"
 
-    eval $(_orb_rename_variable $_orb_old_name $_orb_new_name)
+    eval $(_orb_copy_variable $_orb_old_name $_orb_new_name)
   done
 done; 
 
@@ -22,7 +22,7 @@ done;
 local _orb_history_var; for _orb_history_var in "${_orb_history_variables[@]}"; do
     local _orb_new_name="${_orb_history_var}_history_0"
     
-    eval $(_orb_rename_variable $_orb_history_var $_orb_new_name)
+    eval $(_orb_copy_variable $_orb_history_var $_orb_new_name)
 done
 
 (( _orb_history_index++ ))

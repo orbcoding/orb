@@ -2,7 +2,7 @@
 orb_raise_error_orb=(
   1 = error_message "Error message"
   -d = descriptor 
-    Default: FirstPresent: '$_orb_caller_function_descriptor || $_orb_function_descriptor'
+    Default: IfPresent: '$_orb_caller_function_descriptor || $_orb_function_descriptor'
   -k = kill_script "Kill script instead of exit, even if subshell"
     Default: true
   -t = trace "show stack trace"
@@ -23,7 +23,7 @@ _orb_raise_error() {
   # Setting descriptor to false will leave it at default
   # So we can go forward to next param without changing value
   [[ descriptor == false ]] && descriptor=""
-  local descriptor; orb_first_present descriptor '$descriptor || $_orb_function_descriptor_history_0 || $_orb_function_descriptor'
+  local descriptor; orb_if_present descriptor '$descriptor || $_orb_function_descriptor_history_0 || $_orb_function_descriptor'
 
   local print_trace=${3-true}
   local kill_script=${4-false}
@@ -44,12 +44,12 @@ orb_print_error_orb=(
   1 = "Error message"
     Catch: flag block dash
   2 = "Error descriptor"
-    Default: FirstPresent: '$_orb_function_descriptor_history_0 || $_orb_function_descriptor'
+    Default: IfPresent: '$_orb_function_descriptor_history_0 || $_orb_function_descriptor'
 )
 function orb_print_error() { # 
   local msg="$1"
   local descriptor="$2"
-  orb_first_present descriptor '$descriptor || $_orb_function_descriptor_history_0 || $_orb_function_descriptor'
+  orb_if_present descriptor '$descriptor || $_orb_function_descriptor_history_0 || $_orb_function_descriptor'
 
 	error=(
     "$(orb_red)$(orb_bold)Error:$(orb_normal)"

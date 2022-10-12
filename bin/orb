@@ -39,7 +39,7 @@ if [[ $_orb_initialized != true ]]; then
 
     # Get function declaration
     if [[ -n $_orb_function_name ]]; then
-      source "$_orb_root/scripts/call/function_file.sh"
+      source "$_orb_root/scripts/call/function_files.sh"
       _orb_parse_function_declaration
     fi
     
@@ -49,8 +49,7 @@ if [[ $_orb_initialized != true ]]; then
     # Get function args
     source "$_orb_root/scripts/call/function_args.sh"
 
-    # Source presource files and call function
-    source "$_orb_root/scripts/call/source_presource.sh"
+    # Call function
     $_orb_function_name "${_orb_args_positional[@]}"
     _orb_function_exit_code=$?
     source "$_orb_root/scripts/call/cleanup.sh"

@@ -112,7 +112,7 @@ Here is a more advanced argument declaration
     Multiple: true
   -f 1 = flag_arg 'flagged argument'
     Default: 
-      FirstPresent: '$var1 || $var2 || fallback'
+      IfPresent: '$var1 || $var2 || fallback'
       Help: 'Some helping text'
     Catch: any
  ); 
@@ -124,7 +124,7 @@ Here is a more advanced argument declaration
     - Flag and block args are optional unless set `Required: true`
  - `In:` specifies a list of accepted values.
  - `Default:` specifies a default value. Also has nested options: 
-   - `FirstPresent:` Evaluates to first present variable or string.
+   - `IfPresent:` Evaluates to first present variable or string.
    - `Help:` Help text for documentation.
  - `Catch:` Allows argument to assign undeclared special arguments, preventing orb from raising undeclared argument error. Available values: `any flag block dash`.
 

@@ -10,14 +10,14 @@ function orb_function_declared() {
 }
 
 
-orb_first_present_orb=(
+orb_if_present_orb=(
 	"Stores first present variable to specified arr"
 	DirectCall: true
 
 	1 = "Variable name"
 	... = "Variables to check"
 )
-# function orb_first_present() {
+# function orb_if_present() {
 # 	declare -n _orb_arr_ref="$1" && shift
 
 # 	local _orb_var; for _orb_var in "$@"; do
@@ -51,11 +51,10 @@ function orb_in_arr() {
 
 
 # To be evaled
-_orb_rename_variable() {
+_orb_copy_variable() {
 	local _orb_var=$1
 	local _orb_name=$2
-	local _orb_unset=${3-true}
-	local _orb_global=${4-false}
+	local _orb_global=${3-false}
 
 	local _orb_declare_statement; _orb_declare_statement=($(declare -p "$_orb_var" 2>/dev/null)) || return 1
 	local _orb_opening=(${_orb_declare_statement[@]:0:2}) # declare -a
@@ -63,8 +62,7 @@ _orb_rename_variable() {
 	local _orb_assignment=${_orb_declare_statement[@]:2} # var=....
 	_orb_assignment="${_orb_name}${_orb_assignment/$_orb_var/}" # name=...
 
-	local to_eval="${_orb_opening[@]} ${_orb_assignment[@]}"
-	$_orb_unset && to_eval+="; unset $_orb_var"
+	local to_eval=("${_orb_opening[@]} ${_orb_assignment[@]}")
 
 	echo "${to_eval[@]}"
 }
@@ -95,14 +93,14 @@ function orb_variable_or_string_value() {
 	return 0
 }
 
-# orb_first_present
-orb_first_present_value_orb=(
+# orb_if_present
+orb_if_present_value_orb=(
 	"Store first present value in a chain of variables or strings separated by ||"
 
 	1 = "store variable name"
 	2 = '$option1 || $option2 || fallback_str'
 ); 
-function orb_first_present() {
+function orb_if_present() {
 	local _orb_store=$1
 	local _orb_raw_options=($2)
 	local _orb_options=()

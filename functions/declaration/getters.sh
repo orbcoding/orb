@@ -51,8 +51,8 @@ _orb_get_arg_option_value() {
   fi
 
   # If finding present option with present value or plain default value
-  if _orb_get_arg_nested_option_declaration Default: FirstPresent: _orb_declaration _orb_present_store && \
-    orb_first_present _orb_default_value "${_orb_present_store[*]}" || \
+  if _orb_get_arg_nested_option_declaration Default: IfPresent: _orb_declaration _orb_present_store && \
+    orb_if_present _orb_default_value "${_orb_present_store[*]}" || \
     _orb_get_arg_nested_option_declaration Default: false _orb_declaration _orb_default_value; then
     _orb_declaration_store=(${_orb_default_value[@]})
     return

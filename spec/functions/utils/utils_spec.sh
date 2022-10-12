@@ -35,21 +35,21 @@ Describe 'orb_variable_or_string_value'
   End
 End
 
-# orb_first_present
-Describe 'orb_first_present'
+# orb_if_present
+Describe 'orb_if_present'
   It 'stores first present if variable'
     my_var=spec
-    When call orb_first_present store_var '$unknown || $my_var || fallback'
+    When call orb_if_present store_var '$unknown || $my_var || fallback'
     The variable store_var should eq spec
   End
 
   It 'stores first present if string to variable'
-    When call orb_first_present store_var '$unknown || fallback'
+    When call orb_if_present store_var '$unknown || fallback'
     The variable store_var should eq fallback
   End
 
   It 'fails if no present variable'
-    When call orb_first_present store_var '$unknown'
+    When call orb_if_present store_var '$unknown'
     The status should be failure
     The variable store_var should be undefined
   End
@@ -86,25 +86,18 @@ Describe 'orb_in_arr'
   End
 End
 
-# _orb_rename_variable
-Describe '_orb_rename_variable'
+# _orb_copy_variable
+Describe '_orb_copy_variable'
   first_var=spec
 
-  It 'renames variable based on declaration'
-    eval $(_orb_rename_variable first_var new_var)
-    The variable first_var should be undefined
-    The variable new_var should eq spec
-  End
-
-  It 'does not unset old name if false'
-    eval $(_orb_rename_variable first_var new_var false)
-    The variable first_var should eq spec
+  It 'copies variable based on declaration'
+    eval $(_orb_copy_variable first_var new_var)
     The variable new_var should eq spec
   End
 
   rename() {
     global=$1
-    eval $(_orb_rename_variable first_var new_var true $global)
+    eval $(_orb_copy_variable first_var new_var $global)
   }
   It 'creates local variable if false'
     When call rename false
@@ -117,7 +110,7 @@ Describe '_orb_rename_variable'
   End
 
   It 'does nothing if no variable found'
-    When call _orb_rename_variable unknown_var new_var
+    When call _orb_copy_variable unknown_var new_var
     The status should be failure 
   End
 End
