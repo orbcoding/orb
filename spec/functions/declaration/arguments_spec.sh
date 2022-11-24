@@ -21,11 +21,12 @@ _orb_function_declaration=(
 Describe '_orb_parse_declared_args'
   It 'calls its functions'
     _orb_get_declarad_args_and_start_indexes() { spec_fns+=( $(echo_fn) ); }
+    _orb_validate_declared_args() { spec_fns+=( $(echo_fn) ); }
     _orb_get_declared_args_lengths() { spec_fns+=( $(echo_fn) ); }
     _orb_parse_declared_args_options() { spec_fns+=( $(echo_fn) ); }
     When call _orb_parse_declared_args
     The status should be success
-    The variable 'spec_fns[@]' should equal "_orb_get_declarad_args_and_start_indexes _orb_get_declared_args_lengths _orb_parse_declared_args_options"
+    The variable 'spec_fns[@]' should equal "_orb_get_declarad_args_and_start_indexes _orb_validate_declared_args _orb_get_declared_args_lengths _orb_parse_declared_args_options"
   End
 End
 

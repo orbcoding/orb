@@ -44,6 +44,41 @@ Describe '_orb_raise_undeclared'
 End
 
 
+Describe '_orb_validate_declared_args'
+  _orb_raise_invalid_declaration() { echo "$1" && exit 1; }
+
+  It 'raises error on multiple definitions of same argument'
+    _orb_declared_args=(1 2 3 4 5 5)
+
+    When run _orb_validate_declared_args
+    The status should be failure
+    The output should eq "5: multiple definitions"
+  End
+  
+  It 'raises error on multiple definitions at beginning'
+    _orb_declared_args=(1 1 2 3 4 5)
+
+    When run _orb_validate_declared_args
+    The status should be failure
+    The output should eq "1: multiple definitions"
+  End
+  
+  It 'raises error on multiple definitions with others between'
+    _orb_declared_args=(1 2 3 1 4 5)
+
+    When run _orb_validate_declared_args
+    The status should be failure
+    The output should eq "1: multiple definitions"
+  End
+
+  It 'does not raise error if unique arg definitions'
+    _orb_declared_args=(1 2 3 4 5)
+
+    When call _orb_validate_declared_args
+    The status should be success
+  End
+End
+
 # _orb_postvalidate_declared_args_options
 Describe '_orb_postvalidate_declared_args_options'
   It 'calls _orb_postvalidate_declared_args_options_catchs'

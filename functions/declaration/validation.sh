@@ -21,6 +21,22 @@ _orb_raise_undeclared() {
 	_orb_raise_error "'$1' not in $_orb_fn_descriptor args declaration\n\n$(_orb_print_args_explanation)"
 }
 
+_orb_validate_declared_args() {
+	local i=0 arg other_arg 
+	
+	local len=${#_orb_declared_args[@]}
+	
+	# compare all args except last which will already be compared with rest
+	for arg in ${_orb_declared_args[@]:0:$(($len-1))}; do
+		# compare against all args not previously compared
+		for other_arg in ${_orb_declared_args[@]:$((i+1))}; do
+			[[ $arg == $other_arg ]] && _orb_raise_invalid_declaration "$arg: multiple definitions"
+		done
+
+		((i++))
+	done
+}
+
 _orb_postvalidate_declared_args_options() {
   _orb_postvalidate_declared_args_options_catchs
 	_orb_postvalidate_declared_args_options_requireds

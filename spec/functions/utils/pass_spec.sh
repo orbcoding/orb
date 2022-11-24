@@ -121,7 +121,7 @@ Describe '_orb_pass_arg'
   _orb_has_declared_arg() { return 0; }
   _orb_has_arg_value() { return 0; }
 
-  _orb_get_arg_value() {
+  _orb_store_arg_value() {
     declare -n store=$2
     store=(generic value)
   }

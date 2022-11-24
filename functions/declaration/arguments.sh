@@ -3,6 +3,7 @@ _orb_parse_declared_args() {
 	declare -A declared_args_start_indexes
 	declare -A declared_args_lengths
 	_orb_get_declarad_args_and_start_indexes
+	_orb_validate_declared_args
 	_orb_get_declared_args_lengths
 	_orb_parse_declared_args_options
 }

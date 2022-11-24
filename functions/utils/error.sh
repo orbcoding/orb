@@ -1,18 +1,18 @@
 # Public raise error function
 orb_raise_error_orb=(
   1 = error_message "Error message"
-  -d = descriptor 
+  -d 1 = descriptor 
     Default: IfPresent: '$_orb_caller_function_descriptor || $_orb_function_descriptor'
   -k = kill_script "Kill script instead of exit, even if subshell"
     Default: true
   -t = trace "show stack trace"
     Default: true
 )
-function orb_raise_error_orb=(
+function orb_raise_error() {
   source orb
 
-
-)
+  _orb_raise_error "$error_message" "$descriptor" $trace $kill_script
+}
 
 # Internal raise error function
 # Separated to avoid sourcing orb and getting stuck in a loop of bugs
@@ -23,7 +23,7 @@ _orb_raise_error() {
   # Setting descriptor to false will leave it at default
   # So we can go forward to next param without changing value
   [[ descriptor == false ]] && descriptor=""
-  local descriptor; orb_if_present descriptor '$descriptor || $_orb_function_descriptor_history_0 || $_orb_function_descriptor'
+  local descriptor; orb_if_present descriptor '$descriptor || $_orb_function_descriptor'
 
   local print_trace=${3-true}
   local kill_script=${4-false}

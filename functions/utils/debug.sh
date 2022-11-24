@@ -38,7 +38,7 @@ function orb_print_args() { # print collected arguments, useful for debugging
       _orb_print_arg=$_orb_arg
     fi
 
-    local _orb_value=(); _orb_get_arg_value $_orb_arg _orb_value
+    local _orb_value=(); _orb_store_arg_value $_orb_arg _orb_value
 
     local _orb_var=${_orb_declared_vars_ref[$_orb_arg]}
     local _orb_comment="${_orb_declared_comments_ref[$_orb_arg]}"

@@ -15,7 +15,7 @@ _orb_assign_arg_value() {
 	_orb_args_values+=("$@")
 	
 	if [[ -n "${_orb_declared_vars[$_orb_arg]}" ]]; then
-		_orb_get_arg_value $_orb_arg ${_orb_declared_vars[$_orb_arg]}
+		_orb_store_arg_value $_orb_arg ${_orb_declared_vars[$_orb_arg]}
 	fi
 }
 
