@@ -1,6 +1,6 @@
 # Static initialized once
-declare -ga _orb_available_function_options=( DirectCall: )
-declare -ga _orb_available_function_option_direct_call_values=( true false )
+declare -ga _orb_available_function_options=( RawArgs: )
+declare -ga _orb_available_function_option_raw_args_values=( true false )
 
 declare -ga _orb_available_arg_options=( Required: Default: In: Catch: Multiple: )
 declare -ga _orb_available_arg_options_help=( Required: Default: In: Catch: Multiple: )
@@ -37,7 +37,7 @@ declare -ga _orb_history_variables=(
   _orb_args_values_start_indexes
   _orb_args_values_lengths
 
-  _orb_declared_direct_call
+  _orb_declared_raw_args
 
   _orb_declared_args
   _orb_declared_arg_suffixes

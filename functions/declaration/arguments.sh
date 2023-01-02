@@ -1,5 +1,5 @@
 _orb_parse_declared_args() {
-	declare -n declaration=${1-"_orb_function_declaration"}
+	declare -n declaration=${1-"declared_args"}
 	declare -A declared_args_start_indexes
 	declare -A declared_args_lengths
 	_orb_get_declarad_args_and_start_indexes
@@ -17,7 +17,7 @@ _orb_get_declarad_args_and_start_indexes() {
 			local var="${declaration[$i+1]}"
 			local valid_var=false; orb_is_valid_variable_name "$var" && valid_var=true
 
-			if orb_is_input_arg "$arg" && ($valid_var || $_orb_declared_direct_call); then
+			if orb_is_input_arg "$arg" && ($valid_var || $_orb_declared_raw_args); then
 				if [[ $i != 1 ]] && orb_is_nr $arg && orb_is_any_flag ${declaration[$i-2]}; then
 					arg=${declaration[$i-2]}
 					_orb_declared_arg_suffixes[$arg]=${declaration[$i-1]}
@@ -30,7 +30,7 @@ _orb_get_declarad_args_and_start_indexes() {
 
 				if $valid_var; then
 					_orb_declared_vars[$arg]="$var"
-				elif $_orb_declared_direct_call; then
+				elif $_orb_declared_raw_args; then
 					_orb_declared_comments[$arg]="$var"
 				else
 					_orb_raise_invalid_declaration "$arg: invalid variable name '$var'."

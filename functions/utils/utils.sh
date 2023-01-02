@@ -1,9 +1,9 @@
 # orb_function_declared
 orb_function_declared_orb=(
 	"Check if a function name has been declared"
-	DirectCall: true
+	RawArgs: true
 
-	1 = function_name "Function name"
+	1 = "Function name"
 )
 function orb_function_declared() {
 	declare -f -F $1 > /dev/null
@@ -12,7 +12,7 @@ function orb_function_declared() {
 
 orb_if_present_orb=(
 	"Stores first present variable to specified arr"
-	DirectCall: true
+	RawArgs: true
 
 	1 = "Variable name"
 	... = "Variables to check"
@@ -94,7 +94,7 @@ function orb_variable_or_string_value() {
 }
 
 # orb_if_present
-orb_if_present_value_orb=(
+orb_if_present_orb=(
 	"Store first present value in a chain of variables or strings separated by ||"
 
 	1 = "store variable name"

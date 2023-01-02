@@ -113,13 +113,13 @@ _orb_is_valid_arg_option() {
 
 
 _orb_postvalidate_declared_function_options() {
-  _orb_postvalidate_declared_function_options_direct_call
+  _orb_postvalidate_declared_function_options_raw_args
 }
 
-_orb_postvalidate_declared_function_options_direct_call() {
-	local value=$_orb_declared_direct_call
-	if ! orb_in_arr "$value" _orb_available_function_option_direct_call_values; then
-		_orb_raise_invalid_declaration "Function: DirectCall: $value. Available values: ${_orb_available_function_option_direct_call_values[*]}"
+_orb_postvalidate_declared_function_options_raw_args() {
+	local value=$_orb_declared_raw_args
+	if ! orb_in_arr "$value" _orb_available_function_option_raw_args_values; then
+		_orb_raise_invalid_declaration "Function: RawArgs: $value. Available values: ${_orb_available_function_option_raw_args_values[*]}"
 	fi
 }
 

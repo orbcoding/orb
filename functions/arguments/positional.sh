@@ -1,7 +1,7 @@
 _orb_set_function_positional_args() {
   local _orb_value _orb_nrs _orb_nr
 
-  if $_orb_setting_direct_call || $_orb_declared_direct_call; then
+  if $_orb_setting_raw_args || $_orb_declared_raw_args; then
     _orb_args_positional=("$@")
     return
   fi

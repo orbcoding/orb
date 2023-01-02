@@ -7,8 +7,8 @@
 if [[ $1 != only_args_collection ]]; then
   # Orb settings
   declare _orb_setting_help=false
-  declare _orb_setting_direct_call=false
-  declare _orb_setting_reload_functions=false
+  declare _orb_setting_raw_args=false
+  declare _orb_setting_restore_functions=false
   declare -a _orb_setting_extensions=()
   declare -a _orb_settings_args=()
   
@@ -46,7 +46,7 @@ declare -A _orb_args_values_lengths=()
 
 
 # Declaration
-declare _orb_declared_direct_call=false
+declare _orb_declared_raw_args=false
 declare -a _orb_declared_args=() # ordered
 declare -A _orb_declared_arg_suffixes=()
 declare -A _orb_declared_vars=()

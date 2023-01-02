@@ -12,15 +12,15 @@ Describe 'settings.sh'
   End
 
   It 'collects --d'
-    When call source scripts/call/settings.sh -d
-    The variable "_orb_setting_direct_call" should equal true
-    The variable "_orb_settings_args[@]" should eq "-d"
+    When call source scripts/call/settings.sh -r
+    The variable "_orb_setting_raw_args" should equal true
+    The variable "_orb_settings_args[@]" should eq "-r"
   End
   
-  It 'collects -r'
-    When call source scripts/call/settings.sh -r
-    The variable "_orb_setting_reload_functions" should equal true
-    The variable "_orb_settings_args[@]" should eq "-r"
+  It 'collects --restore-fns'
+    When call source scripts/call/settings.sh --restore-fns
+    The variable "_orb_setting_restore_functions" should equal true
+    The variable "_orb_settings_args[@]" should eq "--restore-fns"
   End
 
   It 'collects -e'

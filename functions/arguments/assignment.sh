@@ -82,7 +82,7 @@ _orb_assign_rest() {
 	local _orb_next_i=1
 	local _orb_rest=()
 
-	local _orb_arg; for _orb_arg in ${_orb_args_remaining[@]}; do
+	local _orb_arg; for _orb_arg in "${_orb_args_remaining[@]}"; do
 		_orb_rest+=("$_orb_arg")
 
 		if [[ "${_orb_args_remaining[$_orb_next_i]}" == '--' ]]; then

@@ -13,11 +13,12 @@ source "$_orb_root/functions/call/settings.sh"
 source "$_orb_root/functions/call/namespace.sh"
 source "$_orb_root/functions/call/function.sh"
 
+source "$_orb_root/functions/declaration/function.sh"
+source "$_orb_root/functions/declaration/function_options.sh"
 source "$_orb_root/functions/declaration/arguments.sh"
 source "$_orb_root/functions/declaration/argument_options.sh"
 source "$_orb_root/functions/declaration/checkers.sh"
 source "$_orb_root/functions/declaration/getters.sh"
-source "$_orb_root/functions/declaration/function.sh"
 source "$_orb_root/functions/declaration/settings_declaration.sh"
 source "$_orb_root/functions/declaration/validation.sh"
 
