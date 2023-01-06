@@ -1,3 +1,4 @@
+# _orb_ prefix local vars to prevent shadowing
 _orb_get_declared_number_args_in_order() {
     local _orb_internal_nrs=()
     declare -n _orb_assign_ref=$1
@@ -20,23 +21,26 @@ _orb_get_arg_comment() {
 }
 
 # Default options values if not specified
+# _orb_ prefix local vars to prevent shadowing
 _orb_get_default_arg_option_value() {
-	local arg=$1
-  local opt=$2
+	local _orb_arg=$1
+  local _orb_opt=$2
 	declare -n _orb_assign_ref=$3
 
-	case $opt in
+	case $_orb_opt in
 		'Required:')
-			_orb_assign_ref=$(orb_is_any_flag $arg || orb_is_block $arg || orb_is_dash $arg && echo false || echo true)
+			_orb_assign_ref=$(orb_is_any_flag $_orb_arg || orb_is_block $_orb_arg || orb_is_dash $_orb_arg && echo false || echo true)
     ;;
     'Default:')
-      _orb_has_declared_boolean_flag $arg && _orb_assign_ref=false
+      _orb_has_declared_boolean_flag $_orb_arg && _orb_assign_ref=false
     ;;
 	esac
 }
 
 # As the option declaration may hold nested options, 
 # This will give the final computed value with them taken into account
+# As we are assigning to variable with uncertain name
+# _orb_ prefix all local vars to prevent shadowing
 _orb_get_arg_option_value() {
   local _orb_arg=$1
   local _orb_opt=$2
@@ -62,29 +66,31 @@ _orb_get_arg_option_value() {
 }
 
 # If called without assignment param $3 will just check if has value
+# _orb_ prefix local vars to prevent shadowing 
 _orb_get_arg_option_declaration() {
-  local arg=$1
-  local opt=$2
-  declare -n declared_option_start_indexes=_orb_declared_option_start_indexes$_orb_variable_suffix
+  local _orb_arg=$1
+  local _orb_opt=$2
+  declare -n _orb_option_start_indexes=_orb_declared_option_start_indexes$_orb_variable_suffix
 
-  local i=$(orb_index_of $arg _orb_declared_args$_orb_variable_suffix)
-  local start_is=(${declared_option_start_indexes[$opt]})
-  local start_i="${start_is[$i]}"
+  local _orb_i=$(orb_index_of $_orb_arg _orb_declared_args$_orb_variable_suffix)
+  local _orb_start_is=(${_orb_option_start_indexes[$_orb_opt]})
+  local _orb_start_i="${_orb_start_is[$_orb_i]}"
 
   # Should always be - if empty but adding -z for sanity when testing
-  [[ $start_i == '-' ]] || [[ -z $start_i ]] && return 1
+  [[ $_orb_start_i == '-' ]] || [[ -z $_orb_start_i ]] && return 1
   [[ -z $3 ]] && return 0 
 
   declare -n _orb_option_declaration="$3"
-  declare -n declared_option_lengths=_orb_declared_option_lengths$_orb_variable_suffix
-  declare -n declared_option_values=_orb_declared_option_values$_orb_variable_suffix
+  declare -n _orb_option_lengths=_orb_declared_option_lengths$_orb_variable_suffix
+  declare -n _orb_option_values=_orb_declared_option_values$_orb_variable_suffix
 
-  local lens=(${declared_option_lengths[$opt]})
-  local len=${lens[$i]}
+  local _orb_lens=(${_orb_option_lengths[$_orb_opt]})
+  local _orb_len=${_orb_lens[$_orb_i]}
 
-  _orb_option_declaration=("${declared_option_values[@]:$start_i:$len}")
+  _orb_option_declaration=("${_orb_option_values[@]:$_orb_start_i:$_orb_len}")
 }
 
+# _orb_ prefix to prevent shadowing
 _orb_get_arg_nested_option_declaration() {
   local _orb_opt="$1"
   local _orb_nested_opt="$2"

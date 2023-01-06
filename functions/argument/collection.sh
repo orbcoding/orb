@@ -5,9 +5,6 @@
 # Arguments are checked against the functions orb declaration
 # _orb_parse_function_declaration should have been called before
 #
-# OBS
-# All local variables in this file have to be _orb prefixed to not block assignment to declared value variables
-#
 # Main function
 _orb_collect_function_args() {
 	local args_count=1
@@ -29,53 +26,53 @@ _orb_collect_function_args() {
 _orb_collect_args() {
 	# Start collecting from first input arg onwards
 	while [[ ${#args_remaining[@]} > 0 ]]; do
-		local _orb_arg="${args_remaining[0]}"
+		local arg="${args_remaining[0]}"
 
-		if orb_is_any_flag "$_orb_arg"; then 
-			_orb_collect_flag_arg "$_orb_arg"
-		elif orb_is_block "$_orb_arg"; then
-			_orb_collect_block_arg "$_orb_arg"
+		if orb_is_any_flag "$arg"; then 
+			_orb_collect_flag_arg "$arg"
+		elif orb_is_block "$arg"; then
+			_orb_collect_block_arg "$arg"
 		else
-			_orb_collect_inline_arg "$_orb_arg"
+			_orb_collect_inline_arg "$arg"
 		fi
 	done
 
 }
 
 _orb_collect_flag_arg() { # $1 input_arg
-	local _orb_arg=$1
+	local arg=$1
 
-	if _orb_has_declared_boolean_flag $_orb_arg; then
-		_orb_store_boolean_flag "$_orb_arg"
-	elif _orb_has_declared_flagged_arg "$_orb_arg"; then
-		_orb_store_flagged_arg "$_orb_arg"
+	if _orb_has_declared_boolean_flag $arg; then
+		_orb_store_boolean_flag "$arg"
+	elif _orb_has_declared_flagged_arg "$arg"; then
+		_orb_store_flagged_arg "$arg"
 	else
-		local _orb_invalid_flags=()
-		_orb_try_collect_multiple_flags "$_orb_arg"
+		local invalid_flags=()
+		_orb_try_collect_multiple_flags "$arg"
 
 		if [[ $? == 1 ]]; then 
-			_orb_try_inline_arg_fallback "$_orb_arg" "${_orb_invalid_flags[*]}"
+			_orb_try_inline_arg_fallback "$arg" "${invalid_flags[*]}"
 		fi
 	fi
 }
 
 _orb_collect_block_arg() {
-	local _orb_arg=$1
+	local arg=$1
 
-	if _orb_has_declared_arg "$_orb_arg"; then
-		_orb_store_block "$_orb_arg"
+	if _orb_has_declared_arg "$arg"; then
+		_orb_store_block "$arg"
 	else
-		_orb_try_inline_arg_fallback "$_orb_arg" "$_orb_arg"
+		_orb_try_inline_arg_fallback "$arg" "$arg"
 	fi
 }
 
-_orb_collect_inline_arg() { # $1 = input_arg
-	local _orb_arg=$1
+_orb_collect_inline_arg() {
+	local arg=$1
 	# add numbered args to args and _args_nrs
-	if [[ "$_orb_arg" == '--' ]] && _orb_has_declared_arg $_orb_arg; then
+	if [[ "$arg" == '--' ]] && _orb_has_declared_arg $arg; then
 		_orb_store_dash
-	elif _orb_has_declared_arg "$args_count" && _orb_is_valid_arg "$args_count" "$_orb_arg"; then
-		_orb_store_inline_arg "$_orb_arg"
+	elif _orb_has_declared_arg "$args_count" && _orb_is_valid_arg "$args_count" "$arg"; then
+		_orb_store_inline_arg "$arg"
 	elif _orb_has_declared_arg '...'; then
 		_orb_store_rest
 	else
@@ -85,53 +82,55 @@ _orb_collect_inline_arg() { # $1 = input_arg
 
 _orb_try_inline_arg_fallback() {
 	# If failed to parse flags or block, fall back to inline args 
-	local _orb_arg=$1
-	local _orb_failed_arg=$2 # usually the same unless multiflag
+	local arg=$1
+	local failed_arg=$2 # usually the same unless multiflag
 
-	if _orb_has_declared_arg "$args_count" && _orb_is_valid_arg "$args_count" "$_orb_arg" && _orb_arg_catches "$args_count" "$_orb_arg"; then
-		_orb_store_inline_arg "$_orb_arg"
-	elif _orb_has_declared_arg "..." && _orb_arg_catches "..." "$_orb_arg"; then
+	if _orb_has_declared_arg "$args_count" && _orb_is_valid_arg "$args_count" "$arg" && _orb_arg_catches "$args_count" "$arg"; then
+		_orb_store_inline_arg "$arg"
+	elif _orb_has_declared_arg "..." && _orb_arg_catches "..." "$arg"; then
 		_orb_store_rest
 	else
-		_orb_raise_invalid_arg "$_orb_failed_arg"
+		_orb_raise_invalid_arg "$failed_arg"
 	fi
 }
 
 _orb_try_collect_multiple_flags() { # $1 arg
 	if orb_is_verbose_flag "$1"; then
-		_orb_invalid_flags+=( "$1" )
+		invalid_flags+=( "$1" )
 		return 1 # only single boolean flags can be multi-flags
 	fi
 
 	# split to individual flags
-	local _orb_flags=$(echo "${1:1}" | grep -o . | sed s/^/-/g )
-	local _orb_valid_flags=()
+	local flags=$(echo "${1:1}" | grep -o . | sed s/^/-/g )
+	local valid_flags=()
 
 	# collect all invalid flags for verbose error
-	local _orb_flag; for _orb_flag in $_orb_flags; do
-		if _orb_has_declared_arg "$_orb_flag"; then
-			_orb_valid_flags+=($_orb_flag)
+	local flag; for flag in $flags; do
+		if _orb_has_declared_arg "$flag"; then
+			valid_flags+=($flag)
 		else
-			_orb_invalid_flags+=($_orb_flag)
+			invalid_flags+=($flag)
 		fi
 	done
 
 	# assign flags only if no invalids
-	[[ ${#_orb_invalid_flags} != 0 ]] && return 1
+	[[ ${#invalid_flags} != 0 ]] && return 1
 
-	local _orb_shift_steps=1
-	local _orb_flag; for _orb_flag in "${_orb_valid_flags[@]}"; do
-		local _orb_suffix=${_orb_declared_arg_suffixes[$_orb_flag]}
+	local steps=1 # to shift
 
-		if [[ -z "$_orb_suffix" ]]; then 
-			_orb_store_boolean_flag "$_orb_flag" 0
+	local flag; for flag in "${valid_flags[@]}"; do
+		local suffix=${_orb_declared_arg_suffixes[$flag]}
+
+		if [[ -z "$suffix" ]]; then 
+			_orb_store_boolean_flag "$flag" 0
 		else
-			_orb_store_flagged_arg "$_orb_flag" 0
-			(( $_orb_suffix >= $_orb_shift_steps )) && _orb_shift_steps=$((_orb_suffix + 1))
+			_orb_store_flagged_arg "$flag" 0
+			# if declared eg: -f 2 = var - we need to shift 3 steps to pass -f + 2 
+			(( $suffix >= $steps )) && steps=$((suffix + 1))
 		fi
 	done
 
-	_orb_shift_args $_orb_shift_steps 
+	_orb_shift_args $steps 
 }
 
 # shift one = remove first arg from arg array

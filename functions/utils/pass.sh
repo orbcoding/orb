@@ -1,5 +1,8 @@
 # orb_pass
 
+# As we are passing args to array with uncertain name
+# All variables have to be _orb_ prefixed to prevent shadowing
+#
 orb_pass_orb=(
   "Pass commands to array eg: cmd=(my_cmd); orb_pass md_cmd -- -fa 1 2 --"
 

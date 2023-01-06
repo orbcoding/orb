@@ -22,9 +22,9 @@ _orb_raise_invalid_arg() { # $1 arg_key $2 arg_value/required
 
 
 _orb_post_validate_args() {
-	local _orb_arg; for _orb_arg in "${_orb_declared_args[@]}"; do
-		local _orb_required; _orb_get_arg_option_value $_orb_arg Required: _orb_required
-		[[ $_orb_required == true ]] && ! _orb_has_arg_value "$_orb_arg" && _orb_raise_error "$_orb_arg is required"
+	local arg; for arg in "${_orb_declared_args[@]}"; do
+		local required; _orb_get_arg_option_value $arg Required: required
+		[[ $required == true ]] && ! _orb_has_arg_value "$arg" && _orb_raise_error "$arg is required"
 	done
 }
 

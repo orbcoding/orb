@@ -1,3 +1,5 @@
+# As we are assigning values to a variable with an uncertain name
+# Local variables in this function have to be _orb_ prefixed to prevent shadowing
 _orb_get_arg_value() {
 	local _orb_arg=$1
 	declare -n _orb_assign_ref=$2
@@ -25,7 +27,7 @@ _orb_get_arg_value() {
 }
 
 _orb_has_arg_value() {
-	local _orb_arg=$1
+	local arg=$1
 	declare -n start_indexes=_orb_args_values_start_indexes$_orb_variable_suffix
-  [[ -n ${start_indexes[$_orb_arg]} ]]
+  [[ -n ${start_indexes[$arg]} ]]
 }
