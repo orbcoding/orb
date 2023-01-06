@@ -1,4 +1,4 @@
-_orb_store_arg_value() {
+_orb_get_arg_value() {
 	local _orb_arg=$1
 	declare -n _orb_assign_ref=$2
 	local _orb_val=()

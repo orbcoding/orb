@@ -10,11 +10,11 @@
 #
 # Main function
 _orb_collect_function_args() {
-	local _orb_args_count=1
-	local _orb_args_remaining=( "$@" ) # array of input args each quoted
+	local args_count=1
+	local args_remaining=( "$@" ) # array of input args each quoted
 	
 	if [[ ${#_orb_declared_args[@]} == 0 ]]; then
-		if [[ ${#_orb_args_remaining[@]} != 0 ]]; then
+		if [[ ${#args_remaining[@]} != 0 ]]; then
 			_orb_raise_error "does not accept arguments"
 		else # no args to parse
 			return 0
@@ -28,8 +28,8 @@ _orb_collect_function_args() {
 
 _orb_collect_args() {
 	# Start collecting from first input arg onwards
-	while [[ ${#_orb_args_remaining[@]} > 0 ]]; do
-		local _orb_arg="${_orb_args_remaining[0]}"
+	while [[ ${#args_remaining[@]} > 0 ]]; do
+		local _orb_arg="${args_remaining[0]}"
 
 		if orb_is_any_flag "$_orb_arg"; then 
 			_orb_collect_flag_arg "$_orb_arg"
@@ -46,9 +46,9 @@ _orb_collect_flag_arg() { # $1 input_arg
 	local _orb_arg=$1
 
 	if _orb_has_declared_boolean_flag $_orb_arg; then
-		_orb_assign_boolean_flag "$_orb_arg"
+		_orb_store_boolean_flag "$_orb_arg"
 	elif _orb_has_declared_flagged_arg "$_orb_arg"; then
-		_orb_assign_flagged_arg "$_orb_arg"
+		_orb_store_flagged_arg "$_orb_arg"
 	else
 		local _orb_invalid_flags=()
 		_orb_try_collect_multiple_flags "$_orb_arg"
@@ -63,7 +63,7 @@ _orb_collect_block_arg() {
 	local _orb_arg=$1
 
 	if _orb_has_declared_arg "$_orb_arg"; then
-		_orb_assign_block "$_orb_arg"
+		_orb_store_block "$_orb_arg"
 	else
 		_orb_try_inline_arg_fallback "$_orb_arg" "$_orb_arg"
 	fi
@@ -73,13 +73,13 @@ _orb_collect_inline_arg() { # $1 = input_arg
 	local _orb_arg=$1
 	# add numbered args to args and _args_nrs
 	if [[ "$_orb_arg" == '--' ]] && _orb_has_declared_arg $_orb_arg; then
-		_orb_assign_dash
-	elif _orb_has_declared_arg "$_orb_args_count" && _orb_is_valid_arg "$_orb_args_count" "$_orb_arg"; then
-		_orb_assign_inline_arg "$_orb_arg"
+		_orb_store_dash
+	elif _orb_has_declared_arg "$args_count" && _orb_is_valid_arg "$args_count" "$_orb_arg"; then
+		_orb_store_inline_arg "$_orb_arg"
 	elif _orb_has_declared_arg '...'; then
-		_orb_assign_rest
+		_orb_store_rest
 	else
-		_orb_raise_invalid_arg "$_orb_args_count with value ${1:-\"\"}"
+		_orb_raise_invalid_arg "$args_count with value ${1:-\"\"}"
 	fi
 }
 
@@ -88,10 +88,10 @@ _orb_try_inline_arg_fallback() {
 	local _orb_arg=$1
 	local _orb_failed_arg=$2 # usually the same unless multiflag
 
-	if _orb_has_declared_arg "$_orb_args_count" && _orb_is_valid_arg "$_orb_args_count" "$_orb_arg" && _orb_arg_catches "$_orb_args_count" "$_orb_arg"; then
-		_orb_assign_inline_arg "$_orb_arg"
+	if _orb_has_declared_arg "$args_count" && _orb_is_valid_arg "$args_count" "$_orb_arg" && _orb_arg_catches "$args_count" "$_orb_arg"; then
+		_orb_store_inline_arg "$_orb_arg"
 	elif _orb_has_declared_arg "..." && _orb_arg_catches "..." "$_orb_arg"; then
-		_orb_assign_rest
+		_orb_store_rest
 	else
 		_orb_raise_invalid_arg "$_orb_failed_arg"
 	fi
@@ -124,9 +124,9 @@ _orb_try_collect_multiple_flags() { # $1 arg
 		local _orb_suffix=${_orb_declared_arg_suffixes[$_orb_flag]}
 
 		if [[ -z "$_orb_suffix" ]]; then 
-			_orb_assign_boolean_flag "$_orb_flag" 0
+			_orb_store_boolean_flag "$_orb_flag" 0
 		else
-			_orb_assign_flagged_arg "$_orb_flag" 0
+			_orb_store_flagged_arg "$_orb_flag" 0
 			(( $_orb_suffix >= $_orb_shift_steps )) && _orb_shift_steps=$((_orb_suffix + 1))
 		fi
 	done
@@ -134,13 +134,8 @@ _orb_try_collect_multiple_flags() { # $1 arg
 	_orb_shift_args $_orb_shift_steps 
 }
 
-_orb_set_default_arg_values() {
-  local _orb_arg; for _orb_arg in "${_orb_declared_args[@]}"; do
-    _orb_has_arg_value $_orb_arg || _orb_set_default_from_declaration $_orb_arg
-  done
-}
-
-_orb_set_default_from_declaration() {
-  local _orb_default; _orb_get_arg_option_value $_orb_arg "Default:" _orb_default || return 1
-  _orb_assign_arg_value $_orb_arg "${_orb_default[@]}"
+# shift one = remove first arg from arg array
+_orb_shift_args() {
+	local steps=${1-1}
+	args_remaining=("${args_remaining[@]:${steps}}")
 }

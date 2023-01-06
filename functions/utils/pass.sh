@@ -106,7 +106,7 @@ _orb_pass_arg() {
 
   _orb_has_declared_arg "$_orb_arg" || _orb_raise_undeclared "$_orb_arg"
   _orb_has_arg_value $_orb_arg || return 1
-  local _orb_value; _orb_store_arg_value $_orb_arg _orb_value
+  local _orb_value; _orb_get_arg_value $_orb_arg _orb_value
 
   if [[ -n "$_orb_pass_self_if_eq" ]]; then 
     [[ "${_orb_value[@]}" != "$_orb_pass_self_if_eq" ]] && return 1 

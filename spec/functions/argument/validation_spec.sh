@@ -1,4 +1,4 @@
-Include functions/arguments/validation.sh
+Include functions/argument/validation.sh
 Include functions/declaration/checkers.sh
 Include functions/declaration/getters.sh
 Include functions/utils/utils.sh

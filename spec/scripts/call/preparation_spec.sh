@@ -1,4 +1,4 @@
-# Include functions/arguments/assignment.sh
+# Include functions/argument/store.sh
 # Include $spec_orb/namespaces/spec/test_functions.sh
 
 # Describe '_orb_flag_value'
@@ -14,7 +14,7 @@
 # End
 
 
-# Describe '_orb_assign_flagged_arg'
+# Describe '_orb_store_flagged_arg'
 
 #   It 'prints args'
 #     When call test_orb_print_args "${test_orb_print_args_input_args[@]}"
