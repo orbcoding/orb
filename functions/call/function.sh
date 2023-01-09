@@ -1,6 +1,6 @@
 # Return success => shift away function_name argument from positional args
 _orb_get_current_function() {
-	if [[ $_orb_sourced == true ]]; then
+	if [[ $_orb_sourced_in_fn == true ]]; then
 		_orb_get_current_function_from_trace
 		return 2
 	else

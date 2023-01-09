@@ -4,8 +4,8 @@ Include functions/utils/text.sh
 
 
 Describe _orb_get_current_function
-  Context 'with _orb_sourced'
-    _orb_sourced=true
+  Context 'with _orb_sourced_in_fn'
+    _orb_sourced_in_fn=true
     _orb_get_current_function_from_trace() { echo_fn; }
 
     It 'calls _orb_get_current_function_from_trace and returns 2'
@@ -15,8 +15,8 @@ Describe _orb_get_current_function
     End
   End
 
-  Context 'without _orb_sourced'
-    unset _orb_sourced
+  Context 'without _orb_sourced_in_fn'
+    unset _orb_sourced_in_fn
 
     It 'returns 0 and outputs $1'
       When call _orb_get_current_function my_function

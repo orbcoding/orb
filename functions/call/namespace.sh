@@ -39,7 +39,7 @@ _orb_collect_namespace_files() {
 
 # Return success => shift away namespace argument from positional args
 _orb_get_current_namespace() {
-	if [[ $_orb_sourced == true ]]; then
+	if [[ $_orb_sourced_in_fn == true ]]; then
 		_orb_get_current_namespace_from_file_structure
 		return 2 # no shift
 	else

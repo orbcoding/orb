@@ -2,19 +2,24 @@
 
 *Unstable. In final development stages*
 
-`orb` is a CLI framework that helps you build self-documenting function libraries in bash. It removes the pain of parsing and validating advanced arguments and helps you organize your functions in namespaces based on a simple file structure.
+`orb` is a `bash` function management tool. It enables the declaration of advanced function parameters, removing the pain of processing function arguments. It also suggests a framework to build self-documenting libraries with functions organized in namespaces based on a simple file structure.
 
-`orb` can also be used to empower argument collection for individual functions in existing projects. See [individual function usage](#individual_function_usage).
 
-`orb` is tested with [shellspec](https://github.com/shellspec/shellspec).
+`orb` is tested with [shellspec](https://github.com/shellspec/shellspec)
 
+Follow the quick start below. Then see:
+
+- [Documentation](https://github.com/orbcoding/orb/DOCUMENTATION.md)
+- [Code Guidelines](https://github.com/orbcoding/orb/DOCUMENTATION.md)
+
+---
 
 ## Installation
 ```BASH
 mkdir ~/.orb && cd ~/.orb
 git clone https://github.com/orbcoding/orb.git
 
-# Extend path in ~/.bashrc or ~/.zshrc
+# Add orb to shell PATH. eg: ~/.bashrc or ~/.zshrc
 PATH=$PATH:~/.orb/orb/bin
 
 # Now you can use the orb command

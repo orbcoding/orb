@@ -63,7 +63,7 @@ Describe '_orb_get_current_namespace'
   _orb_get_current_namespace_from_args() { echo_fn && return 3; }
   _orb_get_current_namespace_from_file_structure() { echo_fn; }
 
-  Context 'with _orb_sourced unset'
+  Context 'with _orb_sourced_in_fn unset'
     It 'echoes output and returns status of _orb_get_current_namespace_from_args'
       When run _orb_get_current_namespace
       The status should equal 3
@@ -71,8 +71,8 @@ Describe '_orb_get_current_namespace'
     End
   End
 
-  Context 'with _orb_sourced'
-    _orb_sourced=true
+  Context 'with _orb_sourced_in_fn'
+    _orb_sourced_in_fn=true
 
     It 'echoes output of _orb_get_current_namespace_from_file_structure and returns 1'
       When run _orb_get_current_namespace

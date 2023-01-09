@@ -8,6 +8,6 @@
 #     # The variable _orb_setting_namespace_help should equal false
 #     # The variable _orb_setting_raw_args should equal false
 #     # The variable _orb_setting_restore_functions should equal false
-#     # The variable _orb_sourced should equal false
+#     # The variable _orb_sourced_in_fn should equal false
 #   End
 # End
