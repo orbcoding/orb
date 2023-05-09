@@ -67,7 +67,7 @@ End
 # _orb_print_namespace_help
 Describe '_orb_print_namespace_help'
   Include "$_orb_root/scripts/call/variables.sh"
-  _orb_setting_raw_args=false
+  _orb_setting_raw=false
 
   dir="$(pwd)/spec/fixtures/.orb/namespaces/spec"
   It 'prints functions with comments'

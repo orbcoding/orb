@@ -1,50 +1,50 @@
 Include functions/utils/file.sh
 Include functions/utils/utils.sh
 
-Describe 'orb_find_closest_below'
+Describe 'orb_get_closest_parent'
   It 'finds the closest matching file'
-    When call orb_find_closest_below specfile spec/fixtures/functions/utils/file.sh/nest1/nest2
+    When call orb_get_closest_parent specfile spec/fixtures/functions/utils/file.sh/nest1/nest2
     The output should include "spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile"
     The status should be success
   End
 
   It 'finds the closest matching file in lower levels'
-    When call orb_find_closest_below specfile1 spec/fixtures/functions/utils/file.sh/nest1/nest2
+    When call orb_get_closest_parent specfile1 spec/fixtures/functions/utils/file.sh/nest1/nest2
     The output should include "spec/fixtures/functions/utils/file.sh/nest1/specfile1"
   End
 
   It 'fails if no file found'
-    When call orb_find_closest_below file_non_existent spec/fixtures/functions/utils/file.sh/nest1/nest2
+    When call orb_get_closest_parent file_non_existent spec/fixtures/functions/utils/file.sh/nest1/nest2
     The status should be failure
   End
 End
 
-Describe 'orb_find_below_to_arr'
+Describe 'orb_get_parents'
   # TODO test & and |
 
   It 'adds file matches to array'
     arr=()
-    When call orb_find_below_to_arr arr specfile spec/fixtures/functions/utils/file.sh/nest1/nest2
+    When call orb_get_parents arr specfile spec/fixtures/functions/utils/file.sh/nest1/nest2
     The variable "arr[0]" should include "spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile" 
     The variable "arr[1]" should include "spec/fixtures/functions/utils/file.sh/nest1/specfile"
   End
 
   It 'stops after parsing last directory'
     arr=()
-    When call orb_find_below_to_arr arr specfile spec/fixtures/functions/utils/file.sh/nest1/nest2 spec/fixtures/functions/utils/file.sh/nest1/nest2
+    When call orb_get_parents arr specfile spec/fixtures/functions/utils/file.sh/nest1/nest2 spec/fixtures/functions/utils/file.sh/nest1/nest2
     The variable "arr[0]" should include "spec/fixtures/functions/utils/file.sh/nest1/nest2/specfile" 
     The variable "arr[1]" should be undefined
   End
 
   It 'fails if no file found'
-    When call orb_find_closest_below file_non_existent spec/fixtures/functions/utils/file.sh/nest1/nest2
+    When call orb_get_closest_parent file_non_existent spec/fixtures/functions/utils/file.sh/nest1/nest2
     The status should be failure
   End
 
   It 'finds both if two files specified with &'
     arr=()
     cd spec/fixtures
-    When call orb_find_below_to_arr arr "_orb&.orb" $(pwd) $(pwd)
+    When call orb_get_parents arr "_orb&.orb" $(pwd) $(pwd)
     The variable "arr[0]" should eq $(pwd)/_orb
     The variable "arr[1]" should eq $(pwd)/.orb
   End
@@ -52,7 +52,7 @@ Describe 'orb_find_below_to_arr'
   It 'finds first if two files specified with |'
     arr=()
     cd spec/fixtures
-    When call orb_find_below_to_arr arr "_orb|.orb" $(pwd) $(pwd)
+    When call orb_get_parents arr "_orb|.orb" $(pwd) $(pwd)
     The variable "arr[0]" should eq $(pwd)/_orb
     The variable "arr[1]" should be undefined
   End

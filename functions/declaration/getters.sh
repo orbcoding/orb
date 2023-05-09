@@ -137,8 +137,8 @@ _orb_get_arg_nested_option_declaration() {
 #   declare -n value=$3
 
 #     case $opt in
-#       'RawArgs:')
-#         value="$_orb_declared_raw_args"
+#       'Raw:')
+#         value="$_orb_declared_raw"
 #         ;;
 #     esac
 # }

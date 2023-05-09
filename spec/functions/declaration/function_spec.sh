@@ -35,7 +35,7 @@ Describe '_orb_parse_function_declaration'
   It 'stores arguments and options to variables'
     _orb_function_declaration=(
       "Function comment"
-      RawArgs: true
+      Raw: true
 
       1 = first 
         "This is first comment"
@@ -51,7 +51,7 @@ Describe '_orb_parse_function_declaration'
 
     When call _orb_parse_function_declaration
     The variable "_orb_declared_comments[function]" should equal "Function comment"
-    The variable "_orb_declared_raw_args" should equal true
+    The variable "_orb_declared_raw" should equal true
     The variable "_orb_declared_args[@]" should equal "1 -a"
     The variable "_orb_declared_comments[1]" should equal "This is first comment"
     The variable "_orb_declared_comments[-a]" should equal "This is flagged comment"
@@ -67,7 +67,7 @@ End
 Describe '_orb_get_declared_function_options'
   declaration=(
     "Comment"
-    RawArgs: true
+    Raw: true
 
     1 = first
   )
@@ -75,18 +75,18 @@ Describe '_orb_get_declared_function_options'
   It "gets declared function options"
     When call _orb_get_declared_function_options
     The variable "declared_function_options[0]" should equal "Comment"
-    The variable "declared_function_options[@]" should equal "Comment RawArgs: true"
+    The variable "declared_function_options[@]" should equal "Comment Raw: true"
   End
 
   It 'gets declared function options when no args declared'
     declaration=(
       "Comment"
-      RawArgs: true
+      Raw: true
     )
 
     When call _orb_get_declared_function_options
     The variable "declared_function_options[0]" should equal "Comment"
-    The variable "declared_function_options[@]" should equal "Comment RawArgs: true"
+    The variable "declared_function_options[@]" should equal "Comment Raw: true"
   End
   
   It 'does not get function options when only args declared'
@@ -103,7 +103,7 @@ End
 Describe '_orb_get_declared_args'
   declaration=(
     "Comment"
-    RawArgs: true
+    Raw: true
 
     1 = first
   )

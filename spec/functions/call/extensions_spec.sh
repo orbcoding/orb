@@ -7,14 +7,14 @@ Describe '_orb_collect_orb_extensions'
   _orb_extensions=()
 
   It 'calls nested functions with correct params'
-    orb_find_below_to_arr() { :; }
+    orb_get_parents() { :; }
     orb_trim_uniq_realpaths() { :; }
     # so no home .orb is found
     HOME=
-    orb_find_below_to_arr() { spec_args+=($(echo_fn "$@")); }
+    orb_get_parents() { spec_args+=($(echo_fn "$@")); }
     orb_trim_uniq_realpaths() { spec_args+=($(echo_fn "$@")); }
     When call _orb_collect_orb_extensions start last
-    The variable "spec_args[@]" should equal "orb_find_below_to_arr _orb_extensions _orb&.orb start last orb_trim_uniq_realpaths _orb_extensions _orb_extensions"
+    The variable "spec_args[@]" should equal "orb_get_parents _orb_extensions _orb&.orb start last orb_trim_uniq_realpaths _orb_extensions _orb_extensions"
     The variable "_orb_extensions[0]" should be undefined
   End
 

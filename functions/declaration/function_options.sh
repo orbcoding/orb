@@ -90,8 +90,8 @@ _orb_store_function_options() {
 
 
     case $option in
-      'RawArgs:')
-        _orb_declared_raw_args="${value[@]}"
+      'Raw:')
+        _orb_declared_raw="${value[@]}"
         ;;
     esac
 

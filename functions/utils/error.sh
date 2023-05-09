@@ -37,7 +37,7 @@ _orb_raise_error() {
 
 # orb_print_error
 orb_print_error_orb=(
-  RawArgs: true
+  Raw: true
 
   "Print pretty error"
 

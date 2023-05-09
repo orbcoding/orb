@@ -22,7 +22,7 @@ Describe "_orb_parse_declared_function_options"
   It 'Gets comment'
     declared_function_options=(
       "Function comment"
-      RawArgs: true
+      Raw: true
     )
 
     When call _orb_parse_declared_function_options
@@ -40,7 +40,7 @@ Describe "_orb_extract_function_comment"
   End
 
   It 'fails if first is function option'
-    declaration=(RawArgs:)
+    declaration=(Raw:)
     When call _orb_extract_function_comment
     The status should be failure
     The variable "_orb_declared_comments[function]" should be undefined
@@ -49,7 +49,7 @@ End
 
 # _orb_get_function_options_start_indexes
 Describe "_orb_get_function_options_start_indexes"
-  declaration=(RawArgs: value RawArgs: value)
+  declaration=(Raw: value Raw: value)
 
   It 'stores correct start_indexes'
     When call _orb_get_function_options_start_indexes
@@ -57,23 +57,23 @@ Describe "_orb_get_function_options_start_indexes"
   End
 
   It 'raises on option as option value'
-    declaration=(RawArgs: RawArgs: value)
+    declaration=(Raw: Raw: value)
     _orb_raise_invalid_declaration() { echo_fn "$@"; }
     When call _orb_get_function_options_start_indexes
-    The output should equal "_orb_raise_invalid_declaration RawArgs: invalid value: RawArgs:"
+    The output should equal "_orb_raise_invalid_declaration Raw: invalid value: Raw:"
   End
 
   It 'raises on option without value'
-    declaration=(RawArgs: true RawArgs:)
+    declaration=(Raw: true Raw:)
     _orb_raise_invalid_declaration() { echo_fn "$@"; }
     When call _orb_get_function_options_start_indexes
-    The output should equal "_orb_raise_invalid_declaration RawArgs: missing value"
+    The output should equal "_orb_raise_invalid_declaration Raw: missing value"
   End
 End
 
 # _orb_get_function_options_lengths
 Describe "_orb_get_function_options_start_indexes"
-  declaration=(RawArgs: value RawArgs: value)
+  declaration=(Raw: value Raw: value)
   declared_function_options_start_indexes=(0 2)
 
   It 'stores correct lengths'
@@ -84,12 +84,12 @@ End
 
 # _orb_store_function_options
 Describe '_orb_store_function_options'
-  declaration=(RawArgs: true)
+  declaration=(Raw: true)
   declared_function_options_start_indexes=(0)
   declared_function_options_lengths=(2)
 
-  It 'stores RawArgs:'
+  It 'stores Raw:'
     When call _orb_store_function_options
-    The variable "_orb_declared_raw_args" should eq true
+    The variable "_orb_declared_raw" should eq true
   End
 End

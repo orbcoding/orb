@@ -13,7 +13,7 @@ Describe 'settings.sh'
 
   It 'collects --d'
     When call source scripts/call/settings.sh -r
-    The variable "_orb_setting_raw_args" should equal true
+    The variable "_orb_setting_raw" should equal true
     The variable "_orb_settings_args[@]" should eq "-r"
   End
   

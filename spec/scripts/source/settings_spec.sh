@@ -6,7 +6,7 @@
 #     # The output should equal lol
 #     # The variable _orb_setting_help should equal false
 #     # The variable _orb_setting_namespace_help should equal false
-#     # The variable _orb_setting_raw_args should equal false
+#     # The variable _orb_setting_raw should equal false
 #     # The variable _orb_setting_restore_functions should equal false
 #     # The variable _orb_sourced should equal false
 #   End

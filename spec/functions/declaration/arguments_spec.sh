@@ -51,7 +51,7 @@ Describe '_orb_get_declarad_args_and_start_indexes'
 
   Context 'declared direct call'
     It 'stores var if valid var'
-      _orb_declared_raw_args=true
+      _orb_declared_raw=true
       declaration=(
         -f = "flag"
       )
@@ -61,7 +61,7 @@ Describe '_orb_get_declarad_args_and_start_indexes'
     End
 
     It 'stores var to comment if invalid var'
-      _orb_declared_raw_args=true
+      _orb_declared_raw=true
       declaration=(
         -f = "flag comment"
       )

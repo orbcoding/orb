@@ -7,7 +7,7 @@
 if [[ $1 != only_args_collection ]]; then
   # Orb settings
   declare _orb_setting_help=false
-  declare _orb_setting_raw_args=false
+  declare _orb_setting_raw=false
   declare _orb_setting_restore_functions=false
   declare -a _orb_setting_extensions=()
   declare -a _orb_settings_args=()
@@ -20,12 +20,15 @@ if [[ $1 != only_args_collection ]]; then
   declare _orb_function_name
   declare _orb_function_descriptor
   declare _orb_function_exit_code
+  declare _orb_script_path
+  declare _orb_script_file
+  declare _orb_script_dir
 
   declare -a _orb_namespace_files=() # namespace files collector
   declare -a _orb_namespace_files_orb_dir_tracker=() # same indexes with directory
 
-  # Extensions
-  declare -a _orb_extensions=()
+  # Extensions are always registered once registered, so calling with -e will stick
+  # declare -a _orb_extensions
   
   [[ -z $_orb_history_index ]] && declare _orb_history_index=0
   # _orb_function_declaration will be a nameref to ${_orb_function_name}_orb
@@ -46,7 +49,7 @@ declare -A _orb_args_values_lengths=()
 
 
 # Declaration
-declare _orb_declared_raw_args=false
+declare _orb_declared_raw=false
 declare -a _orb_declared_args=() # ordered
 declare -A _orb_declared_arg_suffixes=()
 declare -A _orb_declared_vars=()

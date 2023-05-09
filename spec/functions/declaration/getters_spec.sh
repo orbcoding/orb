@@ -36,7 +36,7 @@ End
 # # _orb_get_function_option_value
 # Describe '_orb_get_function_option_value'
 #   It 'stores value to store var'
-#     _orb_declared_raw_args=true
+#     _orb_declared_raw=true
 #     When call _orb_get_function_option_value 
 #   End
 # End

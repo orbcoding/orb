@@ -1,5 +1,5 @@
 function orb_bold() { # $(orb_bold)text$(orb_normal)
-	echo $(tput bold)
+	echo '\033[1m'
 }
 
 function orb_italic() { # $(orb_italic)text$(orb_normal)
@@ -19,7 +19,7 @@ function orb_green() { # $(orb_green)greentext...
 }
 
 function orb_normal() { # $(orb_bold)text$(orb_normal)
-	echo $(tput sgr0)
+	echo '\033[0m'
 }
 
 function orb_nocolor() { # $(orb_nocolor)text...

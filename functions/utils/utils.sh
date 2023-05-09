@@ -1,7 +1,7 @@
 # orb_function_declared
 orb_function_declared_orb=(
 	"Check if a function name has been declared"
-	RawArgs: true
+	Raw: true
 
 	1 = "Function name"
 )
@@ -12,7 +12,7 @@ function orb_function_declared() {
 
 orb_if_present_orb=(
 	"Stores first present variable to specified arr"
-	RawArgs: true
+	Raw: true
 
 	1 = "Variable name"
 	... = "Variables to check"

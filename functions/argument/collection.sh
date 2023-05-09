@@ -25,7 +25,7 @@ _orb_collect_function_args() {
 
 _orb_collect_args() {
 	# Start collecting from first input arg onwards
-	while [[ ${#args_remaining[@]} > 0 ]]; do
+	while [[ "${#args_remaining[@]}" > 0 ]]; do
 		local arg="${args_remaining[0]}"
 
 		if orb_is_any_flag "$arg"; then 

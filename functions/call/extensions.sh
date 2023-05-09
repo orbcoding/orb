@@ -1,6 +1,6 @@
 _orb_collect_orb_extensions() { # $1 = start path, $2 = stop path
   # Start collecting in order of priority
-  orb_find_below_to_arr "_orb_extensions" "_orb&.orb" $1 $2
+  orb_get_parents "_orb_extensions" "_orb&.orb" $1 $2
 
 	if [[ -d "$HOME/.orb" ]] && ! orb_in_arr "$HOME/.orb" _orb_extensions; then 
 		_orb_extensions+=( "$HOME/.orb" )

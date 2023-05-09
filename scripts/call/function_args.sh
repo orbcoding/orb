@@ -1,4 +1,4 @@
-if ! $_orb_setting_raw_args && ! $_orb_declared_raw_args; then 
+if ! $_orb_setting_raw && ! $_orb_declared_raw; then 
   _orb_collect_function_args "$@"
   
   # Collecting arg values is separated from final assignment to declared variables. 
