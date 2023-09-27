@@ -19,7 +19,7 @@ _orb_collect_namespace_files() {
 
 		if [[ -d "$dir" ]]; then
 	 		local files
-			readarray -d '' files < <(find $dir -type f -name "*.sh" ! -name '.*' -print0 | sort -z)
+			readarray -d '' files < <(find $dir -maxdepth 1 -type f -name "*.sh" ! -name '.*' -print0 | sort -z)
 
 			local from=${#_orb_namespace_files[@]}
 			local to=$(( $from + ${#files[@]} - 1 ))
