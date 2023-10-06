@@ -1,5 +1,6 @@
 _orb_collect_namespaces() {
   local ext; for ext in "${_orb_extensions[@]}"; do
+		[ -d "$ext/namespaces" ] || continue
 
     local file; for file in $(ls "$ext/namespaces"); do
       local namespace=$(basename $file)

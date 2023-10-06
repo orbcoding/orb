@@ -17,8 +17,8 @@ _orb_prevalidate_declared_function_options() {
 }
 
 _orb_extract_function_comment() {
-	local comment=${declaration[0]}
-	if [[ -n $comment ]] && ! orb_in_arr $comment _orb_available_function_options; then
+	local comment="${declaration[0]}"
+	if [[ -n "$comment" ]] && ! orb_in_arr "$comment" _orb_available_function_options; then
 		_orb_declared_comments["function"]="$comment"
 		declaration=( "${declaration[@]:1}" )
 	else
