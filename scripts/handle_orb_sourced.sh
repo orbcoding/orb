@@ -24,7 +24,11 @@
 # my_function => orb => my_function
 #
 
-if [[ ${_orb_function_trace[0]} != "source" ]]; then
+if [[ "${_orb_source_trace[-1]}" != "$0" ]]; then
+  # Do nothing if sourced eg from shell
+  # https://nickjanetakis.com/blog/detect-if-a-shell-script-is-being-executed-or-sourced
+  return 0
+elif [[ ${_orb_function_trace[0]} != "source" ]]; then
   # Return false to proceed with normal call
   return 1
 elif [[ ${_orb_function_trace[2]} == "orb" ]]; then
