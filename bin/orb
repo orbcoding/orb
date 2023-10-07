@@ -20,9 +20,9 @@ fi
 # Store trace
 _orb_function_trace=("${FUNCNAME[@]}")
 _orb_source_trace=("${BASH_SOURCE[@]}")
-# Set root path
-_orb_root="${_orb_source_trace[0]}"
-_orb_root="${_orb_root%/*/*}"
+# Set bin and root path
+orb="${_orb_source_trace[0]}"
+_orb_root="${orb%/*/*}"
 
 
 if [[ $_orb_initialized != true ]]; then

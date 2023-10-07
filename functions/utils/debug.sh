@@ -7,7 +7,7 @@ declare -A orb_ee_args=(
 
 # orb_print_args
 function orb_print_args() { # print collected arguments, useful for debugging
-  source orb
+  source $orb
 
   local _orb_history_index=$1
 

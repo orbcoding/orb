@@ -17,7 +17,7 @@ orb_pass_orb=(
   -- = _orb_pass 
 )
 function orb_pass() {
-  source orb
+  source "$orb"
 
   # This will redirect any argument/declaration queries to check our caller history data
   local _orb_variable_suffix=_history_$_orb_history_index

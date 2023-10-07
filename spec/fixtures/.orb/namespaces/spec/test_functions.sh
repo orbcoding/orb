@@ -8,7 +8,7 @@ test_orb_print_args_orb=(
   dash_args = --  
   rest = ... Optional
 ); function test_orb_print_args() {
-  source orb
+  source $orb
   orb_print_args
 }
 

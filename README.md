@@ -1,6 +1,6 @@
 # orb
 
-*Unstable. In final development stages*
+*In development*
 
 `orb` is a CLI framework that helps you build self-documenting function libraries in bash. It removes the pain of parsing and validating advanced arguments and helps you organize your functions in namespaces based on a simple file structure.
 
@@ -188,7 +188,7 @@ my_fn_orb=(
   ... = rest
 ) 
 function my_fn() {
-  source orb
+  source /path/to/orb-cli/bin/orb
   echo $first
   echo $boolean
   echo $flag_arg
@@ -196,7 +196,7 @@ function my_fn() {
 }
 
 # cmdline
-# Make sure were running bash when sourcing orb in this way
+# Make sure we're running bash when sourcing orb in this way
 # With the library setup orb can be called from any shell
 exec bash 
 source my_script.sh && my_fn first -b -f flag rest of args
