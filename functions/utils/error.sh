@@ -4,6 +4,7 @@ orb_raise_error_orb=(
   -d 1 = descriptor 
     Default: IfPresent: '$_orb_caller_function_descriptor || $_orb_function_descriptor'
   -k = kill_script "Kill script instead of exit, even if subshell"
+    Default: true
   -t = trace "show stack trace"
     Default: true
 )
