@@ -21,7 +21,7 @@ Describe 'orb_print_args'
       Required: false
   )
   spec_fn() {
-    source $orb
+    source "$_orb_bin"
     orb_print_args
   }
 

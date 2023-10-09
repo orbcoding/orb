@@ -9,7 +9,7 @@ orb_raise_error_orb=(
     Default: true
 )
 function orb_raise_error() {
-  source $orb
+  source "$_orb_bin"
 
   _orb_raise_error "$error_message" "$descriptor" $trace $kill_script
 }

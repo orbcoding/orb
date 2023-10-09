@@ -1,4 +1,4 @@
-# call 'source $orb' from within any function to ensure it is orb handled, even if called without orb prefix. 
+# call 'source "$_orb_bin"' from within any function to ensure it is orb handled, even if called without orb prefix. 
 #
 # Example: 
 #
@@ -8,7 +8,7 @@
 #  [1]='first arg'
 #  [-f]='flag' 
 # ); function my_function() {
-#   source $orb
+#   source "$_orb_bin"
 #   orb_print_args
 # }
 #
