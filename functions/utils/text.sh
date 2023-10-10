@@ -18,6 +18,10 @@ function orb_green() { # $(orb_green)greentext...
 	echo '\033[0;32m'
 }
 
+function orb_blue() {
+	echo '\033[0;34m'
+}
+
 function orb_normal() { # $(orb_bold)text$(orb_normal)
 	echo '\033[0m'
 }
